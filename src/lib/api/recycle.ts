@@ -7,5 +7,5 @@ export const recycleRestore = (ids: string[]) => invoke<void>('recycle_restore',
 export const recyclePurge = (ids: string[]) => invoke<void>('recycle_purge', { ids });
 export const recycleEmpty = () => invoke<void>('recycle_empty');
 
-/** A shell folder Trove does not show (`::{…}` other than This PC and the bin, `shell:…`). */
+/** A shell folder Velkrys does not show (`::{…}` other than This PC and the bin, `shell:…`). */
 export const openInExplorer = (arg: string) => invoke<void>('open_in_explorer', { arg });

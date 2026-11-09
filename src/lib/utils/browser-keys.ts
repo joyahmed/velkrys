@@ -1,9 +1,9 @@
 // WebView2 keeps its browser shortcuts on (wry `browser_accelerator_keys`, and tauri 2.11 has no
 // switch for it): F5 / Ctrl+R reload the whole app — tabs, transfers and unsaved Settings gone —
-// Ctrl+F opens a find bar, Ctrl+P a print dialog. Trove's own handlers call preventDefault for the
-// keys they own, but nothing does while a text field has focus, or for a chord Trove never uses.
+// Ctrl+F opens a find bar, Ctrl+P a print dialog. Velkrys's own handlers call preventDefault for the
+// keys they own, but nothing does while a text field has focus, or for a chord Velkrys never uses.
 // This is the catch-all: one capture-phase listener that cancels the browser's action and leaves
-// the event travelling, so Trove's handlers still see it.
+// the event travelling, so Velkrys's handlers still see it.
 
 /** The chords that only mean something to a browser, as `ctrl+shift+r` style ids. */
 const BROWSER_ONLY = new Set([
@@ -30,7 +30,7 @@ const DEVTOOLS = new Set(['f12', 'ctrl+shift+i', 'ctrl+shift+j', 'ctrl+shift+c']
 type KeyLike = Pick<KeyboardEvent, 'key' | 'ctrlKey' | 'altKey' | 'shiftKey' | 'metaKey'> &
   Partial<Pick<KeyboardEvent, 'code'>>;
 
-/** Alt+Left / Alt+Right walk the webview's history; Trove's own Back/Forward run on the same keys. */
+/** Alt+Left / Alt+Right walk the webview's history; Velkrys's own Back/Forward run on the same keys. */
 const HISTORY = new Set([
   'alt+arrowleft',
   'alt+arrowright',
@@ -61,7 +61,7 @@ const chordOf = (e: KeyLike): string => {
   if (e.shiftKey) parts.push('shift');
   parts.push(name);
   const chord = parts.join('+');
-  // other Alt chords are menus and Trove's own
+  // other Alt chords are menus and Velkrys's own
   return e.altKey && !HISTORY.has(chord) ? '' : chord;
 };
 
@@ -79,7 +79,7 @@ export const blockBrowserKeys = (
   const onkeydown = (e: KeyboardEvent) => {
     if (isBrowserKey(e)) e.preventDefault();
   };
-  // the mouse's Back / Forward buttons (3, 4) walk the webview's history too; Trove has no use for them
+  // the mouse's Back / Forward buttons (3, 4) walk the webview's history too; Velkrys has no use for them
   const onmouse = (e: MouseEvent) => {
     if (e.button === 3 || e.button === 4) e.preventDefault();
   };

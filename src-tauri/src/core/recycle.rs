@@ -100,7 +100,7 @@ pub fn restore(ids: &[String]) -> Result<(), String> {
 /// `purge_all` drives `IFileOperation` with `FOF_NO_UI`, which folds in `FOF_NOERRORUI`: an
 /// item the shell cannot delete — one a running program still holds open — is passed over in
 /// silence and the call still returns `Ok`. Explorer puts a dialog on that; without this check
-/// Trove reports success, re-lists, and the person sees the same rows they just asked to be
+/// Velkrys reports success, re-lists, and the person sees the same rows they just asked to be
 /// rid of, with nothing said. So the bin is read back and the survivors are named.
 fn purge_items(items: Vec<trash::TrashItem>) -> Result<(), String> {
     let ids: Vec<String> = items
@@ -240,7 +240,7 @@ mod tests {
     #[cfg(windows)]
     fn a_trashed_file_is_listed_by_name_and_purged() {
         let name = format!(
-            "trove-recycle-test-{}-{}.txt",
+            "velkrys-recycle-test-{}-{}.txt",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
@@ -272,7 +272,7 @@ mod tests {
         use std::os::windows::fs::OpenOptionsExt;
 
         let name = format!(
-            "trove-locked-test-{}-{}.txt",
+            "velkrys-locked-test-{}-{}.txt",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)

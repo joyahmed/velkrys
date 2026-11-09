@@ -12,7 +12,7 @@ use tauri::{AppHandle, Emitter, Manager, Runtime};
 pub const NEW_TAB_EVENT: &str = "tray:new-tab";
 
 /// The tray icon's id in Tauri's own registry, so turning residency off can remove it there.
-const TRAY_ID: &str = "trove";
+const TRAY_ID: &str = "velkrys";
 
 /// The live tray icon, `None` while not resident. Managed state on the app.
 pub struct Residency(pub Mutex<Option<TrayIcon>>);
@@ -27,7 +27,7 @@ pub struct Residency(pub Mutex<Option<TrayIcon>>);
 /// the hidden `palette` window kept it alive after `main` was destroyed. Plancheck 8 §G.
 ///
 /// ⛔ **Never turn a failure here back into a `let _ =`.** This is the one entry point every
-/// launch goes through — the tray, `Win+E`, a folder double-click, a second `trove.exe` — and
+/// launch goes through — the tray, `Win+E`, a folder double-click, a second `velkrys.exe` — and
 /// the default-handler path cannot pass a flag to route around it. If this is quiet, the app is
 /// unopenable with no trace anywhere.
 pub fn show_main<R: Runtime>(app: &AppHandle<R>) {
@@ -65,7 +65,7 @@ pub fn show_main<R: Runtime>(app: &AppHandle<R>) {
 fn build_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<TrayIcon<R>> {
     let open = MenuItem::with_id(app, "open", "Open", true, None::<&str>)?;
     let new_tab = MenuItem::with_id(app, "new-tab", "New tab", true, None::<&str>)?;
-    let quit = MenuItem::with_id(app, "quit", "Quit Trove", true, None::<&str>)?;
+    let quit = MenuItem::with_id(app, "quit", "Quit Velkrys", true, None::<&str>)?;
     let menu = Menu::with_items(
         app,
         &[&open, &new_tab, &PredefinedMenuItem::separator(app)?, &quit],
@@ -73,7 +73,7 @@ fn build_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<TrayIcon<R>> {
     let mut builder = TrayIconBuilder::with_id(TRAY_ID)
         .menu(&menu)
         .show_menu_on_left_click(false)
-        .tooltip("Trove")
+        .tooltip("Velkrys")
         .on_menu_event(|app, event| match event.id().as_ref() {
             "open" => show_main(app),
             "new-tab" => {

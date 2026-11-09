@@ -8,15 +8,14 @@
 <script lang="ts">
   import { usePaneHost } from '$lib/hooks/use-pane-host.svelte';
   import { paneModules, previewFits } from '$lib/data/panes';
-  import { settings } from '$lib/state/settings.svelte';
+  import { sidebarReserved } from '$lib/state/panes.svelte';
 
   const host = usePaneHost();
   let viewportWidth = $state(window.innerWidth);
   // Preview hides (stays open) when the list could not keep its 360px; Details still just yields.
   const shown = $derived(
     host.open === 'details' ||
-      (host.open === 'preview' &&
-        previewFits(viewportWidth, settings.navPane ? settings.sidebarWidth : 0)),
+      (host.open === 'preview' && previewFits(viewportWidth, sidebarReserved())),
   );
 </script>
 

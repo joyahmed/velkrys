@@ -81,7 +81,7 @@ describe('a Mac build, through the module-level switch', () => {
   });
 
   it('draws every file and folder when Rust says macOS', async () => {
-    vi.stubGlobal('window', { __TROVE_PLATFORM__: { os: 'macos', thisPcLabel: 'This Mac' } });
+    vi.stubGlobal('window', { __VELKRYS_PLATFORM__: { os: 'macos', thisPcLabel: 'This Mac' } });
     vi.resetModules();
     const mod = await import('./file-icon');
     expect(mod.DRAWN_FILE_ICONS).toBe(true);
@@ -90,7 +90,7 @@ describe('a Mac build, through the module-level switch', () => {
   });
 
   it('keeps the shell when Rust says Windows', async () => {
-    vi.stubGlobal('window', { __TROVE_PLATFORM__: { os: 'windows', thisPcLabel: 'This PC' } });
+    vi.stubGlobal('window', { __VELKRYS_PLATFORM__: { os: 'windows', thisPcLabel: 'This PC' } });
     vi.resetModules();
     const mod = await import('./file-icon');
     expect(mod.DRAWN_FILE_ICONS).toBe(false);

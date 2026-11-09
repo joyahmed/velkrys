@@ -18,6 +18,9 @@ const MAX_WIDTH = 720;
  */
 export const LIST_MIN_WIDTH = 360;
 
+/** The width the sidebar actually takes: its setting, or 0 while the sidebar is hidden. */
+export const sidebarReserved = () => (settings.navPane ? settings.sidebarWidth : 0);
+
 class PanesState {
   #details = $state(false);
 
@@ -43,7 +46,7 @@ class PanesState {
    * without a resize listener; the sidebar half is state, so it is read here.
    */
   get maxWidth() {
-    const reserved = settings.sidebarWidth + LIST_MIN_WIDTH;
+    const reserved = sidebarReserved() + LIST_MIN_WIDTH;
     return `max(${MIN_WIDTH}px, calc(100vw - ${reserved}px))`;
   }
 
@@ -59,7 +62,7 @@ class PanesState {
     if (
       kind === 'preview' &&
       this.open !== null &&
-      !previewFits(window.innerWidth, settings.sidebarWidth)
+      !previewFits(window.innerWidth, sidebarReserved())
     ) {
       // one notice however often the key is pressed: drop the one still showing
       const message = 'Widen the window to see the preview';

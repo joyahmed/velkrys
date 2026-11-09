@@ -105,10 +105,10 @@
    and had never been looked at by a human. Win11 light is #f3f3f3 chrome against #fbfbfb
    content against #ffffff fields: three shades of white, a 1.07:1 chrome→content step, and a
    full-bleed file list at relative luminance 0.96 that is simply a lamp pointed at your face.
-   Trove's light mode is warm paper instead — same Fluent structure, every step taken down and
+   Velkrys's light mode is warm paper instead — same Fluent structure, every step taken down and
    given a warm cast, and **no pure #ffffff anywhere**:
 
-     surface  Win11     Trove     relative luminance
+     surface  Win11     Velkrys     relative luminance
      mica     #f3f3f3 → #e2dfd7   0.896 → 0.739
      layer    #fbfbfb → #edeae3   0.965 → 0.824   ← ~85 % of the window
      flyout   (= layer) #f6f4ef   0.965 → 0.905
@@ -188,7 +188,7 @@
        the fill runs under the two-line label; no shadow.
      Explorer's structure, then, is: the FILL says "selected" and a neutral 1px rim says
      "focused". That is what is copied here. The amplitude is taken down a step (dark 20 %, not
-     24 %) to sit with Trove's quieter palette, and the rim is kept far softer than Explorer's
+     24 %) to sit with Velkrys's quieter palette, and the rim is kept far softer than Explorer's
      — Joy asked for a "barely-there edge", and Explorer's #c3c3c3 (≈66 % white over its own
      fill) is not that. But it must not vanish either: the rim is the ONLY thing separating "the
      cursor is here" from "this is also selected" in a multi-selection, and a 14 % rim rendered
@@ -478,7 +478,7 @@ body {
 /* The checkbox (details pane Read-only / Hidden). The native one paints a white square on dark
    under WebKitGTK; this one is ours: transparent fill, visible border, accent fill + check when
    ticked. */
-.trove-check {
+.velkrys-check {
   appearance: none;
   -webkit-appearance: none;
   flex: none;
@@ -491,7 +491,7 @@ body {
   border: 1px solid var(--color-text-secondary);
   background-color: transparent;
 }
-.trove-check::after {
+.velkrys-check::after {
   content: '';
   width: 8px;
   height: 8px;
@@ -499,18 +499,18 @@ body {
   background-color: var(--color-accent-text);
   clip-path: polygon(14% 44%, 0 59%, 40% 100%, 100% 17%, 85% 3%, 40% 68%);
 }
-.trove-check:checked {
+.velkrys-check:checked {
   background-color: var(--color-accent);
   border-color: var(--color-accent);
 }
-.trove-check:checked::after {
+.velkrys-check:checked::after {
   transform: scale(1);
 }
-.trove-check:disabled {
+.velkrys-check:disabled {
   border-color: var(--color-text-disabled);
   opacity: 0.6;
 }
-.trove-check:focus-visible {
+.velkrys-check:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }
@@ -624,7 +624,7 @@ body {
 }
 
 /* ⭐ HIGH CONTRAST (Windows Contrast themes arrive as forced-colors: active). The browser already
-   swaps most colours; this maps Trove's own tokens onto system colours so token-driven fills and
+   swaps most colours; this maps Velkrys's own tokens onto system colours so token-driven fills and
    alpha tints follow the user's theme too. DECIDED: no see-through window under high contrast —
    body and every glass surface become solid Canvas, on a Mac too. Selection is an outline (a
    fill alone can vanish) and focus rings stay visible. Unlayered, so it beats the glass fills
@@ -686,15 +686,15 @@ body {
     outline: 2px solid Highlight;
     outline-offset: -2px;
   }
-  .trove-check {
+  .velkrys-check {
     forced-color-adjust: none;
     border-color: ButtonText;
   }
-  .trove-check:checked {
+  .velkrys-check:checked {
     background-color: Highlight;
     border-color: Highlight;
   }
-  .trove-check:checked::after {
+  .velkrys-check:checked::after {
     background-color: HighlightText;
   }
   :focus-visible,

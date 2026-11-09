@@ -7,7 +7,7 @@ import { galleryMenuFor } from './gallery-menu';
 import { recycleMenuFor } from './recycle-menu';
 
 const onOs = (os: string) =>
-  vi.stubGlobal('window', { __TROVE_PLATFORM__: { os, thisPcLabel: 'This PC' } });
+  vi.stubGlobal('window', { __VELKRYS_PLATFORM__: { os, thisPcLabel: 'This PC' } });
 
 const shortcutOf = (items: MenuItem[], key: string) => {
   const item = items.find((i) => i.key === key);

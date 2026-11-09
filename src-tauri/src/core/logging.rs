@@ -1,4 +1,4 @@
-//! The runtime log. Until this existed Trove said nothing at all: no plugin, one `println!`
+//! The runtime log. Until this existed Velkrys said nothing at all: no plugin, one `println!`
 //! and it sat inside a `#[test]`, and 40 commands returning `Result<_, String>` whose error
 //! the frontend threw away. A bug that only happens on someone's machine was not debuggable,
 //! only guessable — see `docs/plans/07-the-log-and-four-bugs.md`.
@@ -14,8 +14,8 @@ use std::time::{Duration, Instant};
 use tauri_plugin_log::{Builder, Target, TargetKind};
 
 /// The file in the app-log dir. Windows puts it under
-/// `%LOCALAPPDATA%\com.joyahmed.trove\logs\`.
-const LOG_FILE: &str = "trove";
+/// `%LOCALAPPDATA%\com.joyahmed.velkrys\logs\`.
+const LOG_FILE: &str = "velkrys";
 
 /// Keep the tail of a long session without letting the file grow without bound. A folder walk
 /// or a drag logs steadily, so this is sized for "a day of use", not for a single incident.
@@ -84,7 +84,7 @@ pub fn install_panic_hook() {
 
 /// The facts a bug report needs and nobody can reconstruct afterwards, written once at start.
 ///
-/// ⚠️ Elevation is here for a reason. `docs/plans/07` B.2 lists "Windows launches Trove with a
+/// ⚠️ Elevation is here for a reason. `docs/plans/07` B.2 lists "Windows launches Velkrys with a
 /// different token when it is the default handler, so it reads a different user's Recycle Bin"
 /// as a hypothesis for the bin that reported a delete it had not done. It is a *weak* one —
 /// registration is HKCU-only and needs no elevation — and one line here retires or confirms it
@@ -92,7 +92,7 @@ pub fn install_panic_hook() {
 /// personal too), safe to hand to someone else (A.4).
 pub fn log_environment() {
     log::info!(
-        "trove {} starting — elevated {}",
+        "velkrys {} starting — elevated {}",
         env!("CARGO_PKG_VERSION"),
         is_elevated()
             .map(|b| b.to_string())

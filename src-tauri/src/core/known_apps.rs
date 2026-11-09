@@ -380,7 +380,7 @@ pub fn catalogue(p: &Probed) -> Vec<DetectedApp> {
         // `Zed.exe --help` documents `--wsl <USER@DISTRO>` ("The username is optional, and if not
         // specified, the default user for the distribution will be used"), and the shell script
         // Zed itself ships at `bin/zed` runs `zed.exe --wsl "$USER@$WSL_DISTRO_NAME" "$@"` with
-        // Linux paths. `%distro%` alone is therefore the right filling: Trove knows the distro
+        // Linux paths. `%distro%` alone is therefore the right filling: Velkrys knows the distro
         // from the clicked path and does **not** know the Linux user, and Zed's own default is
         // the one to use. The same binary rejects `--remote` outright.
         //
@@ -1081,7 +1081,7 @@ mod tests {
     /// ⭐ The flag that was deferred rather than guessed. `--remote wsl+<distro>` is **Code's**
     /// spelling and the installed Zed binary rejects it outright; `--wsl <USER@DISTRO>` is Zed's
     /// own, documented in its `--help` and used by the `bin/zed` script Zed ships. `%distro%` with
-    /// no user is the deliberate filling — Trove reads the distro off the clicked path and cannot
+    /// no user is the deliberate filling — Velkrys reads the distro off the clicked path and cannot
     /// know the Linux user, and Zed falls back to the distro's default user when none is given.
     #[test]
     fn the_zed_wsl_entry_uses_zeds_own_flag_and_not_codes() {
@@ -1378,7 +1378,7 @@ mod tests {
 
     #[test]
     fn known_dir_returns_none_when_the_variable_is_missing() {
-        assert_eq!(known_dir(&[("TROVE_NO_SUCH_VAR", "x.exe")]), None);
+        assert_eq!(known_dir(&[("VELKRYS_NO_SUCH_VAR", "x.exe")]), None);
     }
 }
 
@@ -1445,7 +1445,7 @@ mod linux_tests {
         }
     }
     fn scratch(tag: &str) -> Scratch {
-        let dir = std::env::temp_dir().join(format!("trove-known-{tag}-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("velkrys-known-{tag}-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         Scratch(dir)
@@ -1626,7 +1626,7 @@ mod mac_tests {
 
     fn fake_root(tag: &str) -> PathBuf {
         let dir =
-            std::env::temp_dir().join(format!("trove-known-mac-{tag}-{}", std::process::id()));
+            std::env::temp_dir().join(format!("velkrys-known-mac-{tag}-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         dir

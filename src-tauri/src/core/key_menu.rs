@@ -2,7 +2,7 @@
 //!
 //! Bug A.8.9, seen on the screen 2026-10-20 with real keys: Settings ▸ Spotlight shortcut, record
 //! Ctrl+Shift+J (fine), then record Alt+Space to go back — and Windows' own window menu
-//! (Restore / Move / Size / … / Close) opened on the Trove window instead, and the page stopped
+//! (Restore / Move / Size / … / Close) opened on the Velkrys window instead, and the page stopped
 //! answering until a restart (the menu's modal loop).
 //!
 //! Why: once Ctrl+Shift+J is saved, `register_hotkey` releases Alt+Space
@@ -17,7 +17,7 @@
 //! and the chord is handed to the recorder as the `hotkey-recorder:chord` event instead — not
 //! left to the page's keydown, which the menu's modal loop is what starved on the screen.
 //! Outside recording nothing changes: Alt+Space opens the window menu, or Spotlight while
-//! Trove holds it as its chord.
+//! Velkrys holds it as its chord.
 
 use std::sync::Mutex;
 use std::time::{Duration, Instant};

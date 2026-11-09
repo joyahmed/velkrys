@@ -3,7 +3,7 @@
 //
 // ⛔ **The sources load independently, and that is the whole point of this file.** It used to be
 // one `Promise.all` over all three, which meant This PC painted nothing until the *slowest* one
-// landed — and `trove.log` measured `drives` at 21 s on one cold start and **64 s** on the next,
+// landed — and `velkrys.log` measured `drives` at 21 s on one cold start and **64 s** on the next,
 // because one drive letter is a dead network mapping and the SMB redirector waits it out. A
 // minute of empty pane is what "This PC showed nothing and no folder no device and drives" was.
 // `docs/plans/07-the-log-and-four-bugs.md` Phase C.
@@ -33,6 +33,7 @@ import { logError } from '$lib/api/log';
 import { network } from '$lib/state/network.svelte';
 import type { SyncStatus } from '$lib/types/fs';
 import type { DriveInfo, KnownFolder } from '$lib/types/shell';
+import { relativeUnder, samePath } from '$lib/utils/path';
 
 class PlacesState {
   knownFolders = $state<KnownFolder[]>([]);
@@ -181,6 +182,15 @@ class PlacesState {
       logError('places.oneDriveRoot', e);
       if (current()) this.oneDriveRoot = null;
     }
+  }
+
+  /**
+   * The drive whose root is exactly `path`, or undefined. The one test for "this is a drive" behind
+   * the drive menu (plan 23): it counts a `/Volumes/X` or `/media/u/X` row, which `isDriveRoot`
+   * (a Windows letter only) does not. `C:` and `C:\` are the same root.
+   */
+  driveAt(path: string): DriveInfo | undefined {
+    return this.drives.find((d) => samePath(d.path, path) || relativeUnder(path, d.path) === '');
   }
 
   /**

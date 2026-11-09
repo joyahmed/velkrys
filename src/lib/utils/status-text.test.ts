@@ -82,12 +82,12 @@ describe('freeSpaceText with the OS answer for the folder (Mac, disk image)', ()
   ];
   const space = (mountRoot: string, freeBytes: number) => ({ mountRoot, freeBytes });
   it('a disk image the drive list leaves out names its own mount, not the boot disk', () => {
-    const own = space('/Volumes/TroveTest', 2 * GB);
-    expect(freeSpaceText('/Volumes/TroveTest/a', macDrives, mac, own)).toBe(
-      '2.00 GB free on TroveTest',
+    const own = space('/Volumes/VelkrysTest', 2 * GB);
+    expect(freeSpaceText('/Volumes/VelkrysTest/a', macDrives, mac, own)).toBe(
+      '2.00 GB free on VelkrysTest',
     );
     // the old guess, without the answer, was the bug
-    expect(freeSpaceText('/Volumes/TroveTest/a', macDrives, mac)).toBe(
+    expect(freeSpaceText('/Volumes/VelkrysTest/a', macDrives, mac)).toBe(
       '1.56 TB free on Macintosh HD',
     );
   });

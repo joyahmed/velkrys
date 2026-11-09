@@ -5,7 +5,7 @@
   Delete any section that has nothing in it, and delete this comment.
 -->
 
-# Trove {{x.y.z}}
+# Velkrys {{x.y.z}}
 
 {{One sentence: what is the biggest thing in this version, in words a new user understands.}}
 
@@ -23,7 +23,7 @@
 
 ## Good to know
 
-- {{Anything that changes how people use Trove, or a step they need to take.}}
+- {{Anything that changes how people use Velkrys, or a step they need to take.}}
 
 ## Downloads
 

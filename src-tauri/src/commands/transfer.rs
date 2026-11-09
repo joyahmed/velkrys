@@ -169,8 +169,8 @@ fn fold(path: &str) -> String {
 /// instead of stopping the rest — an undo that brings back nothing because of one stray item
 /// is worse than one that brings back all but that item.
 ///
-/// On a Mac the Trash cannot be read, so the items come back from what Trove recorded when it
-/// sent them (`trash_mac::put_back`): only items Trove itself trashed in this run.
+/// On a Mac the Trash cannot be read, so the items come back from what Velkrys recorded when it
+/// sent them (`trash_mac::put_back`): only items Velkrys itself trashed in this run.
 #[tauri::command(async)]
 pub fn restore_from_trash(paths: Vec<String>) -> Result<(), String> {
     #[cfg(target_os = "macos")]
@@ -536,8 +536,10 @@ mod tests {
     }
 
     fn scratch(name: &str) -> PathBuf {
-        let dir =
-            std::env::temp_dir().join(format!("trove-undo-replace-{name}-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!(
+            "velkrys-undo-replace-{name}-{}",
+            std::process::id()
+        ));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         dir
@@ -742,14 +744,14 @@ mod tests {
             true,
             || {
                 Err(trash::Error::Unknown {
-                    description: "Trove cannot put items back from the Trash on macOS.".into(),
+                    description: "Velkrys cannot put items back from the Trash on macOS.".into(),
                 })
             },
             |_| panic!("nothing may be binned"),
             |_| panic!("nothing may be restored"),
         )
         .unwrap_err();
-        assert!(err.starts_with("Trove cannot put items back"), "{err}");
+        assert!(err.starts_with("Velkrys cannot put items back"), "{err}");
         assert_eq!(std::fs::read(root.join("a.txt")).unwrap(), b"new");
         std::fs::remove_dir_all(root).unwrap();
     }

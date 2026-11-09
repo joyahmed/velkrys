@@ -162,7 +162,7 @@ mod tests {
         started.elapsed()
     }
 
-    /// The real watcher on a real folder: a file made, renamed and deleted outside Trove.
+    /// The real watcher on a real folder: a file made, renamed and deleted outside Velkrys.
     #[test]
     fn watcher_create_rename_delete_updates_table() {
         let dir = Scratch::new("index-live");

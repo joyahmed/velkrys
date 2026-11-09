@@ -1,5 +1,5 @@
 // What each place shows, as data: Home is Quick access (known folders, pins) and Recent (the
-// folders Trove visited, then the files the OS saw opened); This PC is the known folders and
+// folders Velkrys visited, then the files the OS saw opened); This PC is the known folders and
 // every drive. `tiles` closures read `places` / `settings` live, so the view follows them the
 // way the sidebar's sections do.
 import type { GlyphName } from '$lib/data/glyphs';

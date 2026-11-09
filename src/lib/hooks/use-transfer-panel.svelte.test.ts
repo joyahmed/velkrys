@@ -98,7 +98,7 @@ describe('useTransferPanel with archive rows', () => {
     ];
     await transfers.applyDone({ jobId: 306, outputs: [], failed, error: null, cancelled: false });
     expect(useTransferPanel().rows.map((r) => r.title)).toEqual([
-      "locked.7z needs a password - Trove can't open protected archives yet",
+      "locked.7z needs a password - Velkrys can't open protected archives yet",
     ]);
   });
 
@@ -124,7 +124,7 @@ describe('useTransferPanel with archive rows', () => {
     await archives.extractHere('C:\\in\\pack.tar.gz');
     const base = { failed: [], error: null, cancelled: false };
     const outputs = [
-      { from: 'C:\\in\\pack.tar.gz', to: 'C:\\in\\trove-tar-test\\pack', created: true },
+      { from: 'C:\\in\\pack.tar.gz', to: 'C:\\in\\velkrys-tar-test\\pack', created: true },
     ];
     await transfers.applyDone({ jobId: 303, outputs, ...base });
     expect(useTransferPanel().rows.map((r) => r.title)).toEqual(['Extracted to pack']);
@@ -132,24 +132,24 @@ describe('useTransferPanel with archive rows', () => {
 
   it('an extract that only replaced files names the target folder', async () => {
     vi.mocked(startExtract).mockResolvedValueOnce(304);
-    await archives.extractTo('C:\\in\\pack.tar.gz', 'C:\\in\\trove-tar-test', null, 'replace');
+    await archives.extractTo('C:\\in\\pack.tar.gz', 'C:\\in\\velkrys-tar-test', null, 'replace');
     const base = { failed: [], error: null, cancelled: false };
     const outputs = [
-      { from: 'C:\\in\\pack.tar.gz', to: 'C:\\in\\trove-tar-test\\a.txt', created: false },
+      { from: 'C:\\in\\pack.tar.gz', to: 'C:\\in\\velkrys-tar-test\\a.txt', created: false },
     ];
     await transfers.applyDone({ jobId: 304, outputs, ...base });
-    expect(useTransferPanel().rows.map((r) => r.title)).toEqual(['Extracted to trove-tar-test']);
+    expect(useTransferPanel().rows.map((r) => r.title)).toEqual(['Extracted to velkrys-tar-test']);
   });
 
   it('a single loose file extracted into an existing folder names that folder', async () => {
     vi.mocked(startExtract).mockResolvedValueOnce(305);
-    await archives.extractTo('C:\\in\\pack.tar.gz', 'C:\\in\\trove-tar-test', null, 'skip');
+    await archives.extractTo('C:\\in\\pack.tar.gz', 'C:\\in\\velkrys-tar-test', null, 'skip');
     const base = { failed: [], error: null, cancelled: false };
     const outputs = [
-      { from: 'C:\\in\\pack.tar.gz', to: 'C:\\in\\trove-tar-test\\a.txt', created: true },
+      { from: 'C:\\in\\pack.tar.gz', to: 'C:\\in\\velkrys-tar-test\\a.txt', created: true },
     ];
     await transfers.applyDone({ jobId: 305, outputs, ...base });
-    expect(useTransferPanel().rows.map((r) => r.title)).toEqual(['Extracted to trove-tar-test']);
+    expect(useTransferPanel().rows.map((r) => r.title)).toEqual(['Extracted to velkrys-tar-test']);
   });
 });
 

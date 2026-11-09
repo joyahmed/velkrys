@@ -1,4 +1,4 @@
-// Mac: the privacy-guarded folders (Desktop, Documents, Downloads…) not opened in Trove yet,
+// Mac: the privacy-guarded folders (Desktop, Documents, Downloads…) not opened in Velkrys yet,
 // which every search leaves out (core/privacy_folders.rs), and the one act that opens them:
 // Allow — each is read once, so macOS asks at a moment the person chose. Read by Settings ▸
 // General and by the palette / search header's "Not searched … — Allow" row. Empty off a Mac.
@@ -29,7 +29,7 @@ class GuardedFoldersState {
   }
 
   /**
-   * Read each of `paths` once (macOS asks for each) and remember the ones it let Trove into.
+   * Read each of `paths` once (macOS asks for each) and remember the ones it let Velkrys into.
    * Resolves to the folders now opened; a second Allow while one waits does nothing.
    */
   async allow(paths: string[]): Promise<string[]> {

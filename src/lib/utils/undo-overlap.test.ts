@@ -193,9 +193,9 @@ describe('blockedText', () => {
     const replace = e('Replace', { kind: 'other', reason: 'x' });
     expect(
       blockedText(folder, { index: 1, path: null, more: 0 }, { kind: 'other', reason: 'x' }),
-    ).toBe(`Undo New folder "n" first — Trove can't tell which files this one touched`);
+    ).toBe(`Undo New folder "n" first — Velkrys can't tell which files this one touched`);
     expect(
       blockedText(replace, { index: 1, path: null, more: 0 }, { kind: 'trash', paths: ['/a'] }),
-    ).toBe(`Undo Replace first — Trove can't tell which files it touched`);
+    ).toBe(`Undo Replace first — Velkrys can't tell which files it touched`);
   });
 });

@@ -385,7 +385,7 @@ mod tests {
     }
 
     fn scratch(name: &str) -> PathBuf {
-        let dir = std::env::temp_dir().join(format!("trove-test-{name}-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("velkrys-test-{name}-{}", std::process::id()));
         let _ = fs::remove_dir_all(&dir);
         fs::create_dir_all(&dir).unwrap();
         dir
@@ -523,13 +523,13 @@ mod tests {
 
     #[test]
     fn missing_directory_is_an_error_not_a_panic() {
-        assert!(read_dir(Path::new("Z:/definitely/not/here-trove")).is_err());
+        assert!(read_dir(Path::new("Z:/definitely/not/here-velkrys")).is_err());
     }
 
     #[test]
     fn path_kind_tells_files_folders_and_nothing_apart() {
         let dir = std::env::temp_dir();
-        let file = dir.join(format!("trove-path-kind-{}.txt", std::process::id()));
+        let file = dir.join(format!("velkrys-path-kind-{}.txt", std::process::id()));
         std::fs::write(&file, "x").unwrap();
         assert_eq!(path_kind(&dir), PathKind::Dir);
         assert_eq!(path_kind(&file), PathKind::File);

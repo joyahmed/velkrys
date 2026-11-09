@@ -2,7 +2,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('$lib/api/default-handler', () => ({
   defaultHandlerStatus: vi.fn(async () => ({ kind: 'not-applied' })),
-  defaultHandlerInfo: vi.fn(async () => ({ exePath: 'D:\\Apps\\Trove\\trove.exe', stable: true })),
+  defaultHandlerInfo: vi.fn(async () => ({
+    exePath: 'D:\\Apps\\Velkrys\\velkrys.exe',
+    stable: true,
+  })),
   defaultHandlerApply: vi.fn(async () => {}),
   defaultHandlerRevert: vi.fn(async () => {}),
 }));
@@ -71,7 +74,7 @@ describe('settings sections', () => {
         ['macos', 'mac'],
         ['linux', 'linux'],
       ] as const) {
-        vi.stubGlobal('window', { __TROVE_PLATFORM__: { os, thisPcLabel: 'x' } });
+        vi.stubGlobal('window', { __VELKRYS_PLATFORM__: { os, thisPcLabel: 'x' } });
         settings.comingFrom = 'native';
         const r = row('general', 'coming-from');
         if (r.kind !== 'radio') throw new Error('radio expected');
@@ -91,7 +94,7 @@ describe('settings sections', () => {
       }
     });
 
-    it('sits right after Open Trove to, and its description names only words', () => {
+    it('sits right after Open Velkrys to, and its description names only words', () => {
       const keys = settingsSections
         .find((x) => x.key === 'general')
         ?.rows()
@@ -140,7 +143,7 @@ describe('settings sections', () => {
   it('the Accent colour row is not offered off Windows', () => {
     const w = globalThis as { window?: unknown };
     const before = w.window;
-    w.window = { __TROVE_PLATFORM__: { os: 'linux', thisPcLabel: 'This Computer' } };
+    w.window = { __VELKRYS_PLATFORM__: { os: 'linux', thisPcLabel: 'This Computer' } };
     try {
       const keys = settingsSections
         .find((x) => x.key === 'appearance')
@@ -153,13 +156,13 @@ describe('settings sections', () => {
     }
   });
 
-  it('keep running and start with Windows are on and locked while Trove is the default', () => {
+  it('keep running and start with Windows are on and locked while Velkrys is the default', () => {
     const keep = row('behaviour', 'keep-running');
     const start = row('behaviour', 'start-with-windows');
     if (keep.kind !== 'toggle' || start.kind !== 'toggle') throw new Error('toggle expected');
     expect(keep.get()).toBe(false);
     expect(keep.disabled?.()).toBe(false);
-    settings.defaultHandler = { applied: true, exePath: 'D:\\Apps\\Trove\\trove.exe' };
+    settings.defaultHandler = { applied: true, exePath: 'D:\\Apps\\Velkrys\\velkrys.exe' };
     expect(keep.get()).toBe(true);
     expect(keep.disabled?.()).toBe(true);
     expect(start.get()).toBe(true);
@@ -172,7 +175,7 @@ describe('settings sections', () => {
     settings.restoreTabs = false;
     settings.startPlace = 'this-pc';
     settings.comingFrom = 'mac';
-    settings.defaultHandler = { applied: true, exePath: 'D:\\Apps\\Trove\\trove.exe' };
+    settings.defaultHandler = { applied: true, exePath: 'D:\\Apps\\Velkrys\\velkrys.exe' };
     const asked = resetToDefaults();
     expect(confirm.pending?.okLabel).toBe('Reset');
     confirm.answer(true);
@@ -183,7 +186,7 @@ describe('settings sections', () => {
     expect(settings.startPlace).toBe('home');
     expect(settings.defaultHandler).toEqual({
       applied: true,
-      exePath: 'D:\\Apps\\Trove\\trove.exe',
+      exePath: 'D:\\Apps\\Velkrys\\velkrys.exe',
     });
   });
 
@@ -234,7 +237,7 @@ describe('settings sections', () => {
   const onOs = (os: string, run: () => void) => {
     const w = globalThis as { window?: unknown };
     const before = w.window;
-    w.window = { __TROVE_PLATFORM__: { os, thisPcLabel: 'This Mac' } };
+    w.window = { __VELKRYS_PLATFORM__: { os, thisPcLabel: 'This Mac' } };
     try {
       run();
     } finally {
@@ -288,7 +291,7 @@ describe('settings sections', () => {
 describe('the Microsoft Store build', () => {
   const store = (channel?: 'direct' | 'msstore') =>
     vi.stubGlobal('window', {
-      __TROVE_PLATFORM__: { os: 'windows', thisPcLabel: 'This PC', channel },
+      __VELKRYS_PLATFORM__: { os: 'windows', thisPcLabel: 'This PC', channel },
     });
   beforeEach(() => settings.apply(sanitize(null)));
   afterEach(() => vi.unstubAllGlobals());
@@ -311,7 +314,7 @@ describe('the Microsoft Store build', () => {
 
   it('keeps Start with Windows as a switch, never locked by a default-handler record', () => {
     store('msstore');
-    settings.defaultHandler = { applied: true, exePath: 'D:\\Apps\\Trove\\trove.exe' };
+    settings.defaultHandler = { applied: true, exePath: 'D:\\Apps\\Velkrys\\velkrys.exe' };
     const start = row('behaviour', 'start-with-windows');
     if (start.kind !== 'toggle') throw new Error('toggle expected');
     expect(start.label).toBe('Start with Windows');
@@ -331,12 +334,12 @@ describe('settings wording off Windows', () => {
   afterEach(() => vi.unstubAllGlobals());
 
   it('Mac says nothing about Explorer, hidden attributes or the default file manager', () => {
-    vi.stubGlobal('window', { __TROVE_PLATFORM__: { os: 'macos', thisPcLabel: 'This Mac' } });
+    vi.stubGlobal('window', { __VELKRYS_PLATFORM__: { os: 'macos', thisPcLabel: 'This Mac' } });
     expect(texts()).not.toMatch(/Explorer|hidden attribute|default file manager/i);
   });
 
   it('Windows keeps its wording', () => {
-    vi.stubGlobal('window', { __TROVE_PLATFORM__: { os: 'windows', thisPcLabel: 'This PC' } });
+    vi.stubGlobal('window', { __VELKRYS_PLATFORM__: { os: 'windows', thisPcLabel: 'This PC' } });
     expect(texts()).toMatch(/Explorer/);
     expect(texts()).toMatch(/hidden attribute/);
     expect(texts()).toMatch(/default file manager is kept/);
@@ -346,7 +349,7 @@ describe('settings wording off Windows', () => {
 describe('background-app words follow the host', () => {
   afterEach(() => vi.unstubAllGlobals());
   const on = (os: string) =>
-    vi.stubGlobal('window', { __TROVE_PLATFORM__: { os, thisPcLabel: 'x' } });
+    vi.stubGlobal('window', { __VELKRYS_PLATFORM__: { os, thisPcLabel: 'x' } });
   const desc = (key: string) => {
     const r = row('behaviour', key);
     return 'description' in r ? (r.description ?? '') : '';
@@ -448,7 +451,7 @@ describe('Spotlight web search engine row', () => {
   });
 });
 
-describe('Open archives inside Trove lists the kinds this build opens', () => {
+describe('Open archives inside Velkrys lists the kinds this build opens', () => {
   it('names .rar only when the build reads RAR', () => {
     expect(archivesInsideWords(true)).toBe(
       'Double-click a .zip, .7z, .tar or .rar to browse it like a folder',

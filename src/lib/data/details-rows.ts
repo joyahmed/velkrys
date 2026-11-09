@@ -7,6 +7,7 @@ import { archiveRowWhere, isArchivePath } from '$lib/utils/archive-location';
 import { parentOf } from '$lib/utils/path';
 import { tildeHome } from '$lib/utils/path-display';
 import { onWindows } from '$lib/utils/platform';
+import type { DriveDetails, DriveType } from '$lib/types/shell';
 import type { RecycleItem } from '$lib/types/recycle';
 import { kindText } from '$lib/components/places/recycle-parts/recycle-columns';
 
@@ -124,6 +125,50 @@ export const detailsRows: DetailsRow[] = [
   { key: 'created', label: 'Created', value: (p) => fmtDate(p.createdMs) || null },
   { key: 'modified', label: 'Modified', value: (p) => fmtDate(p.modifiedMs) || null },
   { key: 'accessed', label: 'Accessed', value: (p) => fmtDate(p.accessedMs) || null },
+];
+
+/** What the pane calls each kind of drive. `unknown` has no word: the Type row is left out. */
+export const driveTypeText = (t: DriveType): string | null =>
+  ({
+    fixed: 'Local disk',
+    external: 'External drive',
+    removable: 'Removable drive',
+    optical: 'Optical drive',
+    network: 'Network drive',
+    ram: 'RAM disk',
+    unknown: null,
+  })[t];
+
+export interface DriveRow {
+  key: string;
+  label: string;
+  /** `null` = the OS did not say: no row (unknown is not zero) */
+  value: (d: DriveDetails) => string | null;
+}
+
+/** A drive's rows, in order. The letter is Windows', the mount point and device are Mac's and
+ *  Linux's: each OS simply gives the others `null`. */
+export const driveRows: DriveRow[] = [
+  { key: 'type', label: 'Type', value: (d) => driveTypeText(d.driveType) },
+  { key: 'fileSystem', label: 'File system', value: (d) => d.fileSystem || null },
+  {
+    key: 'capacity',
+    label: 'Capacity',
+    value: (d) => (d.totalBytes === null ? null : bytes(d.totalBytes)),
+  },
+  {
+    key: 'used',
+    label: 'Used',
+    value: (d) =>
+      d.totalBytes === null || d.freeBytes === null || d.freeBytes > d.totalBytes
+        ? null
+        : bytes(d.totalBytes - d.freeBytes),
+  },
+  { key: 'free', label: 'Free', value: (d) => (d.freeBytes === null ? null : bytes(d.freeBytes)) },
+  { key: 'letter', label: 'Drive letter', value: (d) => d.letter || null },
+  { key: 'mountPoint', label: 'Mounted at', value: (d) => d.mountPoint || null },
+  { key: 'device', label: 'Device', value: (d) => d.device || null },
+  { key: 'bus', label: 'Connection', value: (d) => d.bus || null },
 ];
 
 export interface AttributeToggleDef {

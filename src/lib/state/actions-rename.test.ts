@@ -18,6 +18,16 @@ vi.mock('$lib/api/shell', () => ({
   oneDriveRoot: vi.fn(async () => null),
   openTerminal: vi.fn(async () => {}),
 }));
+vi.mock('$lib/api/drive', () => ({
+  renameDrive: vi.fn(async (path: string, label: string) => ({
+    path,
+    label,
+    totalBytes: null,
+    freeBytes: null,
+  })),
+  driveDetails: vi.fn(),
+  ejectDrive: vi.fn(),
+}));
 vi.mock('$lib/api/transfer', () => ({
   restoreFromTrash: vi.fn(async () => {}),
   transferConflicts: vi.fn(async () => []),
@@ -106,5 +116,66 @@ describe('actions.commitRename', () => {
     });
     await actions.commitRename();
     expect(selection.count).toBe(0);
+  });
+});
+
+describe('F2 on a drive row', () => {
+  it('edits the label and calls renameDrive, never renameEntry', async () => {
+    const { renameDrive } = await import('$lib/api/drive');
+    const { places } = await import('./places.svelte');
+    vi.mocked(renameEntry).mockClear();
+    vi.mocked(renameDrive).mockClear();
+    const root = 'D:\\';
+    const d = { path: root, label: 'Data', totalBytes: null, freeBytes: null, canRename: true };
+    vi.spyOn(places, 'driveAt').mockImplementation((p: string) => (p === root ? d : undefined));
+    vi.spyOn(places, 'retryDrives').mockResolvedValue(undefined as never);
+    tabs.active.location = pathLocation('C:\\scratch');
+    tabs.active.entries = [
+      {
+        name: 'D:\\',
+        path: root,
+        isDir: true,
+        size: 0,
+        modifiedMs: null,
+        createdMs: null,
+        ext: '',
+        isHidden: false,
+        iconKey: 'drive',
+        typeName: 'Drive',
+      },
+    ];
+    actions.startRename(root);
+    expect(actions.draft).toBe('Data');
+    actions.draft = 'Backup';
+    await actions.commitRename();
+    expect(renameDrive).toHaveBeenCalledWith(root, 'Backup');
+    expect(renameEntry).not.toHaveBeenCalled();
+  });
+
+  it('opens no box on a drive the menu offers no Rename for (a network drive)', async () => {
+    const { places } = await import('./places.svelte');
+    const root = 'J:\\';
+    const d = { path: root, label: 'joy', totalBytes: null, freeBytes: null, canRename: false };
+    vi.spyOn(places, 'driveAt').mockImplementation((p: string) => (p === root ? d : undefined));
+    const notify = vi.spyOn(actions, 'notify');
+    tabs.active.location = pathLocation('C:\\scratch');
+    tabs.active.entries = [
+      {
+        name: 'J:\\',
+        path: root,
+        isDir: true,
+        size: 0,
+        modifiedMs: null,
+        createdMs: null,
+        ext: '',
+        isHidden: false,
+        iconKey: 'drive',
+        typeName: 'Drive',
+      },
+    ];
+    actions.renaming = null;
+    actions.startRename(root);
+    expect(actions.renaming).toBeNull();
+    expect(notify).toHaveBeenCalledWith('This drive can’t be renamed here.');
   });
 });

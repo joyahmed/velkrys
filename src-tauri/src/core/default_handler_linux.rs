@@ -1,5 +1,5 @@
 //! Set as the default file manager on Linux, per user, reversibly: `xdg-mime default
-//! <our>.desktop inode/directory` makes Trove the app that opens a folder. The default that
+//! <our>.desktop inode/directory` makes Velkrys the app that opens a folder. The default that
 //! was there before is written to a backup file first, so `revert` puts exactly that back.
 //!
 //! The Linux bundle (`bundle.targets` is `["nsis"]` only today) installs no `.desktop` file,
@@ -13,7 +13,7 @@ use std::path::{Path, PathBuf};
 use serde::{Deserialize, Serialize};
 
 use crate::core::default_handler::Status;
-use crate::core::startup::APP_ID;
+use crate::core::startup::{APP_ID, OLD_APP_ID};
 
 /// The mime type every file manager registers for.
 pub const MIME: &str = "inode/directory";
@@ -23,6 +23,11 @@ pub const BACKUP_FILE: &str = "default-backup-linux.json";
 /// Our `.desktop` file name, the id `xdg-mime` takes.
 pub fn desktop_id() -> String {
     format!("{APP_ID}.desktop")
+}
+
+/// The `.desktop` file name under the app's old name (plan 28).
+pub fn old_desktop_id() -> String {
+    format!("{OLD_APP_ID}.desktop")
 }
 
 /// `xdg-mime query default inode/directory`
@@ -54,7 +59,7 @@ pub fn desktop_file_path(xdg_data_home: Option<&str>, home: &Path) -> PathBuf {
 /// The launcher: opens the folder it is given (`%U` is the URI list a file manager gets).
 pub fn desktop_file(exe: &Path) -> String {
     format!(
-        "[Desktop Entry]\nType=Application\nName=Trove\nComment=File explorer\nExec={} %U\nIcon=trove\nTerminal=false\nCategories=System;FileTools;FileManager;\nMimeType={MIME};\n",
+        "[Desktop Entry]\nType=Application\nName=Velkrys\nComment=File explorer\nExec={} %U\nIcon=velkrys\nTerminal=false\nCategories=System;FileTools;FileManager;\nMimeType={MIME};\n",
         crate::core::startup::desktop_exec_arg(&exe.to_string_lossy())
     )
 }
@@ -129,6 +134,23 @@ pub fn apply(run: Runner, exe: &Path, desktop_path: &Path, backup_path: &Path) -
     Ok(())
 }
 
+/// If the old name is the folder default, make us the default and drop its user launcher,
+/// which sits beside ours. A copied backup keeps the true previous default; with none, there is
+/// no previous default to give back. `true` when it moved; any other default is left alone.
+pub fn retarget(run: Runner, exe: &Path, desktop_path: &Path, backup_path: &Path) -> Result<bool> {
+    if query_default(run)? != Some(old_desktop_id()) {
+        return Ok(false);
+    }
+    if !backup_path.exists() {
+        write_backup(backup_path, &Backup { previous: None })?;
+    }
+    apply(run, exe, desktop_path, backup_path)?;
+    match std::fs::remove_file(desktop_path.with_file_name(old_desktop_id())) {
+        Err(e) if e.kind() != ErrorKind::NotFound => Err(e),
+        _ => Ok(true),
+    }
+}
+
 /// Put the previous default back (when there was one), drop our launcher and the backup.
 /// With no previous default `xdg-mime` has no "unset"; removing our launcher leaves the
 /// association pointing at a file that no longer exists, which the system ignores.
@@ -156,7 +178,7 @@ mod tests {
             set_args("a.desktop"),
             ["default", "a.desktop", "inode/directory"]
         );
-        assert_eq!(desktop_id(), "com.joyahmed.trove.desktop");
+        assert_eq!(desktop_id(), "com.joyahmed.velkrys.desktop");
     }
 
     #[test]
@@ -180,20 +202,21 @@ mod tests {
             .join(".local")
             .join("share")
             .join("applications")
-            .join("com.joyahmed.trove.desktop");
+            .join("com.joyahmed.velkrys.desktop");
         assert_eq!(desktop_file_path(None, home), dflt);
         assert_eq!(desktop_file_path(Some("rel"), home), dflt);
         let abs = std::env::temp_dir().join("xdg-data");
         assert_eq!(
             desktop_file_path(Some(&abs.to_string_lossy()), home),
-            abs.join("applications").join("com.joyahmed.trove.desktop")
+            abs.join("applications")
+                .join("com.joyahmed.velkrys.desktop")
         );
     }
 
     #[test]
     fn desktop_file_handles_folders_and_quotes_the_exe() {
-        let d = desktop_file(Path::new("/opt/Trove App/trove"));
-        assert!(d.contains("\nExec=\"/opt/Trove App/trove\" %U\n"));
+        let d = desktop_file(Path::new("/opt/Velkrys App/velkrys"));
+        assert!(d.contains("\nExec=\"/opt/Velkrys App/velkrys\" %U\n"));
         assert!(d.contains("\nMimeType=inode/directory;\n"));
         assert!(d.contains("FileManager;"));
     }
@@ -222,7 +245,7 @@ mod tests {
     }
 
     fn scratch(tag: &str) -> PathBuf {
-        let d = std::env::temp_dir().join(format!("trove-dh-linux-{tag}-{}", std::process::id()));
+        let d = std::env::temp_dir().join(format!("velkrys-dh-linux-{tag}-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&d);
         std::fs::create_dir_all(&d).unwrap();
         d
@@ -236,7 +259,7 @@ mod tests {
         let run = |a: &[String]| fake.run(a);
         assert_eq!(status(&run), Status::NotApplied);
 
-        apply(&run, Path::new("/opt/trove"), &desktop, &backup).unwrap();
+        apply(&run, Path::new("/opt/velkrys"), &desktop, &backup).unwrap();
         assert_eq!(status(&run), Status::Applied);
         assert!(desktop.is_file());
         assert_eq!(
@@ -245,7 +268,7 @@ mod tests {
         );
 
         // a second apply keeps the first backup
-        apply(&run, Path::new("/opt/trove"), &desktop, &backup).unwrap();
+        apply(&run, Path::new("/opt/velkrys"), &desktop, &backup).unwrap();
         assert_eq!(
             read_backup(&backup).unwrap().previous.as_deref(),
             Some("org.gnome.Nautilus.desktop")
@@ -267,12 +290,69 @@ mod tests {
         let (desktop, backup) = (dir.join("t.desktop"), dir.join("b.json"));
         let fake = Fake::new(None);
         let run = |a: &[String]| fake.run(a);
-        apply(&run, Path::new("/opt/trove"), &desktop, &backup).unwrap();
+        apply(&run, Path::new("/opt/velkrys"), &desktop, &backup).unwrap();
         assert_eq!(read_backup(&backup).unwrap().previous, None);
         let before = fake.calls.borrow().len();
         revert(&run, &desktop, &backup).unwrap();
         assert_eq!(fake.calls.borrow().len(), before);
         assert!(!desktop.exists() && !backup.exists());
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn retarget_takes_over_from_the_old_id_and_drops_its_launcher() {
+        let dir = scratch("retarget");
+        let (desktop, backup) = (dir.join(desktop_id()), dir.join(BACKUP_FILE));
+        let old_launcher = dir.join(old_desktop_id());
+        std::fs::write(&old_launcher, "old").unwrap();
+        let fake = Fake::new(Some(&old_desktop_id()));
+        let run = |a: &[String]| fake.run(a);
+
+        assert!(retarget(&run, Path::new("/opt/v/velkrys"), &desktop, &backup).unwrap());
+        assert_eq!(*fake.default.borrow(), Some(desktop_id()));
+        assert!(desktop.exists());
+        assert!(!old_launcher.exists());
+        assert_eq!(read_backup(&backup).unwrap().previous, None);
+        // a second pass sees our own id and changes nothing
+        assert!(!retarget(&run, Path::new("/opt/v/velkrys"), &desktop, &backup).unwrap());
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn retarget_keeps_a_copied_backup_so_revert_gives_back_the_true_default() {
+        let dir = scratch("retarget-copied");
+        let (desktop, backup) = (dir.join(desktop_id()), dir.join(BACKUP_FILE));
+        let previous = Backup {
+            previous: Some("org.gnome.Nautilus.desktop".into()),
+        };
+        write_backup(&backup, &previous).unwrap();
+        let fake = Fake::new(Some(&old_desktop_id()));
+        let run = |a: &[String]| fake.run(a);
+
+        assert!(retarget(&run, Path::new("/opt/v/velkrys"), &desktop, &backup).unwrap());
+        assert_eq!(read_backup(&backup).unwrap(), previous);
+        revert(&run, &desktop, &backup).unwrap();
+        assert_eq!(
+            fake.default.borrow().as_deref(),
+            Some("org.gnome.Nautilus.desktop")
+        );
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn retarget_leaves_another_default_alone() {
+        let dir = scratch("retarget-other");
+        let (desktop, backup) = (dir.join(desktop_id()), dir.join(BACKUP_FILE));
+        let old_launcher = dir.join(old_desktop_id());
+        std::fs::write(&old_launcher, "old").unwrap();
+        let fake = Fake::new(Some("org.gnome.Nautilus.desktop"));
+        let run = |a: &[String]| fake.run(a);
+
+        assert!(!retarget(&run, Path::new("/opt/v/velkrys"), &desktop, &backup).unwrap());
+        assert_eq!(fake.calls.borrow().len(), 1); // the query, nothing else
+        assert!(!desktop.exists());
+        assert!(!backup.exists());
+        assert!(old_launcher.exists());
         let _ = std::fs::remove_dir_all(&dir);
     }
 
@@ -297,7 +377,7 @@ mod tests {
                 Ok("x.desktop\n".to_string())
             }
         };
-        assert!(apply(&run, Path::new("/opt/trove"), &desktop, &backup).is_err());
+        assert!(apply(&run, Path::new("/opt/velkrys"), &desktop, &backup).is_err());
         assert_eq!(
             read_backup(&backup).unwrap().previous.as_deref(),
             Some("x.desktop")
@@ -315,7 +395,7 @@ mod tests {
             return;
         }
         let dir = scratch("validate");
-        let exe = Path::new("/opt/Trove App/trove");
+        let exe = Path::new("/opt/Velkrys App/velkrys");
         for (name, text) in [
             (
                 "autostart.desktop",

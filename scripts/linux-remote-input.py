@@ -24,7 +24,7 @@ Absolute motion: mutter maps it through a ScreenCast stream linked to the remote
 session, so this script records the primary monitor (pipewire must run on the same
 XDG_RUNTIME_DIR; linux-gnome-headless.sh starts one).
 
-Keys land in an app launched with GH_BACKEND=x11. A native Wayland Trove ignored them
+Keys land in an app launched with GH_BACKEND=x11. A native Wayland Velkrys ignored them
 (2026-10-23, mutter 50.1), so launch the app under x11 for any key or click check.
 """
 import os
@@ -138,7 +138,7 @@ class Remote:
         self.pump(0.05)
 
     def click(self, x, y, btn=1):
-        # WebKitGTK ignored a press that arrived with a single motion event (Trove's sidebar
+        # WebKitGTK ignored a press that arrived with a single motion event (Velkrys's sidebar
         # never saw it); hovering first, then a 1 px step onto the target, makes it land.
         self.move(float(x) - 1, y)
         self.pump(0.15)

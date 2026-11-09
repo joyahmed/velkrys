@@ -1,5 +1,5 @@
-// Windows' own right-click items inside Trove's one menu (plan 05 5.1b, plan 08 D.1): the shell
-// tree mapped to menu rows, minus what Trove already offers, and the slot they arrive into — a
+// Windows' own right-click items inside Velkrys's one menu (plan 05 5.1b, plan 08 D.1): the shell
+// tree mapped to menu rows, minus what Velkrys already offers, and the slot they arrive into — a
 // "Loading…" row while the worker asks, the rows when they come, a quiet note when too late.
 // Pure: the fetch and the timer live in `use-context-menu`.
 import { iconUrl } from '$lib/api/icons'; // a pure URL formatter, not an IPC call
@@ -13,11 +13,11 @@ export const SHELL_DEADLINE_MS = 400;
 export const SHELL_SLOT = 'shell-slot';
 
 /**
- * Canonical verbs whose action Trove's own rows already do. The shell's copy of them is hidden:
- * two "Delete" rows that act differently (one Trove's undoable delete, one Explorer's) is how
+ * Canonical verbs whose action Velkrys's own rows already do. The shell's copy of them is hidden:
+ * two "Delete" rows that act differently (one Velkrys's undoable delete, one Explorer's) is how
  * the wrong one gets clicked.
  */
-export const TROVE_VERBS: ReadonlySet<string> = new Set([
+export const VELKRYS_VERBS: ReadonlySet<string> = new Set([
   'open',
   'cut',
   'copy',
@@ -26,6 +26,8 @@ export const TROVE_VERBS: ReadonlySet<string> = new Set([
   'rename',
   'properties',
   'copyaspath',
+  // Velkrys's own Eject row (plan 23) runs the drive eject; the shell's copy would bypass it
+  'eject',
 ]);
 
 /** The row that holds the shell's place while it is asked. */
@@ -48,7 +50,7 @@ export const lateRow = (): MenuItem => ({
 
 const norm = (label: string) => label.trim().toLowerCase();
 
-/** Every row label in `items`, flyouts included — what Trove already shows. */
+/** Every row label in `items`, flyouts included — what Velkrys already shows. */
 const labelsOf = (items: MenuItem[]): Set<string> => {
   const out = new Set<string>();
   for (const i of items) {
@@ -72,22 +74,22 @@ export const tidyDividers = (items: MenuItem[]): MenuItem[] => {
 };
 
 /**
- * The shell tree as menu rows. A row is dropped when its verb is one Trove does
- * (`TROVE_VERBS`) or when Trove already shows a row with the same label ("Open with",
+ * The shell tree as menu rows. A row is dropped when its verb is one Velkrys does
+ * (`VELKRYS_VERBS`) or when Velkrys already shows a row with the same label ("Open with",
  * "Open in Terminal"); a submenu emptied by that goes too.
  */
 export const shellRows = (
   tree: ShellMenuItem[],
-  trove: MenuItem[],
+  velkrys: MenuItem[],
   run: (id: number) => unknown,
 ): MenuItem[] => {
-  const taken = labelsOf(trove);
+  const taken = labelsOf(velkrys);
   const map = (nodes: ShellMenuItem[], path: string): MenuItem[] =>
     tidyDividers(
       nodes.flatMap((n, i): MenuItem[] => {
         const key = `shell:${path}${i}`;
         if (n.separator) return [{ kind: 'divider', key }];
-        if (n.verb && TROVE_VERBS.has(n.verb)) return [];
+        if (n.verb && VELKRYS_VERBS.has(n.verb)) return [];
         if (path === '' && taken.has(norm(n.label))) return [];
         if (n.children.length) {
           const items = map(n.children, `${path}${i}.`);

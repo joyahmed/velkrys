@@ -2,14 +2,14 @@
 //!
 //! A share that wants a user name answers a listing with `ERROR_ACCESS_DENIED` (5) or
 //! `ERROR_LOGON_FAILURE` (1326). Explorer then shows the Windows credential box and connects;
-//! Trove does the same, once per attempt, when the person asks for it: the frontend offers
+//! Velkrys does the same, once per attempt, when the person asks for it: the frontend offers
 //! "Sign in…" on that error, `sign_in` shows `CredUIPromptForWindowsCredentialsW` and hands
 //! what was typed to `WNetAddConnection2W`, and the listing is tried again.
 //!
 //! ⛔ The password never leaves this module: it is read out of the credential buffer, passed
 //! to `WNetAddConnection2W`, and both buffers are zeroed before they are freed. It is never
 //! logged and never crosses IPC. The connection is `CONNECT_TEMPORARY`: nothing is remembered
-//! past logoff, so Trove adds no saved credential the person did not choose in the box itself.
+//! past logoff, so Velkrys adds no saved credential the person did not choose in the box itself.
 
 /// `ERROR_ACCESS_DENIED`.
 pub const ACCESS_DENIED: i32 = 5;
@@ -78,7 +78,7 @@ pub fn sign_in(share: &str, owner: isize, last_error: i32) -> Result<SignIn, Str
     use windows_sys::Win32::System::Com::CoTaskMemFree;
 
     let wide = |s: &str| -> Vec<u16> { s.encode_utf16().chain([0]).collect() };
-    let caption = wide("Trove");
+    let caption = wide("Velkrys");
     let message = wide(&format!("Enter a user name and password for {share}"));
     let info = CREDUI_INFOW {
         cbSize: std::mem::size_of::<CREDUI_INFOW>() as u32,

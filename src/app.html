@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Trove</title>
+    <title>Velkrys</title>
     <script>
       // Paint the right theme on the first frame: settings load later, so a new window would flash
       // the OS theme first. use-theme stores the CHOICE (system, light or dark) under this key;
@@ -11,7 +11,7 @@
       (function () {
         var t = null;
         try {
-          t = localStorage.getItem('trove-theme');
+          t = localStorage.getItem('velkrys-theme');
         } catch (e) {}
         if (t !== 'dark' && t !== 'light') {
           // 'system', nothing stored, or junk: ask the OS now
@@ -20,7 +20,7 @@
         document.documentElement.dataset.theme = t;
         // `data-os="macos"` gates the Mac-only frosted-glass rules in app.css, set here so the
         // first frame already has it. Rust's init script (`platform_init_script`) runs first.
-        var p = window.__TROVE_PLATFORM__;
+        var p = window.__VELKRYS_PLATFORM__;
         if (p && p.os === 'macos') document.documentElement.dataset.os = 'macos';
       })();
     </script>

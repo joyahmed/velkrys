@@ -64,7 +64,7 @@ describe('fileCategoryOf', () => {
 
   it('a name with no extension is a generic file, unless it says what it is', () => {
     expect(fileCategoryOf('data')).toBe('file');
-    expect(fileCategoryOf('trove')).toBe('file');
+    expect(fileCategoryOf('velkrys')).toBe('file');
     expect(fileCategoryOf('README')).toBe('text');
     expect(fileCategoryOf('LICENSE')).toBe('text');
     expect(fileCategoryOf('Dockerfile')).toBe('code');

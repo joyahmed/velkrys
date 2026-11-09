@@ -19,16 +19,16 @@ pub enum SessionKind {
     },
     /// The user's own shell on macOS / Linux.
     Unix,
-    /// A plain `/bin/sh` Trove opened itself to type one uninstall line into (plan 18, 4.1):
+    /// A plain `/bin/sh` Velkrys opened itself to type one uninstall line into (plan 18, 4.1):
     /// no rc file, a known prompt, and it never follows a navigation (a `cd` line typed after
     /// the removal line would run with it on Enter).
     Plain,
 }
 
 /// The prompt a `Plain` session prints. The frontend types into that session only after it has
-/// seen exactly this, so the line lands at a shell prompt Trove knows, not in a program an rc
+/// seen exactly this, so the line lands at a shell prompt Velkrys knows, not in a program an rc
 /// file started (tmux, a REPL, a Y/n prompt).
-pub const PLAIN_PROMPT: &str = "trove-uninstall$ ";
+pub const PLAIN_PROMPT: &str = "velkrys-uninstall$ ";
 
 /// Variables an interactive `sh`/`bash` reads a start-up file from; a `Plain` session drops them.
 pub const PLAIN_ENV_REMOVE: &[&str] = &["ENV", "BASH_ENV"];
@@ -573,7 +573,7 @@ mod tests {
         use std::sync::mpsc;
         use std::time::{Duration, Instant};
 
-        let dir = std::env::temp_dir().join(format!("trove-plain-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("velkrys-plain-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let rc = dir.join("rc.sh");
         std::fs::write(&rc, "echo RC-RAN\nPS1='hijacked> '\n").unwrap();
@@ -825,7 +825,7 @@ mod tests {
         use std::sync::mpsc;
         use std::time::{Duration, Instant};
 
-        let root = std::env::temp_dir().join(format!("trove-osc7-{}", std::process::id()));
+        let root = std::env::temp_dir().join(format!("velkrys-osc7-{}", std::process::id()));
         let into = root.join("dir with space");
         std::fs::create_dir_all(&into).unwrap();
         let root = root.canonicalize().unwrap();
@@ -887,7 +887,7 @@ mod tests {
         // a prompt that does not move (plain Enter) is not news
         session.write(b"\n").unwrap();
         // a cd that fails leaves the shell where it was: nothing new is reported
-        session.write(b"cd /no/such/trove/dir\n").unwrap();
+        session.write(b"cd /no/such/velkrys/dir\n").unwrap();
         session.write(b"cd ..\n").unwrap();
         let between = wait_cwd(&root_s);
         assert!(between.is_empty(), "unexpected reports {between:?}");

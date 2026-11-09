@@ -3,6 +3,8 @@ import {
   attributesHeading,
   attributeToggles,
   detailsRows,
+  driveRows,
+  driveTypeText,
   folderSize,
   notCountedRow,
   recycleItemRows,
@@ -13,7 +15,7 @@ import { fmtDate, fmtSize } from '$lib/utils/format';
 import type { RecycleItem } from '$lib/types/recycle';
 
 const on = (os: string) =>
-  vi.stubGlobal('window', { __TROVE_PLATFORM__: { os, thisPcLabel: 'This PC' } });
+  vi.stubGlobal('window', { __VELKRYS_PLATFORM__: { os, thisPcLabel: 'This PC' } });
 
 describe('attribute wording per platform', () => {
   afterEach(() => vi.unstubAllGlobals());
@@ -111,4 +113,75 @@ describe('one selected Trash item in the Details pane (plan 15 A.5.10)', () => {
   });
   it('says Date modified and no origin in the macOS Trash', () =>
     expect(recycleItemRows(items[0], true).map((r) => r.label)).toEqual(['Type', 'Date modified']));
+});
+
+describe('driveRows', () => {
+  const base = {
+    path: 'E:\\',
+    label: 'Stick',
+    fileSystem: 'exFAT',
+    driveType: 'removable' as const,
+    totalBytes: 1000,
+    freeBytes: 400,
+    letter: 'E:',
+    mountPoint: null,
+    device: null,
+    bus: 'USB',
+    readOnly: false,
+  };
+  const shown = (d: Parameters<(typeof driveRows)[0]['value']>[0]) =>
+    Object.fromEntries(
+      driveRows.map((r) => [r.key, r.value(d)]).filter((e): e is [string, string] => e[1] !== null),
+    );
+
+  it('Windows: letter, no mount point or device', () => {
+    const r = shown(base);
+    expect(Object.keys(r)).toEqual([
+      'type',
+      'fileSystem',
+      'capacity',
+      'used',
+      'free',
+      'letter',
+      'bus',
+    ]);
+    expect(r.type).toBe('Removable drive');
+    expect(r.used).toContain('600 bytes');
+  });
+
+  it.each(['macos', 'linux'])('%s: mount point and device, no letter', () => {
+    const r = shown({
+      ...base,
+      letter: null,
+      mountPoint: '/Volumes/Stick',
+      device: '/dev/disk4s1',
+    });
+    expect(r.mountPoint).toBe('/Volumes/Stick');
+    expect(r.device).toBe('/dev/disk4s1');
+    expect(r.letter).toBeUndefined();
+  });
+
+  it('unknown sizes, file system and type give no rows, never 0', () => {
+    const r = shown({
+      ...base,
+      driveType: 'unknown',
+      fileSystem: null,
+      totalBytes: null,
+      freeBytes: null,
+      bus: null,
+    });
+    expect(Object.keys(r)).toEqual(['letter']);
+  });
+
+  it('one known size shows that size only: no Used', () => {
+    const r = shown({ ...base, freeBytes: null });
+    expect(r.capacity).toBeDefined();
+    expect(r.free).toBeUndefined();
+    expect(r.used).toBeUndefined();
+  });
+
+  it('every drive type but unknown has a word', () => {
+    expect(driveTypeText('network')).toBe('Network drive');
+    expect(driveTypeText('unknown')).toBeNull();
+  });
 });

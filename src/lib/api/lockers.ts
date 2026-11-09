@@ -9,15 +9,15 @@ export interface Locker {
   app: string;
   /** `WINWORD.EXE`; empty when Windows would not say */
   exe: string;
-  /** false: Windows needs it, or it is Trove — no End task, "close it yourself" instead */
+  /** false: Windows needs it, or it is Velkrys — no End task, "close it yourself" instead */
   canEnd: boolean;
   /** why there is no End task; null exactly when `canEnd` */
   noEnd: NoEnd | null;
 }
 
-/** Why a program gets no End task: Trove (this window or another), the terminal pane's shell,
+/** Why a program gets no End task: Velkrys (this window or another), the terminal pane's shell,
  * a program Windows needs, or one in another Windows session. */
-export type NoEnd = 'trove' | 'terminal' | 'windows' | 'otherSession';
+export type NoEnd = 'velkrys' | 'terminal' | 'windows' | 'otherSession';
 
 /** A path and who holds it; Rust leaves out a path nobody holds. */
 export interface LockedPath {

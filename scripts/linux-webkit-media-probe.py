@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Which video src can WebKitGTK's player load from a page served on a custom scheme, as Trove's is?
+"""Which video src can WebKitGTK's player load from a page served on a custom scheme, as Velkrys's is?
 Tries file://, the custom scheme (answering Range), http://127.0.0.1 and blob:, one line each:
 LOADS duration=..., ERROR <code>, or TIMEOUT. Plan 02 2.9: rerun after a WebKitGTK upgrade - if
 the custom scheme ever LOADS, Linux can stream through preview:// and media-src.ts can go.

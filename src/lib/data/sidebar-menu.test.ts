@@ -68,4 +68,57 @@ describe('the sidebar menu', () => {
     expect(shows(menu, 'pin')).toBe(true);
     expect(shows(menu, 'unpin')).toBe(false);
   });
+
+  it('a plain folder row keeps its exact key list', () => {
+    const keys = (m: MenuItem[]) => m.filter((i) => i.kind === 'item').map((i) => i.key);
+    expect(keys(sidebarMenuFor(item('desktop'), on))).toEqual([
+      'open-tab',
+      'open-window',
+      'pin',
+      'unpin',
+      'terminal',
+    ]);
+  });
+
+  it('a drive row adds Copy as path, Rename, Eject (USB only) and Properties', () => {
+    const shownKeys = (m: MenuItem[]) =>
+      m.filter((i) => i.kind === 'item' && (i.visible?.() ?? true)).map((i) => i.key);
+    places.drives = [
+      {
+        path: 'C:\\',
+        label: 'OS',
+        totalBytes: 10,
+        freeBytes: 5,
+        canRename: true,
+        ejectable: false,
+      },
+      {
+        path: 'E:\\',
+        label: 'USB',
+        totalBytes: 10,
+        freeBytes: 5,
+        canRename: true,
+        ejectable: true,
+      },
+    ];
+    expect(shownKeys(sidebarMenuFor(item('C:\\'), on))).toEqual([
+      'open-tab',
+      'open-window',
+      'pin',
+      'terminal',
+      'copy-path',
+      'rename-drive',
+      'properties',
+    ]);
+    expect(shownKeys(sidebarMenuFor(item('E:\\'), on))).toEqual([
+      'open-tab',
+      'open-window',
+      'pin',
+      'terminal',
+      'eject',
+      'copy-path',
+      'rename-drive',
+      'properties',
+    ]);
+  });
 });

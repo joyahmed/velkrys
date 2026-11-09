@@ -1,6 +1,6 @@
 //! The journal of moves parked beside their target (`transfer::park_beside`).
 //!
-//! A Replace by move first renames the source to a hidden `.<name>.<launch>-<job>.trove-parked` beside
+//! A Replace by move first renames the source to a hidden `.<name>.<launch>-<job>.velkrys-parked` beside
 //! the old file, then (once the old file is in the bin) renames it over the old one. A crash in
 //! between left the moved file hidden in the target folder for good, gone from where it came
 //! from, and nobody was told.
@@ -460,7 +460,8 @@ mod tests {
     use super::*;
 
     fn scratch(name: &str) -> PathBuf {
-        let dir = std::env::temp_dir().join(format!("trove-parked-{name}-{}", std::process::id()));
+        let dir =
+            std::env::temp_dir().join(format!("velkrys-parked-{name}-{}", std::process::id()));
         let _ = fs::remove_dir_all(&dir);
         fs::create_dir_all(&dir).unwrap();
         dir
@@ -468,7 +469,7 @@ mod tests {
 
     fn entry(dir: &Path, name: &str) -> Entry {
         Entry {
-            parked: dir.join(format!(".{name}.1.trove-parked")),
+            parked: dir.join(format!(".{name}.1.velkrys-parked")),
             target: dir.join(name),
         }
     }
@@ -583,7 +584,7 @@ mod tests {
         let root = scratch("launch");
         let journal = root.join(FILE);
         let at = |launch: &str| Entry {
-            parked: root.join(format!(".a.txt.{launch}-1.trove-parked")),
+            parked: root.join(format!(".a.txt.{launch}-1.velkrys-parked")),
             target: root.join("a.txt"),
         };
         let old = at("aa01");

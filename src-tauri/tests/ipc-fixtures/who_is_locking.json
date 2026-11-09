@@ -10,10 +10,10 @@
           "pid": 4242
         },
         {
-          "app": "Trove",
+          "app": "Velkrys",
           "canEnd": false,
-          "exe": "trove.exe",
-          "noEnd": "trove",
+          "exe": "velkrys.exe",
+          "noEnd": "velkrys",
           "pid": 1
         },
         {

@@ -141,6 +141,52 @@ pub fn apply(root: &str, exe: &Path, backup_path: &Path) -> Result<()> {
     Ok(())
 }
 
+/// Hand the keys an old build of this app holds over to `exe` (plan 28). `was_ours` reads the
+/// program path in each key; a key holding anything else stays as it is. A backup that was
+/// copied across keeps the true state from before the old build's first apply; with none, the
+/// keys held are recorded as not there before, so `revert` deletes them and Explorer's
+/// machine-wide entries show through. Returns how many keys moved.
+#[cfg_attr(not(windows), allow(dead_code))]
+pub fn retarget(
+    root: &str,
+    exe: &Path,
+    backup_path: &Path,
+    was_ours: &dyn Fn(&str) -> bool,
+) -> Result<usize> {
+    let held: Vec<&str> = HANDLER_KEYS
+        .into_iter()
+        .filter(|key| {
+            read_sz(&full(root, key), DEFAULT_VALUE)
+                .ok()
+                .flatten()
+                .and_then(|c| handler_exe(&c))
+                .is_some_and(|h| was_ours(&h))
+        })
+        .collect();
+    if held.is_empty() {
+        return Ok(0);
+    }
+    if !backup_path.exists() {
+        let entries = held
+            .iter()
+            .map(|key| BackupEntry {
+                key: key.to_string(),
+                existed: false,
+                default: None,
+                delegate_execute: None,
+            })
+            .collect();
+        write_backup(backup_path, &Backup { entries })?;
+    }
+    let command = command_line(exe);
+    for key in &held {
+        let path = full(root, key);
+        write_sz(&path, DEFAULT_VALUE, &command)?;
+        write_sz(&path, DELEGATE_EXECUTE, "")?;
+    }
+    Ok(held.len())
+}
+
 /// Put back exactly what `apply` found, then delete the backup.
 pub fn revert(root: &str, backup_path: &Path) -> Result<()> {
     let backup = read_backup(backup_path)?;
@@ -259,7 +305,10 @@ mod tests {
             .expect("nsis-hooks.nsh");
         let called: Vec<String> = nsh
             .lines()
-            .filter_map(|l| l.trim().strip_prefix("!insertmacro TROVE_DROP_HANDLER \""))
+            .filter_map(|l| {
+                l.trim()
+                    .strip_prefix("!insertmacro VELKRYS_DROP_HANDLER \"")
+            })
             .map(|rest| rest.split('"').next().unwrap().to_string())
             .collect();
         let expected: Vec<String> = HANDLER_KEYS.iter().map(|k| k.to_string()).collect();
@@ -280,8 +329,8 @@ mod tests {
     #[test]
     fn command_line_quotes_the_exe_and_the_argument() {
         assert_eq!(
-            command_line(Path::new(r"D:\Apps\trove.exe")),
-            r#""D:\Apps\trove.exe" "%1""#
+            command_line(Path::new(r"D:\Apps\velkrys.exe")),
+            r#""D:\Apps\velkrys.exe" "%1""#
         );
     }
 
@@ -307,15 +356,15 @@ mod tests {
     #[cfg(windows)]
     #[test]
     fn stable_paths_exclude_build_temp_and_download_folders() {
-        assert!(is_stable_path(Path::new(r"D:\Apps\trove.exe")));
+        assert!(is_stable_path(Path::new(r"D:\Apps\velkrys.exe")));
         assert!(is_stable_path(Path::new(
             r"C:\Users\alex\AppData\Local\Programs\Otter\otter.exe"
         )));
         assert!(!is_stable_path(Path::new(
-            r"D:\08_TauriProjects\explorer-tauri\src-tauri\target\release\trove.exe"
+            r"D:\08_TauriProjects\explorer-tauri\src-tauri\target\release\velkrys.exe"
         )));
         assert!(!is_stable_path(Path::new(
-            r"C:\Users\alex\Downloads\trove.exe"
+            r"C:\Users\alex\Downloads\velkrys.exe"
         )));
         assert!(!is_stable_path(Path::new(
             r"C:\Users\alex\AppData\Local\Temp\x.exe"
@@ -341,7 +390,7 @@ mod tests {
     }
 }
 
-/// Live tests against a throw-away key under `HKCU\Software\trove-test`, deleted on
+/// Live tests against a throw-away key under `HKCU\Software\velkrys-test`, deleted on
 /// drop. `HKCU\Software\Classes` is never touched here.
 #[cfg(all(test, windows))]
 mod live_tests {
@@ -360,10 +409,10 @@ mod live_tests {
                 .map(|d| d.subsec_nanos())
                 .unwrap_or(0);
             let id = format!("{tag}-{}-{nanos}", std::process::id());
-            let dir = std::env::temp_dir().join(format!("trove-default-{id}"));
+            let dir = std::env::temp_dir().join(format!("velkrys-default-{id}"));
             std::fs::create_dir_all(&dir).unwrap();
             Scratch {
-                root: format!("Software\\trove-test\\{id}"),
+                root: format!("Software\\velkrys-test\\{id}"),
                 dir,
                 _lock: crate::core::registry::tests::scratch_lock(),
             }
@@ -379,13 +428,13 @@ mod live_tests {
     impl Drop for Scratch {
         fn drop(&mut self) {
             let _ = delete_tree(&self.root);
-            let _ = delete_key_if_empty("Software\\trove-test");
+            let _ = delete_key_if_empty("Software\\velkrys-test");
             let _ = std::fs::remove_dir_all(&self.dir);
         }
     }
 
     fn exe() -> PathBuf {
-        PathBuf::from(r"D:\Apps\trove.exe")
+        PathBuf::from(r"D:\Apps\velkrys.exe")
     }
 
     #[test]
@@ -460,7 +509,7 @@ mod live_tests {
         let s = Scratch::new("case");
         apply(&s.root, &exe(), &s.backup()).unwrap();
         assert_eq!(
-            status(&s.root, Path::new(r"d:\apps\TROVE.EXE")),
+            status(&s.root, Path::new(r"d:\apps\VELKRYS.EXE")),
             Status::Applied
         );
     }
@@ -526,13 +575,107 @@ mod live_tests {
         write_sz(&dir, DEFAULT_VALUE, "prior").unwrap();
         apply(&s.root, &exe(), &s.backup()).unwrap();
         let first = read_backup(&s.backup()).unwrap();
-        apply(&s.root, Path::new(r"E:\moved\trove.exe"), &s.backup()).unwrap();
+        apply(&s.root, Path::new(r"E:\moved\velkrys.exe"), &s.backup()).unwrap();
         assert_eq!(read_backup(&s.backup()).unwrap(), first);
         revert(&s.root, &s.backup()).unwrap();
         assert_eq!(
             s.read(HANDLER_KEYS[1], DEFAULT_VALUE).as_deref(),
             Some("prior")
         );
+    }
+
+    use crate::core::startup::{is_old_exe, OLD_EXE};
+
+    fn old_command() -> String {
+        format!(r#""C:\Apps\{OLD_EXE}" "%1""#)
+    }
+
+    fn hold(s: &Scratch, key: &str, command: &str) {
+        write_sz(&full(&s.root, key), DEFAULT_VALUE, command).unwrap();
+        write_sz(&full(&s.root, key), DELEGATE_EXECUTE, "").unwrap();
+    }
+
+    #[test]
+    fn retarget_moves_only_the_keys_the_old_exe_holds() {
+        let s = Scratch::new("retarget");
+        for key in &HANDLER_KEYS[..3] {
+            hold(&s, key, &old_command());
+        }
+        let other = r#""C:\Other\files.exe" "%1""#;
+        hold(&s, HANDLER_KEYS[3], other);
+
+        assert_eq!(
+            retarget(&s.root, &exe(), &s.backup(), &is_old_exe).unwrap(),
+            3
+        );
+        for key in &HANDLER_KEYS[..3] {
+            assert_eq!(s.read(key, DEFAULT_VALUE), Some(command_line(&exe())));
+            assert_eq!(s.read(key, DELEGATE_EXECUTE).as_deref(), Some(""));
+        }
+        assert_eq!(
+            s.read(HANDLER_KEYS[3], DEFAULT_VALUE).as_deref(),
+            Some(other)
+        );
+        // nothing left to move on a second pass
+        assert_eq!(
+            retarget(&s.root, &exe(), &s.backup(), &is_old_exe).unwrap(),
+            0
+        );
+    }
+
+    #[test]
+    fn retarget_with_no_backup_records_the_held_keys_as_not_there_before() {
+        let s = Scratch::new("nobak");
+        hold(&s, HANDLER_KEYS[1], &old_command());
+        hold(&s, HANDLER_KEYS[2], r#""C:\Other\files.exe" "%1""#);
+        retarget(&s.root, &exe(), &s.backup(), &is_old_exe).unwrap();
+        let backup = read_backup(&s.backup()).unwrap();
+        assert_eq!(backup.entries.len(), 1);
+        assert_eq!(backup.entries[0].key, HANDLER_KEYS[1]);
+        assert!(!backup.entries[0].existed);
+
+        revert(&s.root, &s.backup()).unwrap();
+        assert!(!key_exists(&full(&s.root, HANDLER_KEYS[1])));
+        assert!(key_exists(&full(&s.root, HANDLER_KEYS[2])));
+    }
+
+    #[test]
+    fn retarget_keeps_a_copied_backup_so_revert_gives_back_the_true_state() {
+        let s = Scratch::new("copied");
+        // the machine as it was before the old build first applied
+        for key in HANDLER_KEYS {
+            write_sz(&full(&s.root, key), DEFAULT_VALUE, "true state").unwrap();
+        }
+        apply(
+            &s.root,
+            Path::new(&format!(r"C:\Apps\{OLD_EXE}")),
+            &s.backup(),
+        )
+        .unwrap();
+        let copied = std::fs::read(s.backup()).unwrap();
+
+        assert_eq!(
+            retarget(&s.root, &exe(), &s.backup(), &is_old_exe).unwrap(),
+            4
+        );
+        assert_eq!(std::fs::read(s.backup()).unwrap(), copied);
+        assert_eq!(status(&s.root, &exe()), Status::Applied);
+
+        revert(&s.root, &s.backup()).unwrap();
+        for key in HANDLER_KEYS {
+            assert_eq!(s.read(key, DEFAULT_VALUE).as_deref(), Some("true state"));
+        }
+    }
+
+    #[test]
+    fn retarget_leaves_explorer_alone_and_writes_no_backup() {
+        let s = Scratch::new("explorer");
+        hold(&s, HANDLER_KEYS[1], r#""C:\Windows\explorer.exe" "%1""#);
+        assert_eq!(
+            retarget(&s.root, &exe(), &s.backup(), &is_old_exe).unwrap(),
+            0
+        );
+        assert!(!s.backup().exists());
     }
 
     #[test]

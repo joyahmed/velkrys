@@ -1,9 +1,9 @@
-// The facts Rust injects about the OS Trove runs on (`core/shell.rs`, `platform_init_script`),
+// The facts Rust injects about the OS Velkrys runs on (`core/shell.rs`, `platform_init_script`),
 // set on `window` before any page script runs. Its own module so both `platform.ts` and
 // `state/coming-from.svelte.ts` can read it without importing each other (plan 19, 1.1.2).
 // Off Tauri (tests, a plain browser) nothing is set and every caller treats that as Windows.
 
-export interface TrovePlatform {
+export interface VelkrysPlatform {
   os: string;
   thisPcLabel: string;
   /** which store this build ships through (`core/channel.rs`); absent in an older build */
@@ -16,10 +16,10 @@ export interface TrovePlatform {
 
 declare global {
   interface Window {
-    __TROVE_PLATFORM__?: TrovePlatform;
+    __VELKRYS_PLATFORM__?: VelkrysPlatform;
   }
 }
 
 /** What Rust injected, or `undefined` off Tauri. Read at call time, never cached. */
-export const injected = (): TrovePlatform | undefined =>
-  typeof window === 'undefined' ? undefined : window.__TROVE_PLATFORM__;
+export const injected = (): VelkrysPlatform | undefined =>
+  typeof window === 'undefined' ? undefined : window.__VELKRYS_PLATFORM__;

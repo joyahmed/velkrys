@@ -7,7 +7,7 @@ import type { MovedPair, SavedUndo, SavedUndoLog, UndoKind, UndoRecord } from '$
 /** How many actions survive a restart (plan 08 F2 names none; 50 is what the lead set). */
 export const UNDO_LOG_CAP = 50;
 
-/** A record holding more paths than this is refused: no real action of Trove's needs it. */
+/** A record holding more paths than this is refused: no real action of Velkrys's needs it. */
 export const MAX_RECORD_PATHS = 10_000;
 
 const MAX_TEXT = 2_000;

@@ -14,7 +14,7 @@ use std::sync::Mutex;
 static WRITE_LOCK: Mutex<()> = Mutex::new(());
 
 pub const FILE_NAME: &str = "settings.json";
-/// The identifier the app had before it was named Trove; its config folder is read once.
+/// The identifier the app had before it was named Velkrys; its config folder is read once.
 pub const OLD_IDENTIFIER: &str = "com.joyahmed.explorer";
 /// What moves along with the settings on the rename (the set-as-default backup).
 /// Settings go last: its presence in the new folder is what marks the migration as done, so a
@@ -139,7 +139,7 @@ mod tests {
     /// only by pid is shared and one test's `remove_dir_all` races the other's write.
     fn scratch(name: &str) -> PathBuf {
         let dir =
-            std::env::temp_dir().join(format!("trove-settings-{}-{name}", std::process::id()));
+            std::env::temp_dir().join(format!("velkrys-settings-{}-{name}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         dir
     }

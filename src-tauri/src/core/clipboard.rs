@@ -103,10 +103,10 @@ pub use win::{read_paths, write_paths, write_text};
 #[cfg(not(windows))]
 pub use fallback::{read_paths, write_paths, write_text};
 
-/// Off Windows there is no `CF_HDROP`, so files copied or cut in Trove live in this process
-/// only: copy/cut/paste between Trove windows works (they share one process), with cut vs copy
+/// Off Windows there is no `CF_HDROP`, so files copied or cut in Velkrys live in this process
+/// only: copy/cut/paste between Velkrys windows works (they share one process), with cut vs copy
 /// kept. ⛔ Files are NOT put on the system clipboard, so pasting them into another app (or
-/// another app's files into Trove) does not work off Windows; that is a deliberate scope
+/// another app's files into Velkrys) does not work off Windows; that is a deliberate scope
 /// limit, not an oversight. Plain text does go to the system clipboard, through `arboard`.
 #[cfg(not(windows))]
 mod fallback {
@@ -214,7 +214,7 @@ mod fallback {
         #[test]
         #[ignore]
         fn copied_text_outlives_the_call() {
-            let text = format!("trove-clipboard-{}", std::process::id());
+            let text = format!("velkrys-clipboard-{}", std::process::id());
             write_text(&text).expect("write");
             std::thread::sleep(std::time::Duration::from_millis(500));
             let out = std::process::Command::new("xclip")
@@ -455,8 +455,8 @@ mod live_tests {
             if self.0.is_empty() {
                 cmd.arg("Set-Clipboard -Value $null");
             } else {
-                cmd.arg("Set-Clipboard -Value $env:TROVE_CLIP")
-                    .env("TROVE_CLIP", &self.0);
+                cmd.arg("Set-Clipboard -Value $env:VELKRYS_CLIP")
+                    .env("VELKRYS_CLIP", &self.0);
             }
             let _ = cmd.output();
         }
@@ -475,7 +475,7 @@ mod live_tests {
     }
 
     fn temp_file(name: &str) -> String {
-        let p = std::env::temp_dir().join(format!("trove-clip-{}-{name}", std::process::id()));
+        let p = std::env::temp_dir().join(format!("velkrys-clip-{}-{name}", std::process::id()));
         std::fs::write(&p, b"x").unwrap();
         p.to_string_lossy().into_owned()
     }
@@ -506,7 +506,10 @@ mod live_tests {
     fn clipboard_live_powershell_copy_is_read_by_rust() {
         let _g = Restore::new();
         let f = temp_file("ps.txt");
-        ps("Set-Clipboard -Path $env:TROVE_T", Some(("TROVE_T", &f)));
+        ps(
+            "Set-Clipboard -Path $env:VELKRYS_T",
+            Some(("VELKRYS_T", &f)),
+        );
         let got = eventually(read_paths);
         std::fs::remove_file(&f).ok();
         let got = got.expect("file list on the clipboard");

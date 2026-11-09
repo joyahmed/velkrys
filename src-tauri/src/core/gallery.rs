@@ -283,7 +283,7 @@ mod tests {
     }
     fn scratch(tag: &str) -> Scratch {
         let dir = std::env::temp_dir().join(format!(
-            "trove-gallery-{tag}-{}-{}",
+            "velkrys-gallery-{tag}-{}-{}",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>BusProtocol</key>
+	<string>Apple Fabric</string>
+	<key>DeviceIdentifier</key>
+	<string>disk3s1s1</string>
+	<key>DeviceNode</key>
+	<string>/dev/disk3s1s1</string>
+	<key>FilesystemName</key>
+	<string>APFS</string>
+	<key>Internal</key>
+	<true/>
+	<key>MountPoint</key>
+	<string>/</string>
+	<key>RemovableMedia</key>
+	<false/>
+	<key>TotalSize</key>
+	<integer>494384795648</integer>
+	<key>VolumeName</key>
+	<string>Startup Disk</string>
+	<key>WritableVolume</key>
+	<false/>
+</dict>
+</plist>

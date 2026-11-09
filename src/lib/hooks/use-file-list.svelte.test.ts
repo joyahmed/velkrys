@@ -198,7 +198,7 @@ describe('modalOpen', () => {
 
 const onOs = (os: string) =>
   vi.stubGlobal('window', {
-    __TROVE_PLATFORM__: { os, thisPcLabel: 'This PC' },
+    __VELKRYS_PLATFORM__: { os, thisPcLabel: 'This PC' },
     addEventListener() {},
     removeEventListener() {},
   });

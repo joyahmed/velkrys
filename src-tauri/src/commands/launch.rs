@@ -9,7 +9,7 @@ use crate::core::launch::{self, Launch};
 ///
 /// On Windows and Linux every launch arrives as argv: this process's own (read below) or a
 /// second process's (the single-instance handler emits it). macOS sends neither — Finder's
-/// "Open With", a folder dropped on the Dock icon and `open -a Trove <dir>` all arrive as
+/// "Open With", a folder dropped on the Dock icon and `open -a Velkrys <dir>` all arrive as
 /// `RunEvent::Opened` (`commands::dock`), often before the webview has loaded. Such a launch
 /// is parked here and handed over by `initial_launch`, because an event emitted before the
 /// frontend listens is simply lost. So is a second process's launch while `main` is gone or

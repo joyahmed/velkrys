@@ -34,22 +34,25 @@ test('counts ldd lines that say not found', () => {
 });
 
 test('names the control fields that are absent or empty', () => {
-  const control = 'Package: trove\nVersion: 0.1.0\nArchitecture: amd64\nDepends:\nDescription: x\n';
+  const control =
+    'Package: velkrys\nVersion: 0.1.0\nArchitecture: amd64\nDepends:\nDescription: x\n';
   expect(missingFields(control)).toEqual(['Depends']);
-  expect(missingFields('Package: trove\n', ['Package', 'Version'])).toEqual(['Version']);
+  expect(missingFields('Package: velkrys\n', ['Package', 'Version'])).toEqual(['Version']);
 });
 
 test('lists metainfo files, not the folder', () => {
   const listing = [
     'drwxr-xr-x root/root  0 2026-10-23 10:00 ./usr/share/metainfo/',
-    '-rw-r--r-- root/root 99 2026-10-23 10:00 ./usr/share/metainfo/com.joyahmed.trove.metainfo.xml',
-    '-rwxr-xr-x root/root 99 2026-10-23 10:00 ./usr/bin/trove',
+    '-rw-r--r-- root/root 99 2026-10-23 10:00 ./usr/share/metainfo/com.joyahmed.velkrys.metainfo.xml',
+    '-rwxr-xr-x root/root 99 2026-10-23 10:00 ./usr/bin/velkrys',
   ].join('\n');
-  expect(metainfoFiles(listing)).toEqual(['./usr/share/metainfo/com.joyahmed.trove.metainfo.xml']);
+  expect(metainfoFiles(listing)).toEqual([
+    './usr/share/metainfo/com.joyahmed.velkrys.metainfo.xml',
+  ]);
   // dpkg-deb from tauri's bundler prints paths without the leading "./".
   const bare =
-    '-rw-r--r-- 0/0 1522 2026-10-23 18:25 usr/share/metainfo/com.joyahmed.trove.metainfo.xml';
-  expect(metainfoFiles(bare)).toEqual(['usr/share/metainfo/com.joyahmed.trove.metainfo.xml']);
+    '-rw-r--r-- 0/0 1522 2026-10-23 18:25 usr/share/metainfo/com.joyahmed.velkrys.metainfo.xml';
+  expect(metainfoFiles(bare)).toEqual(['usr/share/metainfo/com.joyahmed.velkrys.metainfo.xml']);
   expect(metainfoFiles('drwxr-xr-x 0/0 0 2026-10-23 18:25 usr/share/metainfo')).toEqual([]);
 });
 

@@ -90,12 +90,14 @@ describe('archives', () => {
 
   it('canExtract: a .rar (Phase 5) only in a build with the `rar` feature', () => {
     try {
-      vi.stubGlobal('window', { __TROVE_PLATFORM__: { os: 'macos', thisPcLabel: 'x', rar: true } });
+      vi.stubGlobal('window', {
+        __VELKRYS_PLATFORM__: { os: 'macos', thisPcLabel: 'x', rar: true },
+      });
       expect(canExtract('old.rar')).toBe(true);
       expect(canExtract('OLD.RAR')).toBe(true);
       expect(canExtract('set.part1.rar')).toBe(true);
       vi.stubGlobal('window', {
-        __TROVE_PLATFORM__: { os: 'macos', thisPcLabel: 'x', rar: false },
+        __VELKRYS_PLATFORM__: { os: 'macos', thisPcLabel: 'x', rar: false },
       });
       expect(canExtract('old.rar')).toBe(false);
       expect(canExtract('photos.zip')).toBe(true);
@@ -232,7 +234,7 @@ describe('archives', () => {
     const id = await archives.compress(['D:\\in\\photos'], 'zip');
     await done(id, [{ from: 'D:\\in\\photos', to: 'D:\\in\\photos.zip', created: true }]);
     vi.mocked(trashEntries).mockRejectedValueOnce(
-      Object.assign(new Error('macOS did not let Trove use the Trash'), {
+      Object.assign(new Error('macOS did not let Velkrys use the Trash'), {
         name: 'NoRecycleBin',
         place: 'This Mac',
         reason: 'denied',
@@ -242,7 +244,7 @@ describe('archives', () => {
     await expect(undo.undo()).rejects.toThrow(/not deleted/);
     expect(ask).toHaveBeenCalledOnce();
     expect(ask.mock.calls[0][0].message).toMatch(
-      /^macOS did not let Trove use the (Trash|Recycle Bin) — permanently delete the ZIP file\?$/,
+      /^macOS did not let Velkrys use the (Trash|Recycle Bin) — permanently delete the ZIP file\?$/,
     );
     expect(deleteEntries).not.toHaveBeenCalled();
     ask.mockRestore();

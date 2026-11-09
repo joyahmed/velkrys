@@ -33,7 +33,7 @@ pub fn platform_init_script() -> String {
         // RAR row off, so a distro build without UnRAR never offers what it cannot do
         "rar": cfg!(feature = "rar"),
     });
-    format!("window.__TROVE_PLATFORM__ = Object.freeze({facts});")
+    format!("window.__VELKRYS_PLATFORM__ = Object.freeze({facts});")
 }
 
 #[derive(Debug, Clone, Serialize, PartialEq)]
@@ -61,9 +61,42 @@ pub struct DriveInfo {
     pub free_bytes: Option<u64>,
     /// A network share (SMB, AFP, NFS, WebDAV, sshfs ...). Never measured: its sizes are `None`
     /// and nothing walks it until the person opens it - touching it is what makes macOS ask
-    /// "Trove would like to access files on a network volume" (`core/mounts.rs`). Always
+    /// "Velkrys would like to access files on a network volume" (`core/mounts.rs`). Always
     /// `false` on Windows.
     pub network: bool,
+    /// What kind of drive it is (plan 23). `unknown` for a drive that did not answer in time.
+    pub drive_type: crate::core::drive::DriveType,
+    /// `NTFS`, `FAT32`, `exFAT`, `apfs`, `ext4` … as the OS spells it; `None` when it would not
+    /// say (unknown is not "").
+    pub file_system: Option<String>,
+    /// Whether the menu offers Rename (`drive::can_rename`).
+    pub can_rename: bool,
+    /// Whether the menu offers Eject (`drive::ejectable`).
+    pub ejectable: bool,
+}
+
+/// What asking a volume gives (`volume_info` and the per-OS refinements).
+#[derive(Debug, Clone, PartialEq)]
+pub(crate) struct Volume {
+    pub label: String,
+    pub total_bytes: Option<u64>,
+    pub free_bytes: Option<u64>,
+    pub file_system: Option<String>,
+    pub drive_type: crate::core::drive::DriveType,
+}
+
+impl Volume {
+    /// A volume known only by its label and sizes: type `Fixed` until the OS says otherwise.
+    #[cfg_attr(windows, allow(dead_code))]
+    fn plain(label: String, total_bytes: Option<u64>, free_bytes: Option<u64>) -> Self {
+        Self {
+            label,
+            total_bytes,
+            free_bytes,
+            file_system: None,
+            drive_type: crate::core::drive::DriveType::Fixed,
+        }
+    }
 }
 
 /// `(key, label, folder under the profile)`. ⛔ The key is persisted (`hiddenKnownFolders`) and
@@ -216,7 +249,7 @@ const SLOW_DRIVE_MS: u128 = 2000;
 
 /// How long the listing waits for a drive's label and sizes. A healthy disk answers in
 /// milliseconds; a dead network mapping answers after the redirector's timeout (21-64 s in
-/// `trove.log`), and C: and D: must not wait that long for it.
+/// `velkrys.log`), and C: and D: must not wait that long for it.
 const DRIVE_WAIT: std::time::Duration = std::time::Duration::from_millis(1500);
 
 /// What a drive that did not answer in `DRIVE_WAIT` is called. On Windows that is in practice a
@@ -242,8 +275,8 @@ pub fn drives() -> Vec<DriveInfo> {
     list_drives(drive_list(), volume_info, DRIVE_WAIT)
 }
 
-/// `volume_info`'s shape: a drive's root in, its label, total and free bytes out.
-type VolumeProbe = fn(&str) -> (String, Option<u64>, Option<u64>);
+/// `volume_info`'s shape: a drive's root in, what the volume says out.
+type VolumeProbe = fn(&str) -> Volume;
 
 /// The listing behind `drives`, with the probe and the wait as parameters so a test can make a
 /// drive slow without a network. ⛔ It never waits more than `wait` in all: a drive that has
@@ -261,7 +294,7 @@ fn list_drives(
         let tx = tx.clone();
         std::thread::spawn(move || {
             // ⚠️ Per letter, because the whole list is only as slow as its worst one and the
-            // log could not say which. `trove.log` measured this call at 21 s on one cold
+            // log could not say which. `velkrys.log` measured this call at 21 s on one cold
             // start and 64 s on another, then under a second on a third — a dead network
             // mapping waiting out the SMB redirector, intermittently. This is the line that
             // names the letter. `debug`, so a release build does not record it (A.4), and
@@ -319,6 +352,10 @@ fn list_drives(
                     total_bytes: None,
                     free_bytes: None,
                     network: root.network,
+                    drive_type: crate::core::drive::DriveType::Unknown,
+                    file_system: None,
+                    can_rename: false,
+                    ejectable: false,
                 })
             }
         })
@@ -332,25 +369,86 @@ fn list_drives(
 /// dead server. `query` is a parameter so a test can prove it is never called for a share.
 fn describe(
     root: crate::core::places_unix::DriveRoot,
-    query: impl FnOnce(&str) -> (String, Option<u64>, Option<u64>),
+    query: impl FnOnce(&str) -> Volume,
 ) -> DriveInfo {
+    use crate::core::drive::{can_rename, ejectable, DriveType};
     if root.network {
         return DriveInfo {
             label: crate::core::places_unix::mount_leaf(&root.path),
+            can_rename: can_rename(DriveType::Network, &root.path),
+            ejectable: false,
+            drive_type: DriveType::Network,
+            file_system: root.fstype.clone(),
             path: root.path,
             total_bytes: None,
             free_bytes: None,
             network: true,
         };
     }
-    let (label, total_bytes, free_bytes) = query(&root.path);
+    let mut volume = query(&root.path);
+    refine(&root, &mut volume);
     DriveInfo {
+        can_rename: can_rename(volume.drive_type, &root.path),
+        ejectable: ejectable(volume.drive_type, &root.path),
         path: root.path,
-        label,
-        total_bytes,
-        free_bytes,
+        label: volume.label,
+        total_bytes: volume.total_bytes,
+        free_bytes: volume.free_bytes,
         network: false,
+        drive_type: volume.drive_type,
+        file_system: volume.file_system,
     }
+}
+
+/// What only the mount table, sysfs or `diskutil` know (the type, the file system, a Linux
+/// label): Windows' probe already answered all of it.
+#[cfg(windows)]
+fn refine(_root: &crate::core::places_unix::DriveRoot, _volume: &mut Volume) {}
+
+#[cfg(target_os = "linux")]
+fn refine(root: &crate::core::places_unix::DriveRoot, volume: &mut Volume) {
+    let d = crate::core::drive_linux::details(
+        &root.path,
+        root.source.as_deref(),
+        root.fstype.as_deref(),
+        &volume.label,
+    );
+    volume.label = d.label;
+    volume.file_system = d.file_system;
+    volume.drive_type = d.drive_type;
+}
+
+#[cfg(target_os = "macos")]
+fn refine(root: &crate::core::places_unix::DriveRoot, volume: &mut Volume) {
+    let d = crate::core::drive_mac::info(&root.path, root.fstype.as_deref(), &volume.label);
+    volume.label = d.label;
+    volume.file_system = d.file_system;
+    volume.drive_type = d.drive_type;
+}
+
+#[cfg(not(any(windows, target_os = "linux", target_os = "macos")))]
+fn refine(root: &crate::core::places_unix::DriveRoot, volume: &mut Volume) {
+    volume.file_system = root.fstype.clone();
+}
+
+/// The mount-table row of one drive, by its root.
+pub fn drive_root(path: &str) -> Option<crate::core::places_unix::DriveRoot> {
+    drive_list().into_iter().find(|r| r.path == path)
+}
+
+/// One drive's row, asked for by its root, for the commands that act on a single drive.
+pub fn drive_info(path: &str) -> Option<DriveInfo> {
+    Some(describe(drive_root(path)?, volume_info))
+}
+
+/// One drive's row, asked for by the device behind it: a Linux volume that was renamed is
+/// re-mounted under its new name, so its old root is gone.
+#[cfg_attr(not(target_os = "linux"), allow(dead_code))]
+pub fn drive_info_by_source(source: &str) -> Option<DriveInfo> {
+    let root = drive_list()
+        .into_iter()
+        .find(|r| r.source.as_deref() == Some(source))?;
+    Some(describe(root, volume_info))
 }
 
 /// The drives to list. Windows' letters are all local here: its own code is unchanged.
@@ -441,11 +539,11 @@ fn drive_roots() -> Vec<crate::core::places_unix::DriveRoot> {
 /// drive" box, which blocks this thread until someone clicks it. `SEM_FAILCRITICALERRORS`
 /// turns that into an error return. Restored on the way out so nothing else inherits it.
 #[cfg(windows)]
-struct QuietDriveErrors(u32);
+pub(crate) struct QuietDriveErrors(u32);
 
 #[cfg(windows)]
 impl QuietDriveErrors {
-    fn set() -> Self {
+    pub(crate) fn set() -> Self {
         use windows_sys::Win32::System::Diagnostics::Debug::{
             SetThreadErrorMode, SEM_FAILCRITICALERRORS,
         };
@@ -466,46 +564,15 @@ impl Drop for QuietDriveErrors {
 }
 
 #[cfg(windows)]
-fn volume_info(root: &str) -> (String, Option<u64>, Option<u64>) {
-    use std::os::windows::ffi::OsStrExt;
-    use windows_sys::Win32::Storage::FileSystem::{GetDiskFreeSpaceExW, GetVolumeInformationW};
-
-    let _quiet = QuietDriveErrors::set();
-    let wide: Vec<u16> = std::ffi::OsStr::new(root)
-        .encode_wide()
-        .chain(Some(0))
-        .collect();
-    let mut name = [0u16; 261];
-    let mut label = String::from("Local Disk");
-    // SAFETY: every pointer is to a live local buffer of the stated length; the nullable
-    // out-params we do not need are null, as the API allows.
-    let ok = unsafe {
-        GetVolumeInformationW(
-            wide.as_ptr(),
-            name.as_mut_ptr(),
-            name.len() as u32,
-            std::ptr::null_mut(),
-            std::ptr::null_mut(),
-            std::ptr::null_mut(),
-            std::ptr::null_mut(),
-            0,
-        )
-    };
-    if ok != 0 {
-        let end = name.iter().position(|&c| c == 0).unwrap_or(0);
-        let s = String::from_utf16_lossy(&name[..end]);
-        if !s.is_empty() {
-            label = s;
-        }
+fn volume_info(root: &str) -> Volume {
+    let p = crate::core::drive_windows::probe(root);
+    Volume {
+        label: p.label.unwrap_or_else(|| "Local Disk".to_string()),
+        total_bytes: p.total_bytes,
+        free_bytes: p.free_bytes,
+        file_system: p.file_system,
+        drive_type: p.drive_type,
     }
-    let (mut free, mut total) = (0u64, 0u64);
-    // SAFETY: out-params point to live u64s; the caller-free-bytes param may be null.
-    let sized =
-        unsafe { GetDiskFreeSpaceExW(wide.as_ptr(), std::ptr::null_mut(), &mut total, &mut free) };
-    if sized == 0 {
-        return (label, None, None);
-    }
-    (label, Some(total), Some(free))
 }
 
 /// The label (the mount point's last component; `/` gets the platform's name for it) and
@@ -513,7 +580,7 @@ fn volume_info(root: &str) -> (String, Option<u64>, Option<u64>) {
 /// "Avail"), not the root-reserved total. A failed `statvfs` is logged and reads unknown
 /// (`None` / `None`), never 0 / 0.
 #[cfg(unix)]
-fn volume_info(root: &str) -> (String, Option<u64>, Option<u64>) {
+fn volume_info(root: &str) -> Volume {
     let label = if root == "/" {
         root_label()
     } else {
@@ -526,7 +593,7 @@ fn volume_info(root: &str) -> (String, Option<u64>, Option<u64>) {
             (None, None)
         }
     };
-    (label, total, free)
+    Volume::plain(label, total, free)
 }
 
 #[cfg(unix)]
@@ -585,18 +652,19 @@ fn root_label() -> String {
 }
 
 #[cfg(not(any(windows, unix)))]
-fn volume_info(_root: &str) -> (String, Option<u64>, Option<u64>) {
-    ("Local Disk".into(), None, None)
+fn volume_info(_root: &str) -> Volume {
+    Volume::plain("Local Disk".into(), None, None)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::core::drive::DriveType;
     use std::fs;
 
     #[test]
     fn known_folders_lists_only_what_exists() {
-        let dir = std::env::temp_dir().join(format!("trove-known-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("velkrys-known-{}", std::process::id()));
         let _ = fs::remove_dir_all(&dir);
         fs::create_dir_all(dir.join("Desktop")).unwrap();
         fs::create_dir_all(dir.join("Music")).unwrap();
@@ -612,7 +680,7 @@ mod tests {
 
     #[test]
     fn a_redirected_known_folder_wins_over_the_profile_path() {
-        let dir = std::env::temp_dir().join(format!("trove-kfm-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("velkrys-kfm-{}", std::process::id()));
         let _ = fs::remove_dir_all(&dir);
         fs::create_dir_all(dir.join("Documents")).unwrap();
         let moved = dir.join("OneDrive").join("Documents");
@@ -632,7 +700,7 @@ mod tests {
     #[test]
     fn the_init_script_carries_this_platforms_label() {
         let script = platform_init_script();
-        assert!(script.starts_with("window.__TROVE_PLATFORM__ = Object.freeze({"));
+        assert!(script.starts_with("window.__VELKRYS_PLATFORM__ = Object.freeze({"));
         assert!(script.contains(&format!("\"thisPcLabel\":\"{THIS_PC_LABEL}\"")));
         assert!(script.contains(&format!("\"os\":\"{}\"", std::env::consts::OS)));
         assert!(script.contains(&format!(
@@ -675,6 +743,8 @@ mod tests {
         let share = DriveRoot {
             path: "/Volumes/media".into(),
             network: true,
+            source: Some("//host/media".into()),
+            fstype: Some("smbfs".into()),
         };
         let d = describe(share, |root| panic!("volume_info was called for {root}"));
         assert_eq!(d.label, "media");
@@ -685,11 +755,11 @@ mod tests {
     }
 
     /// A probe whose `N:\` is a dead share: it answers, but only after 3 s.
-    fn slow_n(root: &str) -> (String, Option<u64>, Option<u64>) {
+    fn slow_n(root: &str) -> Volume {
         if root == "N:\\" {
             std::thread::sleep(std::time::Duration::from_secs(3));
         }
-        ("Disk".into(), Some(10), Some(4))
+        Volume::plain("Disk".into(), Some(10), Some(4))
     }
 
     #[test]
@@ -721,9 +791,9 @@ mod tests {
     #[test]
     fn a_drive_whose_probe_panics_is_dropped_and_the_rest_come_back_at_once() {
         use crate::core::places_unix::DriveRoot;
-        fn panics_on_e(root: &str) -> (String, Option<u64>, Option<u64>) {
+        fn panics_on_e(root: &str) -> Volume {
             assert_ne!(root, "E:\\", "a probe that panics");
-            ("Disk".into(), None, None)
+            Volume::plain("Disk".into(), None, None)
         }
         let roots = ["C:\\", "E:\\"].map(DriveRoot::local).to_vec();
         let started = std::time::Instant::now();
@@ -739,7 +809,7 @@ mod tests {
         let mut asked = Vec::new();
         let d = describe(DriveRoot::local("/Volumes/Stick"), |root| {
             asked.push(root.to_string());
-            ("Stick".into(), Some(10), Some(4))
+            Volume::plain("Stick".into(), Some(10), Some(4))
         });
         assert_eq!(asked, ["/Volumes/Stick"]);
         assert_eq!(
@@ -756,6 +826,10 @@ mod tests {
             total_bytes: None,
             free_bytes: None,
             network: false,
+            drive_type: DriveType::Fixed,
+            file_system: None,
+            can_rename: true,
+            ejectable: false,
         };
         let v = serde_json::to_value(&d).unwrap();
         assert!(v["totalBytes"].is_null() && v["freeBytes"].is_null(), "{v}");
@@ -772,7 +846,7 @@ mod tests {
     #[test]
     #[cfg(unix)]
     fn a_failed_statvfs_reads_unknown() {
-        let (_, total, free) = volume_info("/definitely/not/a/mount");
-        assert_eq!((total, free), (None, None));
+        let v = volume_info("/definitely/not/a/mount");
+        assert_eq!((v.total_bytes, v.free_bytes), (None, None));
     }
 }

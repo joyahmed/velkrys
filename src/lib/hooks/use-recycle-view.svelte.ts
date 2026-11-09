@@ -97,7 +97,7 @@ export const useRecycleView = () => {
     // ⭐ The count is read again here, not taken from the last listing. `recycle.empty()` purges
     // whatever is in the bin when it runs, and the bin grows from every delete elsewhere in the
     // app while this view is away — so a stale number would have the person agree to less than
-    // gets destroyed. Explorer counts at the moment it asks; so does Trove.
+    // gets destroyed. Explorer counts at the moment it asks; so does Velkrys.
     const count = await recycle.countNow();
     if (count === 0) return;
     logInfo(`frontend: recycle empty confirming ${count} item(s)`);

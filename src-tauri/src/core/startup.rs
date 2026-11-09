@@ -27,7 +27,10 @@ use crate::core::channel;
 use crate::core::registry;
 
 /// The value name under the `Run` key.
-pub const RUN_VALUE: &str = "Trove";
+pub const RUN_VALUE: &str = "Velkrys";
+/// The value and the program the app's old name wrote (plan 28).
+pub const OLD_RUN_VALUE: &str = "Trove"; // rename-keep
+pub const OLD_EXE: &str = "trove.exe"; // rename-keep
 /// The `Run` key, relative to HKCU (or to a throw-away root in tests).
 pub const RUN_KEY: &str = "Software\\Microsoft\\Windows\\CurrentVersion\\Run";
 /// The switch the entry passes so the app starts hidden.
@@ -60,9 +63,45 @@ pub fn run_entry_exists(root: &str) -> bool {
     matches!(registry::read_sz(&run_key(root), RUN_VALUE), Ok(Some(_)))
 }
 
+/// The program a command line starts: the quoted first part, else the first word.
+fn command_program(command: &str) -> Option<&str> {
+    let command = command.trim_start();
+    match command.strip_prefix('"') {
+        Some(rest) => rest.split('"').next(),
+        None => command.split_whitespace().next(),
+    }
+}
+
+/// Whether a program path is the old exe, by file name. Splits on both slashes, so a Windows
+/// path reads the same in a test on any OS.
+pub fn is_old_exe(program: &str) -> bool {
+    program
+        .rsplit(['\\', '/'])
+        .next()
+        .is_some_and(|name| name.eq_ignore_ascii_case(OLD_EXE))
+}
+
+/// Hand the old `Run` value over to `exe`: set ours, then delete it. A value that runs anything
+/// else is someone's own entry and stays. `true` when it moved.
+pub fn move_run_entry(root: &str, exe: &Path) -> Result<bool> {
+    let key = run_key(root);
+    let Some(held) = registry::read_sz(&key, OLD_RUN_VALUE)? else {
+        return Ok(false);
+    };
+    if !command_program(&held).is_some_and(is_old_exe) {
+        return Ok(false);
+    }
+    set_run_entry(root, exe)?;
+    registry::delete_value(&key, OLD_RUN_VALUE)?;
+    Ok(true)
+}
+
 /// The app identifier (`tauri.conf.json`): the LaunchAgent label and the autostart file name.
 #[cfg(any(unix, test))]
-pub const APP_ID: &str = "com.joyahmed.trove";
+pub const APP_ID: &str = "com.joyahmed.velkrys";
+/// The id the old login entries are named after (plan 28).
+#[cfg(any(unix, test))]
+pub const OLD_APP_ID: &str = "com.joyahmed.trove"; // rename-keep
 
 #[cfg(any(target_os = "macos", test))]
 fn xml_escape(s: &str) -> String {
@@ -124,7 +163,7 @@ pub fn desktop_exec_arg(arg: &str) -> String {
 #[cfg(any(all(unix, not(target_os = "macos")), test))]
 pub fn autostart_desktop(exe: &Path) -> String {
     format!(
-        "[Desktop Entry]\nType=Application\nName=Trove\nExec={} {HIDDEN_ARG}\nTerminal=false\nX-GNOME-Autostart-enabled=true\n",
+        "[Desktop Entry]\nType=Application\nName=Velkrys\nExec={} {HIDDEN_ARG}\nTerminal=false\nX-GNOME-Autostart-enabled=true\n",
         desktop_exec_arg(&exe.to_string_lossy())
     )
 }
@@ -156,6 +195,32 @@ pub fn remove_entry_file(path: &Path) -> Result<()> {
         Err(e) if e.kind() != std::io::ErrorKind::NotFound => Err(e),
         _ => Ok(()),
     }
+}
+
+/// The old name's login entry beside `new`: same folder, same kind of file.
+#[cfg(any(unix, test))]
+pub fn old_entry_path(new: &Path) -> PathBuf {
+    let kind = new.extension().unwrap_or_default().to_string_lossy();
+    new.with_file_name(format!("{OLD_APP_ID}.{kind}"))
+}
+
+/// If the old entry is there, write `content` at `new` and remove the old one. `true` when it
+/// moved. The old entry goes only after the new one is written.
+#[cfg(any(unix, test))]
+pub fn move_entry_file(old: &Path, new: &Path, content: &str) -> Result<bool> {
+    if !old.is_file() {
+        return Ok(false);
+    }
+    write_entry_file(new, content)?;
+    remove_entry_file(old)?;
+    Ok(true)
+}
+
+/// The real login entry, moved from the old name to `exe`.
+#[cfg(unix)]
+pub fn move_login_entry(exe: &Path) -> Result<bool> {
+    let new = login_file()?;
+    move_entry_file(&old_entry_path(&new), &new, &login_content(exe))
 }
 
 /// The login-entry file on macOS / Linux.
@@ -209,12 +274,12 @@ pub fn task_outcome(want: bool, state: i32) -> std::result::Result<(), &'static 
     }
     Err(match state {
         task_state::DISABLED_BY_USER => {
-            "Startup is turned off for Trove in Task Manager > Startup apps. Turn it on there."
+            "Startup is turned off for Velkrys in Task Manager > Startup apps. Turn it on there."
         }
         task_state::DISABLED_BY_POLICY | task_state::ENABLED_BY_POLICY => {
-            "Your organisation's policy decides whether Trove starts at sign-in."
+            "Your organisation's policy decides whether Velkrys starts at sign-in."
         }
-        _ => "Windows did not change Trove's startup setting.",
+        _ => "Windows did not change Velkrys's startup setting.",
     })
 }
 
@@ -354,12 +419,12 @@ mod tests {
     #[test]
     fn plist_runs_the_exe_hidden_at_load_and_escapes_xml() {
         let p = launch_agent_plist(Path::new(
-            "/Applications/Trove & Co.app/Contents/MacOS/trove",
+            "/Applications/Velkrys & Co.app/Contents/MacOS/velkrys",
         ));
-        assert!(p.contains("<key>Label</key>\n\t<string>com.joyahmed.trove</string>"));
-        assert!(
-            p.contains("<string>/Applications/Trove &amp; Co.app/Contents/MacOS/trove</string>")
-        );
+        assert!(p.contains("<key>Label</key>\n\t<string>com.joyahmed.velkrys</string>"));
+        assert!(p.contains(
+            "<string>/Applications/Velkrys &amp; Co.app/Contents/MacOS/velkrys</string>"
+        ));
         assert!(p.contains("<string>--hidden</string>"));
         assert!(p.contains("<key>RunAtLoad</key>\n\t<true/>"));
         assert!(p.starts_with("<?xml"));
@@ -372,19 +437,19 @@ mod tests {
             Path::new("/Users/alex")
                 .join("Library")
                 .join("LaunchAgents")
-                .join("com.joyahmed.trove.plist")
+                .join("com.joyahmed.velkrys.plist")
         );
     }
 
     #[test]
     fn exec_arg_is_bare_when_safe_and_quoted_and_escaped_otherwise() {
-        assert_eq!(desktop_exec_arg("/opt/trove"), "/opt/trove");
+        assert_eq!(desktop_exec_arg("/opt/velkrys"), "/opt/velkrys");
         assert_eq!(
-            desktop_exec_arg("/usr/local/bin/trove-1.2_x+y,z"),
-            "/usr/local/bin/trove-1.2_x+y,z"
+            desktop_exec_arg("/usr/local/bin/velkrys-1.2_x+y,z"),
+            "/usr/local/bin/velkrys-1.2_x+y,z"
         );
         assert_eq!(desktop_exec_arg(""), "\"\"");
-        assert_eq!(desktop_exec_arg("/my apps/trove"), "\"/my apps/trove\"");
+        assert_eq!(desktop_exec_arg("/my apps/velkrys"), "\"/my apps/velkrys\"");
         // `$` and `"` get one escape for the quoting rule, which the string rule doubles
         assert_eq!(desktop_exec_arg("/a$b"), r#""/a\\$b""#);
         assert_eq!(desktop_exec_arg("/a\"b"), r#""/a\\"b""#);
@@ -393,15 +458,15 @@ mod tests {
 
     #[test]
     fn autostart_file_runs_the_exe_hidden() {
-        let d = autostart_desktop(Path::new("/opt/Trove App/trove"));
+        let d = autostart_desktop(Path::new("/opt/Velkrys App/velkrys"));
         assert!(d.starts_with("[Desktop Entry]\nType=Application\n"));
-        assert!(d.contains("\nExec=\"/opt/Trove App/trove\" --hidden\n"));
+        assert!(d.contains("\nExec=\"/opt/Velkrys App/velkrys\" --hidden\n"));
     }
 
     #[test]
     fn autostart_path_honours_xdg_config_home() {
         let home = Path::new("/home/alex");
-        let want = |base: &Path| base.join("autostart").join("com.joyahmed.trove.desktop");
+        let want = |base: &Path| base.join("autostart").join("com.joyahmed.velkrys.desktop");
         let dflt = want(&home.join(".config"));
         assert_eq!(autostart_path(None, home), dflt);
         assert_eq!(autostart_path(Some(""), home), dflt);
@@ -414,8 +479,97 @@ mod tests {
     }
 
     #[test]
+    fn the_old_entry_sits_beside_the_new_one_with_the_same_kind() {
+        let home = Path::new("/home/alex");
+        let plist = launch_agent_path(home);
+        let old = old_entry_path(&plist);
+        assert_eq!(old.parent(), plist.parent());
+        assert_eq!(
+            old.file_name().unwrap().to_string_lossy(),
+            format!("{OLD_APP_ID}.plist")
+        );
+        let desktop = autostart_path(None, home);
+        let old = old_entry_path(&desktop);
+        assert_eq!(old.parent(), desktop.parent());
+        assert_eq!(
+            old.file_name().unwrap().to_string_lossy(),
+            format!("{OLD_APP_ID}.desktop")
+        );
+    }
+
+    fn entry_scratch(tag: &str) -> PathBuf {
+        let dir = std::env::temp_dir().join(format!("velkrys-move-{tag}-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        dir
+    }
+
+    /// The Mac plist and the Linux desktop entry under a throw-away home.
+    #[test]
+    fn an_old_login_entry_moves_to_the_new_name() {
+        let home = entry_scratch("both");
+        let exe = Path::new("/opt/Velkrys/velkrys");
+        let entries = [
+            (launch_agent_path(&home), launch_agent_plist(exe)),
+            (autostart_path(None, &home), autostart_desktop(exe)),
+        ];
+        for (new, content) in &entries {
+            let old = old_entry_path(new);
+            write_entry_file(&old, "old entry").unwrap();
+            assert!(move_entry_file(&old, new, content).unwrap());
+            assert!(!old.exists());
+            assert_eq!(&std::fs::read_to_string(new).unwrap(), content);
+            // a second pass finds nothing to do and leaves the new entry alone
+            assert!(!move_entry_file(&old, new, "other").unwrap());
+            assert_eq!(&std::fs::read_to_string(new).unwrap(), content);
+        }
+        let _ = std::fs::remove_dir_all(&home);
+    }
+
+    #[test]
+    fn no_old_login_entry_writes_nothing() {
+        let home = entry_scratch("none");
+        let new = autostart_path(None, &home);
+        assert!(!move_entry_file(&old_entry_path(&new), &new, "x").unwrap());
+        assert!(!new.exists());
+    }
+
+    #[test]
+    fn a_failed_write_keeps_the_old_login_entry() {
+        let home = entry_scratch("fail");
+        let new = autostart_path(None, &home);
+        let old = old_entry_path(&new);
+        write_entry_file(&old, "old entry").unwrap();
+        // a folder at the new name: the write cannot land
+        std::fs::create_dir_all(&new).unwrap();
+        assert!(move_entry_file(&old, &new, "x").is_err());
+        assert_eq!(std::fs::read_to_string(&old).unwrap(), "old entry");
+        let _ = std::fs::remove_dir_all(&home);
+    }
+
+    #[test]
+    fn command_program_reads_quoted_and_bare_commands() {
+        assert_eq!(
+            command_program(r#""C:\Program Files\App\app.exe" --hidden"#),
+            Some(r"C:\Program Files\App\app.exe")
+        );
+        assert_eq!(
+            command_program(r"C:\App\app.exe --x"),
+            Some(r"C:\App\app.exe")
+        );
+        assert_eq!(command_program(""), None);
+    }
+
+    #[test]
+    fn is_old_exe_goes_by_the_file_name_alone() {
+        assert!(is_old_exe(&format!(r"C:\Users\a\{OLD_EXE}")));
+        assert!(is_old_exe(&format!("/x/{}", OLD_EXE.to_uppercase())));
+        assert!(!is_old_exe(&format!(r"C:\{OLD_EXE}\other.exe")));
+        assert!(!is_old_exe(&format!(r"C:\not-{OLD_EXE}")));
+    }
+
+    #[test]
     fn entry_file_write_remove_round_trip_in_a_temp_dir() {
-        let dir = std::env::temp_dir().join(format!("trove-startup-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("velkrys-startup-{}", std::process::id()));
         let path = dir.join("autostart").join("x.desktop");
         remove_entry_file(&path).unwrap(); // absent: Ok
         write_entry_file(&path, "a").unwrap();
@@ -470,7 +624,7 @@ mod tests {
     }
 }
 
-/// Under a throw-away `HKCU\Software\trove-test\…` root, never the real `Run` key.
+/// Under a throw-away `HKCU\Software\velkrys-test\…` root, never the real `Run` key.
 #[cfg(all(test, windows))]
 mod live_tests {
     use super::*;
@@ -482,8 +636,61 @@ mod live_tests {
     impl Drop for Scratch {
         fn drop(&mut self) {
             let _ = registry::delete_tree(&self.0);
-            let _ = registry::delete_key_if_empty("Software\\trove-test");
+            let _ = registry::delete_key_if_empty("Software\\velkrys-test");
         }
+    }
+
+    fn scratch(tag: &str) -> Scratch {
+        let nanos = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|d| d.subsec_nanos())
+            .unwrap_or(0);
+        Scratch(
+            format!(
+                "Software\\velkrys-test\\{tag}-{}-{nanos}",
+                std::process::id()
+            ),
+            registry::tests::scratch_lock(),
+        )
+    }
+
+    fn read(s: &Scratch, name: &str) -> Option<String> {
+        registry::read_sz(&run_key(&s.0), name).unwrap()
+    }
+
+    const NEW_EXE: &str = r"D:\Apps\velkrys.exe";
+
+    #[test]
+    fn the_old_value_moves_once_and_runs_the_new_exe_hidden() {
+        let s = scratch("move");
+        let old = format!(r#""C:\Apps\{OLD_EXE}" --hidden"#);
+        registry::write_sz(&run_key(&s.0), OLD_RUN_VALUE, &old).unwrap();
+        assert!(move_run_entry(&s.0, Path::new(NEW_EXE)).unwrap());
+        assert_eq!(read(&s, OLD_RUN_VALUE), None);
+        assert_eq!(
+            read(&s, RUN_VALUE).as_deref(),
+            Some(r#""D:\Apps\velkrys.exe" --hidden"#)
+        );
+        assert!(!move_run_entry(&s.0, Path::new(NEW_EXE)).unwrap());
+    }
+
+    #[test]
+    fn an_old_value_that_runs_something_else_stays() {
+        let s = scratch("other");
+        registry::write_sz(&run_key(&s.0), OLD_RUN_VALUE, r#""C:\Other\app.exe""#).unwrap();
+        assert!(!move_run_entry(&s.0, Path::new(NEW_EXE)).unwrap());
+        assert_eq!(
+            read(&s, OLD_RUN_VALUE).as_deref(),
+            Some(r#""C:\Other\app.exe""#)
+        );
+        assert_eq!(read(&s, RUN_VALUE), None);
+    }
+
+    #[test]
+    fn no_old_value_writes_nothing() {
+        let s = scratch("none");
+        assert!(!move_run_entry(&s.0, Path::new(NEW_EXE)).unwrap());
+        assert_eq!(read(&s, RUN_VALUE), None);
     }
 
     #[test]
@@ -494,19 +701,19 @@ mod live_tests {
             .unwrap_or(0);
         let s = Scratch(
             format!(
-                "Software\\trove-test\\startup-{}-{nanos}",
+                "Software\\velkrys-test\\startup-{}-{nanos}",
                 std::process::id()
             ),
             registry::tests::scratch_lock(),
         );
         assert!(!run_entry_exists(&s.0));
-        set_run_entry(&s.0, Path::new(r"D:\Apps\trove.exe")).unwrap();
+        set_run_entry(&s.0, Path::new(r"D:\Apps\velkrys.exe")).unwrap();
         assert!(run_entry_exists(&s.0));
         assert_eq!(
             registry::read_sz(&run_key(&s.0), RUN_VALUE)
                 .unwrap()
                 .as_deref(),
-            Some(r#""D:\Apps\trove.exe" --hidden"#)
+            Some(r#""D:\Apps\velkrys.exe" --hidden"#)
         );
         remove_run_entry(&s.0).unwrap();
         assert!(!run_entry_exists(&s.0));

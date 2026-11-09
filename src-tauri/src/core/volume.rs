@@ -155,7 +155,8 @@ mod tests {
 
     /// A fresh folder under the temp dir, unique per test and process.
     fn scratch(name: &str) -> PathBuf {
-        let dir = std::env::temp_dir().join(format!("trove-volume-{name}-{}", std::process::id()));
+        let dir =
+            std::env::temp_dir().join(format!("velkrys-volume-{name}-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         dir
@@ -196,9 +197,9 @@ mod tests {
 
     #[test]
     fn the_mount_root_is_the_highest_folder_on_the_same_device() {
-        // `/` is device 1, the disk image mounted at /Volumes/TroveTest is device 7
+        // `/` is device 1, the disk image mounted at /Volumes/VelkrysTest is device 7
         let dev = |p: &Path| {
-            Some(if p.starts_with("/Volumes/TroveTest") {
+            Some(if p.starts_with("/Volumes/VelkrysTest") {
                 7
             } else {
                 1
@@ -206,12 +207,12 @@ mod tests {
         };
         let at = |p: &str| mount_root(Path::new(p), dev).map(|r| r.to_string_lossy().into_owned());
         assert_eq!(
-            at("/Volumes/TroveTest/a/b").as_deref(),
-            Some("/Volumes/TroveTest")
+            at("/Volumes/VelkrysTest/a/b").as_deref(),
+            Some("/Volumes/VelkrysTest")
         );
         assert_eq!(
-            at("/Volumes/TroveTest").as_deref(),
-            Some("/Volumes/TroveTest")
+            at("/Volumes/VelkrysTest").as_deref(),
+            Some("/Volumes/VelkrysTest")
         );
         assert_eq!(at("/Users/alex/Documents").as_deref(), Some("/"));
         assert_eq!(at("/").as_deref(), Some("/"));
@@ -221,8 +222,8 @@ mod tests {
     fn the_mac_boot_data_volume_counts_as_the_boot_disk() {
         assert_eq!(boot_data_is_root("/System/Volumes/Data"), "/");
         assert_eq!(
-            boot_data_is_root("/Volumes/TroveTest"),
-            "/Volumes/TroveTest"
+            boot_data_is_root("/Volumes/VelkrysTest"),
+            "/Volumes/VelkrysTest"
         );
         assert_eq!(boot_data_is_root("/"), "/");
     }
@@ -255,12 +256,12 @@ mod tests {
     }
 
     // Two devices cannot be made portably in a test (a Mac disk image, a Linux loop mount and a
-    // Windows VHD all need privileges). Set TROVE_OTHER_VOLUME to a folder on another volume
+    // Windows VHD all need privileges). Set VELKRYS_OTHER_VOLUME to a folder on another volume
     // and run `cargo test -- --ignored other_volume` to check the cross-device answer by hand.
     #[test]
-    #[ignore = "needs a folder on another volume in TROVE_OTHER_VOLUME"]
+    #[ignore = "needs a folder on another volume in VELKRYS_OTHER_VOLUME"]
     fn a_folder_on_another_volume_is_not_the_same_volume() {
-        let other = std::env::var("TROVE_OTHER_VOLUME").expect("TROVE_OTHER_VOLUME");
+        let other = std::env::var("VELKRYS_OTHER_VOLUME").expect("VELKRYS_OTHER_VOLUME");
         let dir = scratch("other");
         let file = dir.as_path().join("a.txt");
         std::fs::write(&file, b"x").unwrap();

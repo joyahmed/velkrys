@@ -15,7 +15,7 @@ import type { HandlerInfo, HandlerStatus } from '$lib/types/default-handler';
 export const LABEL = 'Use as default file manager';
 export const UNSTABLE_WARNING =
   'The exe is in a temporary or build folder; move it somewhere permanent before setting it as default';
-export const APPLIED_TITLE = 'Trove is the default file manager';
+export const APPLIED_TITLE = 'Velkrys is the default file manager';
 export const APPLIED_NOTICE =
   'It stays in the tray and starts with Windows. Undo here, or from the … menu at any time.';
 export const REVERTED_NOTICE = 'Explorer is the default file manager again';

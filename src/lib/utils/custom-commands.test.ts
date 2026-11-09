@@ -64,7 +64,7 @@ describe('expandArgs', () => {
     ]);
   });
 
-  // plan 09 B.2: DevGo scans ~/projects inside the distro; Trove hands it the same folder by its
+  // plan 09 B.2: DevGo scans ~/projects inside the distro; Velkrys hands it the same folder by its
   // Linux name, so DevGo matches on `$HOME/projects/...` and never parses a UNC path.
   it('a project under \\\\wsl.localhost reaches DevGo as its ~/projects path', () => {
     const p = '\\\\wsl.localhost\\Ubuntu-26.04\\home\\alex\\projects\\01_tauri\\my app';

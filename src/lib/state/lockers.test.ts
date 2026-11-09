@@ -8,7 +8,7 @@ import {
   notifyLocked,
   OTHER_SESSION,
   TERMINAL_HAS_IT,
-  TROVE_ITSELF,
+  VELKRYS_ITSELF,
   WINDOWS_NEEDS,
 } from './lockers.svelte';
 import { transfers } from './transfers.svelte';
@@ -60,7 +60,13 @@ const critical: Locker = {
   canEnd: false,
   noEnd: 'windows',
 };
-const trove: Locker = { pid: 77, app: 'Trove', exe: 'trove.exe', canEnd: false, noEnd: 'trove' };
+const velkrys: Locker = {
+  pid: 77,
+  app: 'Velkrys',
+  exe: 'velkrys.exe',
+  canEnd: false,
+  noEnd: 'velkrys',
+};
 const shell: Locker = {
   pid: 78,
   app: 'PowerShell',
@@ -111,10 +117,10 @@ describe('the notice for a file in use', () => {
     expect(await notifyLocked([DOC], IN_USE, vi.fn())).toBe(false);
   });
 
-  it('Trove itself, or its terminal, holding it says so — no End task', async () => {
-    whoIsLocking.mockResolvedValue([{ path: DOC, lockers: [trove] }]);
+  it('Velkrys itself, or its terminal, holding it says so — no End task', async () => {
+    whoIsLocking.mockResolvedValue([{ path: DOC, lockers: [velkrys] }]);
     await notifyLocked([DOC], IN_USE, vi.fn());
-    expect(notices.list[0].message).toBe(TROVE_ITSELF);
+    expect(notices.list[0].message).toBe(VELKRYS_ITSELF);
     expect(notices.list[0].second).toBeUndefined();
     notices.clear();
     whoIsLocking.mockResolvedValue([{ path: DOC, lockers: [shell] }]);
@@ -221,11 +227,11 @@ describe('End task', () => {
     expect(notices.list[0].message).toContain(WINDOWS_NEEDS);
   });
 
-  it('Trove itself is never ended either, and says so', async () => {
-    expect(await endTask(DOC, trove, vi.fn())).toBe(false);
+  it('Velkrys itself is never ended either, and says so', async () => {
+    expect(await endTask(DOC, velkrys, vi.fn())).toBe(false);
     expect(confirm.pending).toBeNull();
     expect(endLockingApp).not.toHaveBeenCalled();
-    expect(notices.list[0].message).toBe(TROVE_ITSELF);
+    expect(notices.list[0].message).toBe(VELKRYS_ITSELF);
   });
 });
 

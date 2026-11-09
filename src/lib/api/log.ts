@@ -1,6 +1,6 @@
 // The only place `@tauri-apps/plugin-log` appears. Mirrors src-tauri/src/core/logging.rs.
 //
-// Trove used to say nothing at runtime: zero `console.*` in this tree, and 12 `catch {}`
+// Velkrys used to say nothing at runtime: zero `console.*` in this tree, and 12 `catch {}`
 // blocks that bound no error at all. A failure reached the person as a toast that faded, or
 // as nothing. See docs/plans/07-the-log-and-four-bugs.md § A.3.
 //

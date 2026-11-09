@@ -25,7 +25,7 @@ pub struct IndexAnswer {
     /// The roots still on their first walk, for the palette footer.
     pub filling: Vec<FillingRoot>,
     /// The roots served from their saved file and not caught up yet: a name made or deleted
-    /// while Trove was closed may be missing or still listed.
+    /// while Velkrys was closed may be missing or still listed.
     pub stale: Vec<String>,
     /// Mac: the privacy-guarded folders under `roots` the person has not opened, whose names the
     /// index does not hold (`core::privacy_folders`), so the palette can say "Not searched".

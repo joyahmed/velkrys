@@ -422,7 +422,7 @@ fn tar_mode(_meta: &std::fs::Metadata, dir: bool) -> u32 {
 }
 
 /// Compress `paths` into one `.tar.gz` / `.tar.xz` / `.tar.zst` beside the first of them,
-/// named like Compress to ZIP names its zip. Written under a `.<name>.trove-partial` name and
+/// named like Compress to ZIP names its zip. Written under a `.<name>.velkrys-partial` name and
 /// renamed into place only when whole, never over an existing file; a cancel or any error
 /// deletes the partial.
 pub(crate) fn compress(
@@ -446,7 +446,7 @@ pub(crate) fn compress(
     let partial = Partial {
         path: dir.join(ops::unique_name(
             dir,
-            &format!(".{name}.trove-partial"),
+            &format!(".{name}.velkrys-partial"),
             false,
         )),
         armed: true,
@@ -720,7 +720,7 @@ mod tests {
         let left: Vec<String> = walkdir::WalkDir::new(&dest)
             .into_iter()
             .map(|e| e.unwrap().file_name().to_string_lossy().into_owned())
-            .filter(|n| n.contains("trove-partial"))
+            .filter(|n| n.contains("velkrys-partial"))
             .collect();
         assert!(left.is_empty(), "{left:?}");
         fs::remove_dir_all(root).unwrap();

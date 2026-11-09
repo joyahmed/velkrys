@@ -3,10 +3,10 @@
 //!
 //! Windows asks the Restart Manager (`RmStartSession` → `RmRegisterResources` → `RmGetList`),
 //! the API Explorer's own "File In Use" dialog and PowerToys' File Locksmith use. It needs no
-//! admin and works on Trove's own process too (the test relies on that). Other systems return
+//! admin and works on Velkrys's own process too (the test relies on that). Other systems return
 //! no lockers: the error they show stays the OS's sentence (lsof is out of scope, plan 21).
 //!
-//! ⛔ Ending a program loses its unsaved work. [`end`] never touches Trove (this window or
+//! ⛔ Ending a program loses its unsaved work. [`end`] never touches Velkrys (this window or
 //! another), the terminal pane's shell, Explorer, a service, anything the Restart Manager calls
 //! critical, or a program in another Windows session; it closes politely first (`WM_CLOSE` to
 //! the program's windows) and only kills with `force` after that polite try, within
@@ -30,7 +30,7 @@ pub struct Locker {
     pub app: String,
     /// the program's file name, `WINWORD.EXE`; empty when Windows would not say
     pub exe: String,
-    /// false: Windows needs it, or it is Trove — no End task, "close it yourself" instead
+    /// false: Windows needs it, or it is Velkrys — no End task, "close it yourself" instead
     pub can_end: bool,
     /// why there is no End task; None exactly when `can_end`
     pub no_end: Option<NoEnd>,
@@ -40,8 +40,8 @@ pub struct Locker {
 #[derive(Serialize, Debug, Clone, Copy, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub enum NoEnd {
-    /// Trove itself, or another Trove window ([`TROVE_EXES`])
-    Trove,
+    /// Velkrys itself, or another Velkrys window ([`VELKRYS_EXES`])
+    Velkrys,
     /// the terminal pane's shell, or a program started in it
     Terminal,
     /// Windows needs it: a [`NEVER_END`] name, a service, Explorer, critical
@@ -110,13 +110,13 @@ const NEVER_END: [&str; 14] = [
 /// (4) and critical (1000).
 const NEVER_END_TYPES: [i32; 3] = [3, 4, 1000];
 
-/// Trove's own file names, lower case: the release build (`productName`), the screen build
-/// (`tauri.screen.conf.json`) and `cargo` / `tauri dev` (the crate's bin name). Another Trove
-/// window holding a file is Trove too, never ended from here.
-const TROVE_EXES: [&str; 2] = ["trove.exe", "trove screen.exe"];
+/// Velkrys's own file names, lower case: the release build (`productName`), the screen build
+/// (`tauri.screen.conf.json`) and `cargo` / `tauri dev` (the crate's bin name). Another Velkrys
+/// window holding a file is Velkrys too, never ended from here.
+const VELKRYS_EXES: [&str; 2] = ["velkrys.exe", "velkrys screen.exe"];
 
 /// What the terminal pane starts (`core/pty.rs` `shell_for`, and `cmd.exe` in its tests): a
-/// process whose parent is Trove and whose name is one of these is the pane's own shell.
+/// process whose parent is Velkrys and whose name is one of these is the pane's own shell.
 const TERMINAL_SHELLS: [&str; 4] = ["pwsh.exe", "powershell.exe", "wsl.exe", "cmd.exe"];
 
 /// The last part of a Windows program path, lower-cased. It splits on `\` and `/` itself
@@ -128,9 +128,9 @@ fn file_name_lower(exe: &str) -> String {
         .to_ascii_lowercase()
 }
 
-/// Why Trove may not offer End task for this program, or None: it may. `in_terminal`: it is
+/// Why Velkrys may not offer End task for this program, or None: it may. `in_terminal`: it is
 /// the terminal pane's shell or runs under it ([`in_terminal`]); `same_session`: it runs in
-/// Trove's own Windows session ([`same_session`]).
+/// Velkrys's own Windows session ([`same_session`]).
 // only the Windows lookup asks it (and the tests, everywhere)
 #[cfg_attr(not(windows), allow(dead_code))]
 pub fn no_end(
@@ -141,8 +141,8 @@ pub fn no_end(
     same_session: bool,
 ) -> Option<NoEnd> {
     let name = file_name_lower(exe);
-    if pid == std::process::id() || TROVE_EXES.contains(&name.as_str()) {
-        Some(NoEnd::Trove)
+    if pid == std::process::id() || VELKRYS_EXES.contains(&name.as_str()) {
+        Some(NoEnd::Velkrys)
     } else if in_terminal {
         Some(NoEnd::Terminal)
     } else if pid <= 4 // 0 Idle, 4 System
@@ -166,7 +166,7 @@ pub fn same_session(theirs: Option<u32>, mine: Option<u32>) -> bool {
 
 /// Is `pid` the terminal pane's shell, or a program started under it? Walks up the parents
 /// (`parent_of(pid)` → its parent's pid and its own exe name) until one is a child of `me`;
-/// that child must be a [`TERMINAL_SHELLS`] name. Anything else Trove started (a file opened
+/// that child must be a [`TERMINAL_SHELLS`] name. Anything else Velkrys started (a file opened
 /// with its app) is not the terminal. At most 64 steps, so a parent loop cannot hang it.
 #[cfg_attr(not(windows), allow(dead_code))]
 pub fn in_terminal(pid: u32, me: u32, parent_of: impl Fn(u32) -> Option<(u32, String)>) -> bool {
@@ -227,11 +227,11 @@ fn asked_recently(asked: &[Asked], pid: u32, started: u64, now: Instant) -> bool
 #[cfg_attr(not(windows), allow(dead_code))]
 fn refusal(why: NoEnd, app: &str) -> String {
     match why {
-        NoEnd::Trove => "Trove itself has this file open".to_string(),
-        NoEnd::Terminal => "Trove's terminal has this file open — close it there".to_string(),
+        NoEnd::Velkrys => "Velkrys itself has this file open".to_string(),
+        NoEnd::Terminal => "Velkrys's terminal has this file open — close it there".to_string(),
         NoEnd::Windows => format!("Windows needs {app}; close it yourself"),
         NoEnd::OtherSession => {
-            format!("{app} runs in another Windows session; Trove cannot end it")
+            format!("{app} runs in another Windows session; Velkrys cannot end it")
         }
     }
 }
@@ -572,7 +572,7 @@ mod win {
             | PROCESS_QUERY_LIMITED_INFORMATION
             | if force { PROCESS_TERMINATE } else { 0 };
         let process = open(pid, access)
-            .ok_or_else(|| format!("Trove is not allowed to end {}", who.locker.app))?;
+            .ok_or_else(|| format!("Velkrys is not allowed to end {}", who.locker.app))?;
         if !started(&process).is_some_and(|t| same_time(t, who.started)) {
             return Err("That program no longer has the file open".to_string());
         }
@@ -630,26 +630,26 @@ mod tests {
         }
     }
 
-    /// `no_end` for a program in Trove's session and not under its terminal, as a yes / no.
+    /// `no_end` for a program in Velkrys's session and not under its terminal, as a yes / no.
     fn can_end(pid: u32, exe: &str, app_type: i32) -> bool {
         no_end(pid, exe, app_type, false, true).is_none()
     }
 
     #[test]
-    fn never_ends_trove_windows_programs_services_or_critical() {
+    fn never_ends_velkrys_windows_programs_services_or_critical() {
         let me = std::process::id();
-        assert!(!can_end(me, "trove.exe", 1), "Trove itself");
-        assert_eq!(no_end(me, "x.exe", 1, false, true), Some(NoEnd::Trove));
-        for trove in [
-            "trove.exe",
-            "Trove.exe",
-            "Trove Screen.exe",
-            r"C:\Apps\Trove\trove.exe",
+        assert!(!can_end(me, "velkrys.exe", 1), "Velkrys itself");
+        assert_eq!(no_end(me, "x.exe", 1, false, true), Some(NoEnd::Velkrys));
+        for velkrys in [
+            "velkrys.exe",
+            "Velkrys.exe",
+            "Velkrys Screen.exe",
+            r"C:\Apps\Velkrys\velkrys.exe",
         ] {
             assert_eq!(
-                no_end(9999, trove, 1, false, true),
-                Some(NoEnd::Trove),
-                "another Trove window: {trove}"
+                no_end(9999, velkrys, 1, false, true),
+                Some(NoEnd::Velkrys),
+                "another Velkrys window: {velkrys}"
             );
         }
         assert_eq!(
@@ -689,7 +689,7 @@ mod tests {
 
     #[test]
     fn not_in_use_error_asks_nobody() {
-        let p = std::env::temp_dir().join("trove-lockers-none.txt");
+        let p = std::env::temp_dir().join("velkrys-lockers-none.txt");
         assert!(locked(&[p], "Access is denied. (os error 5)").is_empty());
     }
 
@@ -706,14 +706,14 @@ mod tests {
     }
 
     #[test]
-    fn the_terminal_is_a_shell_trove_started_or_anything_under_it() {
+    fn the_terminal_is_a_shell_velkrys_started_or_anything_under_it() {
         let me = 100;
         let tree = |p: u32| -> Option<(u32, String)> {
             match p {
                 200 => Some((me, "pwsh.exe".into())),    // the pane's shell
                 300 => Some((200, "python.exe".into())), // started in it
-                400 => Some((me, "WINWORD.EXE".into())), // a file Trove opened with its app
-                500 => Some((4, "WINWORD.EXE".into())),  // nothing to do with Trove
+                400 => Some((me, "WINWORD.EXE".into())), // a file Velkrys opened with its app
+                500 => Some((4, "WINWORD.EXE".into())),  // nothing to do with Velkrys
                 600 => Some((600, "loop.exe".into())),   // its own parent
                 _ => None,
             }
@@ -777,24 +777,24 @@ mod tests {
     #[test]
     fn end_refusals_name_why() {
         assert_eq!(
-            refusal(NoEnd::Trove, "Trove"),
-            "Trove itself has this file open"
+            refusal(NoEnd::Velkrys, "Velkrys"),
+            "Velkrys itself has this file open"
         );
         assert_eq!(
             refusal(NoEnd::Terminal, "PowerShell"),
-            "Trove's terminal has this file open — close it there"
+            "Velkrys's terminal has this file open — close it there"
         );
         assert!(refusal(NoEnd::Windows, "Explorer").contains("Windows needs Explorer"));
         assert!(refusal(NoEnd::OtherSession, "Word").contains("another Windows session"));
     }
 
-    /// The Restart Manager sees Trove's own handle: open a file with share mode 0 (nobody else
+    /// The Restart Manager sees Velkrys's own handle: open a file with share mode 0 (nobody else
     /// may open it), ask who holds it, and find this process — with no End task offered.
     #[cfg(windows)]
     #[test]
     fn finds_this_process_holding_a_file_with_no_sharing() {
         use std::os::windows::fs::OpenOptionsExt;
-        let dir = std::env::temp_dir().join(format!("trove-lockers-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("velkrys-lockers-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let path = dir.join("held.docx");
         let held = std::fs::OpenOptions::new()
@@ -814,13 +814,13 @@ mod tests {
             .iter()
             .find(|l| l.pid == std::process::id())
             .unwrap_or_else(|| panic!("own pid missing from {found:?}"));
-        assert!(!me.can_end, "Trove never offers to end itself");
-        assert_eq!(me.no_end, Some(NoEnd::Trove));
+        assert!(!me.can_end, "Velkrys never offers to end itself");
+        assert_eq!(me.no_end, Some(NoEnd::Velkrys));
         assert!(!me.app.is_empty());
         assert_eq!(
             end(&path, std::process::id(), false),
-            Err("Trove itself has this file open".to_string()),
-            "end refuses Trove itself"
+            Err("Velkrys itself has this file open".to_string()),
+            "end refuses Velkrys itself"
         );
         assert!(end(&path, std::process::id(), true).is_err());
 
@@ -835,7 +835,7 @@ mod tests {
     #[test]
     fn delete_to_the_bin_of_a_held_file_names_the_holder() {
         use std::os::windows::fs::OpenOptionsExt;
-        let dir = std::env::temp_dir().join(format!("trove-lockers-bin-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("velkrys-lockers-bin-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let path = dir.join("held.txt");
         let held = std::fs::OpenOptions::new()
@@ -862,7 +862,7 @@ mod tests {
 
     #[cfg(windows)]
     #[test]
-    fn trove_knows_its_own_session() {
+    fn velkrys_knows_its_own_session() {
         assert!(win::session_of(std::process::id()).is_some());
     }
 }

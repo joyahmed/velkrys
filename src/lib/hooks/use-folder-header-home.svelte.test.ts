@@ -40,11 +40,11 @@ const homeKnown = async () => {
 describe('home as ~ in the display places only', () => {
   it('the folder header line shows ~, its tooltip and the tab keep the full path', async () => {
     await homeKnown();
-    tabs.active.location = pathLocation('C:\\Users\\alex\\trove-demo');
+    tabs.active.location = pathLocation('C:\\Users\\alex\\velkrys-demo');
     const h = useFolderHeader();
-    expect(h.path).toBe('~\\trove-demo');
-    expect(h.meta).toBe('C:\\Users\\alex\\trove-demo · 0 items');
-    expect(tabs.active.path).toBe('C:\\Users\\alex\\trove-demo');
+    expect(h.path).toBe('~\\velkrys-demo');
+    expect(h.meta).toBe('C:\\Users\\alex\\velkrys-demo · 0 items');
+    expect(tabs.active.path).toBe('C:\\Users\\alex\\velkrys-demo');
   });
 
   it('a look-alike sibling of home stays whole in the header', async () => {
@@ -61,9 +61,9 @@ describe('home as ~ in the display places only', () => {
 
   it('Copy path still copies the full path inside home', async () => {
     await homeKnown();
-    tabs.active.location = pathLocation('C:\\Users\\alex\\trove-demo');
+    tabs.active.location = pathLocation('C:\\Users\\alex\\velkrys-demo');
     selection.clear();
-    const p = 'C:\\Users\\alex\\trove-demo\\a.txt';
+    const p = 'C:\\Users\\alex\\velkrys-demo\\a.txt';
     selection.click(p, { ctrl: true, shift: false }, [p]);
     await actions.copyAsPath();
     expect(writeText).toHaveBeenCalledWith([p]);

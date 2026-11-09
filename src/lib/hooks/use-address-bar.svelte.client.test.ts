@@ -74,7 +74,7 @@ describe('a link typed in the address bar opens in the browser, as Explorer does
     expect(tabs.active.location).toEqual(START);
   });
 
-  it('file:///C:/… opens the folder in Trove, not the browser', async () => {
+  it('file:///C:/… opens the folder in Velkrys, not the browser', async () => {
     await typeInAddressBar('file:///C:/Users/alex/a%20b');
     expect(openUrl).not.toHaveBeenCalled();
     expect(tabs.active.location).toEqual(pathLocation('C:\\Users\\alex\\a b'));

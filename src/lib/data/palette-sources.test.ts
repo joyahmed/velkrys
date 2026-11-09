@@ -255,7 +255,7 @@ describe('the files source near pass', () => {
     // Joy's real list, shape for shape: drive roots scattered through it, `G:` spelled with no
     // trailing separator, two UNC WSL shares, and `E:\WINDOWS` for good measure
     settings.recentFolders = [
-      'G:\\01_tauri\\trove',
+      'G:\\01_tauri\\velkrys',
       'E:\\',
       'E:\\WINDOWS',
       'G:\\01_tauri',
@@ -274,7 +274,7 @@ describe('the files source near pass', () => {
     expect(roots).toEqual([
       DESKTOP,
       DOWNLOADS,
-      'G:\\01_tauri\\trove',
+      'G:\\01_tauri\\velkrys',
       'E:\\WINDOWS',
       'G:\\01_tauri',
       WSL_HOME,
@@ -348,14 +348,14 @@ describe('the files source near pass', () => {
 });
 
 /**
- * Plan 21C.1d: Trove's own name index holds the home folder at every depth, so the palette asks
+ * Plan 21C.1d: Velkrys's own name index holds the home folder at every depth, so the palette asks
  * it first and walks only the near roots it does not hold. While its first walk runs it says
  * `ready: false`, and the walks run exactly as before.
  */
 describe('the files source with the name index', () => {
   const HOME = 'C:\\Users\\alex';
   const DESKTOP = `${HOME}\\Desktop`;
-  const OUTSIDE = 'G:\\01_tauri\\trove';
+  const OUTSIDE = 'G:\\01_tauri\\velkrys';
   const filesSource = () => sourceNamed('files');
   const hit = (path: string) =>
     ({ name: path.slice(path.lastIndexOf('\\') + 1), path, isDir: false }) as FileEntry;
@@ -684,7 +684,9 @@ describe('the files source on Linux', () => {
     ({ name: path.slice(path.lastIndexOf('/') + 1), path, isDir: false }) as FileEntry;
 
   beforeEach(() => {
-    vi.stubGlobal('window', { __TROVE_PLATFORM__: { os: 'linux', thisPcLabel: 'This Computer' } });
+    vi.stubGlobal('window', {
+      __VELKRYS_PLATFORM__: { os: 'linux', thisPcLabel: 'This Computer' },
+    });
     files.mockReset();
     files.mockResolvedValue([]);
     indexed.mockReset();
@@ -710,7 +712,7 @@ describe('the files source on Linux', () => {
   it('readme: 200 dot-folder README index hits rank under a /tmp/claude-1000 recent folder', async () => {
     // BUG-S2 on Ubuntu, shape for shape: the index (home) answers with 200 dot-folder READMEs
     // first, as Rust ranks them by path length; the test folder is a recent outside home
-    const s2 = '/tmp/claude-1000/-home-sam-trove/5f1c/scratchpad/s2';
+    const s2 = '/tmp/claude-1000/-home-sam-velkrys/5f1c/scratchpad/s2';
     settings.recentFolders = [s2];
     const dots = Array.from({ length: 200 }, (_, i) =>
       hit(`/home/sam/.${['config', 'vscode', 'cargo'][i % 3]}/p${i}/README.md`),
@@ -801,7 +803,9 @@ describe('the places source, drive rows', () => {
   });
 
   it('off Windows uses the label, or the mount path when there is none', async () => {
-    vi.stubGlobal('window', { __TROVE_PLATFORM__: { os: 'linux', thisPcLabel: 'This Computer' } });
+    vi.stubGlobal('window', {
+      __VELKRYS_PLATFORM__: { os: 'linux', thisPcLabel: 'This Computer' },
+    });
     places.drives = [drive('/media/alex/USB', 'USB', 2 ** 30), drive('/mnt/data', '', 2 ** 30)];
     expect((await driveRows()).map((r) => r.title)).toEqual(['USB', '/mnt/data']);
   });
@@ -895,7 +899,9 @@ describe('the path source and hidden items', () => {
   afterEach(() => vi.unstubAllGlobals());
 
   it('lists a hidden name only while Show hidden is on', async () => {
-    vi.stubGlobal('window', { __TROVE_PLATFORM__: { os: 'linux', thisPcLabel: 'This Computer' } });
+    vi.stubGlobal('window', {
+      __VELKRYS_PLATFORM__: { os: 'linux', thisPcLabel: 'This Computer' },
+    });
     vi.mocked(readDir).mockResolvedValue({
       path: '/tmp/x',
       entries: [entry('.hid.txt', true), entry('seen.txt', false)],

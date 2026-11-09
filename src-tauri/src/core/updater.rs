@@ -153,7 +153,7 @@ mod tests {
         assert!(plugin["pubkey"].as_str().is_some());
         assert_eq!(
             plugin["endpoints"][0],
-            "https://github.com/joyahmed/trove-releases/releases/latest/download/latest.json"
+            "https://github.com/joyahmed/velkrys-releases/releases/latest/download/latest.json"
         );
         // a crafted latest.json cannot pair a new version number with an old signed build
         assert_eq!(plugin["requireSignedVersion"], true);

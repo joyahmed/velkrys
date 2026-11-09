@@ -68,6 +68,30 @@ describe('the Home / This PC tile menu', () => {
     );
   });
 
+  it('a USB tile offers Eject, Copy as path, Rename and Properties like its sidebar row', () => {
+    const usb = {
+      path: 'E:\\',
+      label: 'USB',
+      totalBytes: 10,
+      freeBytes: 5,
+      canRename: true,
+      ejectable: true,
+    };
+    places.drives = [DRIVE, usb];
+    const menu = placeTileMenuFor(driveTile(usb), on);
+    expect(shown(menu)).toEqual([
+      'open-tab',
+      'open-window',
+      'pin',
+      'terminal',
+      'eject',
+      'copy-path',
+      'rename-drive',
+      'properties',
+    ]);
+    expect(shown(menu)).toEqual(shown(sidebarMenuFor(sidebarRow('E:\\'), on)));
+  });
+
   it('a recent folder offers Pin, and Pin pins it', () => {
     const menu = placeTileMenuFor(recentFolderTile('E:\\photos'), on);
     expect(shown(menu)).toEqual(['open-tab', 'open-window', 'pin', 'terminal']);

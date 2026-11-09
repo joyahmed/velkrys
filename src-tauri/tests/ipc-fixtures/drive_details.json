@@ -1,0 +1,41 @@
+[
+  {
+    "bus": "USB",
+    "device": null,
+    "driveType": "removable",
+    "fileSystem": "exFAT",
+    "freeBytes": 12000000000,
+    "label": "STICK",
+    "letter": "E:",
+    "mountPoint": null,
+    "path": "E:\\",
+    "readOnly": false,
+    "totalBytes": 64000000000
+  },
+  {
+    "bus": "USB",
+    "device": "/dev/disk4s1",
+    "driveType": "external",
+    "fileSystem": "apfs",
+    "freeBytes": 400000000000,
+    "label": "Backup",
+    "letter": null,
+    "mountPoint": "/Volumes/Backup",
+    "path": "/Volumes/Backup",
+    "readOnly": false,
+    "totalBytes": 1000000000000
+  },
+  {
+    "bus": null,
+    "device": null,
+    "driveType": "unknown",
+    "fileSystem": null,
+    "freeBytes": null,
+    "label": "nas",
+    "letter": null,
+    "mountPoint": "/mnt/nas",
+    "path": "/mnt/nas",
+    "readOnly": true,
+    "totalBytes": null
+  }
+]

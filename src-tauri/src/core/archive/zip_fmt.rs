@@ -196,7 +196,7 @@ pub(crate) fn list_items(paths: &[PathBuf]) -> Result<Vec<Item>> {
 /// Explorer's "Compress to ZIP file": the items land in one archive beside them, named after
 /// the single item (`report.zip`, `Photos.zip`) or `Archive.zip`, never over an existing file.
 ///
-/// The archive is written under a `.<name>.trove-partial` name and renamed into place only when
+/// The archive is written under a `.<name>.velkrys-partial` name and renamed into place only when
 /// whole, with a no-replace rename (another program may take the name meanwhile). A cancel, a
 /// locked file, a full disk or a vanished item deletes the partial and returns the error.
 pub(crate) fn compress(paths: &[PathBuf], progress: &mut ArchiveProgress) -> Result<PathBuf> {
@@ -210,7 +210,7 @@ pub(crate) fn compress(paths: &[PathBuf], progress: &mut ArchiveProgress) -> Res
     let partial = Partial {
         path: dir.join(ops::unique_name(
             dir,
-            &format!(".{name}.trove-partial"),
+            &format!(".{name}.velkrys-partial"),
             false,
         )),
         armed: true,

@@ -1,6 +1,6 @@
 MIT licence
 Used by (Rust crates in the archive feature): zip 2.4.2, tar 0.4.46, flate2 1.1.10, bzip2 0.6.1, unrar 0.5.8, unrar_sys 0.5.8.
-tar, flate2, bzip2 and the unrar crates are also offered under Apache-2.0; Trove uses the MIT terms.
+tar, flate2, bzip2 and the unrar crates are also offered under Apache-2.0; Velkrys uses the MIT terms.
 Text copied from each crate in the Cargo registry.
 
 ===== zip 2.4.2 =====

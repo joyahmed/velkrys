@@ -1,6 +1,6 @@
 //! Windows' own right-click menu for a selection or a folder background (plan 05 5.1, plan 08
 //! D.1): `IContextMenu` asked on a dedicated STA thread, its `HMENU` walked into a tree the
-//! frontend can render inside Trove's one menu, and a chosen item run by its id.
+//! frontend can render inside Velkrys's one menu, and a chosen item run by its id.
 //!
 //! ⛔ Nothing here blocks the IPC thread for long. Every call goes to the worker over a channel
 //! and is awaited with a deadline; a worker that misses it is retired (a fresh thread takes the
@@ -178,7 +178,7 @@ pub fn icon(key: &str) -> Option<Arc<[u8]>> {
 }
 
 #[cfg(windows)]
-pub use win::{invoke, query};
+pub use win::{invoke, invoke_verb, query};
 
 /// How long after launch the worker is warmed: past the first listing, before most first clicks.
 #[cfg(windows)]
@@ -191,7 +191,7 @@ pub const PREWARM_DELAY: std::time::Duration = std::time::Duration::from_secs(3)
 /// a cold first menu is the cost, never a failed launch.
 #[cfg(windows)]
 pub fn prewarm() {
-    let file = std::env::temp_dir().join("trove-shell-menu-warm.txt");
+    let file = std::env::temp_dir().join("velkrys-shell-menu-warm.txt");
     if let Err(e) = std::fs::write(&file, b"") {
         log::info!("shell menu prewarm: no scratch file: {e}");
         return;
@@ -231,6 +231,12 @@ pub fn query(
     _extended: bool,
     _hwnd: isize,
 ) -> Result<ShellMenu, String> {
+    Err("The Windows shell menu exists only on Windows".into())
+}
+
+/// Not on macOS or Linux: only Windows has shell verbs.
+#[cfg(not(windows))]
+pub fn invoke_verb(_path: &str, _verb: &str, _hwnd: isize) -> Result<(), String> {
     Err("The Windows shell menu exists only on Windows".into())
 }
 
@@ -278,6 +284,12 @@ mod win {
             extended: bool,
             hwnd: isize,
             reply: Sender<Result<ShellMenu, String>>,
+        },
+        Verb {
+            path: String,
+            verb: String,
+            hwnd: isize,
+            reply: Sender<Result<(), String>>,
         },
         Invoke {
             token: u64,
@@ -373,6 +385,21 @@ mod win {
         .unwrap_or(Ok(()))
     }
 
+    /// Run the shell verb named `verb` (`eject`) on `path`, on the worker, as Explorer would.
+    pub fn invoke_verb(path: &str, verb: &str, hwnd: isize) -> Result<(), String> {
+        // a verb that shows its own dialog past the deadline has not failed
+        ask(
+            |reply| Job::Verb {
+                path: path.to_string(),
+                verb: verb.to_string(),
+                hwnd,
+                reply,
+            },
+            INVOKE_DEADLINE,
+        )
+        .unwrap_or(Ok(()))
+    }
+
     /// The live menu an invoke targets. Dropped (and its `HMENU` destroyed) by the next query.
     struct Live {
         token: u64,
@@ -410,6 +437,23 @@ mod win {
                             live = Some(Live { token, ctx, hmenu });
                             ShellMenu { token, items }
                         });
+                    let _ = reply.send(answer);
+                }
+                Ok(Job::Verb {
+                    path,
+                    verb,
+                    hwnd,
+                    reply,
+                }) => {
+                    // built like a query, but only to reach the verb: dropped right after
+                    let answer = build(&[path], false, false, hwnd).and_then(|(ctx, hmenu, _)| {
+                        let live = Live {
+                            token: 0,
+                            ctx,
+                            hmenu,
+                        };
+                        run_verb(&live.ctx, &verb, hwnd)
+                    });
                     let _ = reply.send(answer);
                 }
                 Ok(Job::Invoke {
@@ -544,6 +588,29 @@ mod win {
         };
         // SAFETY: `info` and the strings it points at outlive the call; the EX struct starts
         // with the plain one's layout, which is how the API is meant to be called.
+        unsafe {
+            ctx.InvokeCommand((&info as *const CMINVOKECOMMANDINFOEX).cast::<CMINVOKECOMMANDINFO>())
+        }
+        .map_err(|e| e.message())
+    }
+
+    fn run_verb(ctx: &IContextMenu, verb: &str, hwnd: isize) -> Result<(), String> {
+        if verb.is_empty() || !verb.is_ascii() {
+            return Err("Not a shell verb".into());
+        }
+        let verb_a: Vec<u8> = verb.bytes().chain(std::iter::once(0)).collect();
+        let verb_w = wide(verb);
+        let info = CMINVOKECOMMANDINFOEX {
+            cbSize: std::mem::size_of::<CMINVOKECOMMANDINFOEX>() as u32,
+            fMask: CMIC_MASK_UNICODE,
+            hwnd: HWND(hwnd as *mut _),
+            lpVerb: PCSTR(verb_a.as_ptr()),
+            lpVerbW: PCWSTR(verb_w.as_ptr()),
+            nShow: SW_SHOWNORMAL.0,
+            ..Default::default()
+        };
+        // SAFETY: `info` and the verb strings outlive the call; the EX struct starts with the
+        // plain one's layout, which is how the API is meant to be called.
         unsafe {
             ctx.InvokeCommand((&info as *const CMINVOKECOMMANDINFOEX).cast::<CMINVOKECOMMANDINFO>())
         }
@@ -838,7 +905,7 @@ mod tests {
         let t = Instant::now();
         prewarm();
         println!("cold prewarm: {} ms", t.elapsed().as_millis());
-        let dir = std::env::temp_dir().join("trove-shell-menu-timing");
+        let dir = std::env::temp_dir().join("velkrys-shell-menu-timing");
         std::fs::create_dir_all(&dir).unwrap();
         let a = dir.join("notes.txt");
         let b = dir.join("photo.png");
@@ -870,7 +937,7 @@ mod tests {
     #[test]
     #[ignore = "asks the real shell; prints the verbs it sees"]
     fn live_menu_on_a_temp_file() {
-        let path = std::env::temp_dir().join("trove-shell-menu-live.txt");
+        let path = std::env::temp_dir().join("velkrys-shell-menu-live.txt");
         std::fs::write(&path, b"hi").unwrap();
         let menu = query(vec![path.display().to_string()], false, false, 0).expect("menu");
         fn dump(items: &[ShellMenuItem], depth: usize) {
@@ -902,5 +969,26 @@ mod tests {
         println!("== background ==");
         dump(&bg.items, 0);
         let _ = std::fs::remove_file(path);
+    }
+
+    /// Prints the Eject row's verb on `VELKRYS_TEST_DRIVE` (plan 23.0.2). Read only: nothing runs.
+    #[cfg(windows)]
+    #[test]
+    #[ignore = "asks the real shell about the drive named by VELKRYS_TEST_DRIVE; prints verbs"]
+    fn live_menu_on_a_drive() {
+        let root = std::env::var("VELKRYS_TEST_DRIVE").expect("set VELKRYS_TEST_DRIVE, e.g. E:\\");
+        let menu = query(vec![root], false, false, 0).expect("menu");
+        fn dump(items: &[ShellMenuItem], depth: usize) {
+            for i in items {
+                if i.separator {
+                    println!("{}----", "  ".repeat(depth));
+                } else {
+                    println!("{}{} [verb {:?}]", "  ".repeat(depth), i.label, i.verb);
+                    dump(&i.children, depth + 1);
+                }
+            }
+        }
+        dump(&menu.items, 0);
+        assert!(!menu.items.is_empty());
     }
 }

@@ -1,6 +1,6 @@
 // Checks a Linux release .deb before it ships (plan 22.3.1). One call replaces the CI steps.
-// Use:  bun scripts/linux-package-check.ts src-tauri/target/release/bundle/deb/Trove_0.1.0_amd64.deb
-//       bun scripts/linux-package-check.ts src-tauri/target/release/trove --max 2.35
+// Use:  bun scripts/linux-package-check.ts src-tauri/target/release/bundle/deb/Velkrys_0.1.0_amd64.deb
+//       bun scripts/linux-package-check.ts src-tauri/target/release/velkrys --max 2.35
 // Checks, each printed as one line:
 //   - glibc floor: the highest GLIBC_x.y symbol version the binary needs (`objdump -T`) is at most
 //     --max (default 2.35, Ubuntu 22.04). A binary built on a newer distro cannot start on an older one.
@@ -100,13 +100,13 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   let dir = '';
   let binary = args.file;
   if (isDeb) {
-    dir = mkdtempSync(join(tmpdir(), 'trove-deb-'));
+    dir = mkdtempSync(join(tmpdir(), 'velkrys-deb-'));
     const x = run('dpkg-deb', ['-x', args.file, dir]);
     if (x.code !== 0) {
       console.error(x.out);
       process.exit(1);
     }
-    binary = join(dir, 'usr/bin/trove');
+    binary = join(dir, 'usr/bin/velkrys');
   }
 
   try {

@@ -12,7 +12,7 @@
 <label class="flex items-center gap-2 {disabled ? 'text-text-disabled' : ''}">
   <input
     type="checkbox"
-    class="trove-check"
+    class="velkrys-check"
     {checked}
     {disabled}
     onchange={(e) => onchange((e.currentTarget as HTMLInputElement).checked)}

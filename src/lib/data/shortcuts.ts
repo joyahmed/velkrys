@@ -262,7 +262,7 @@ export const hiddenItemsShortcuts = (
 ];
 
 /**
- * Trove's own Snap (plan 20): ⌃⌥←/→/↑/↓ on a Mac coming from Windows, built from
+ * Velkrys's own Snap (plan 20): ⌃⌥←/→/↑/↓ on a Mac coming from Windows, built from
  * `utils/key-label` `SNAP_CHORDS` so the menu hint and the key cannot drift. Exact: ⌃⌥⌘← and
  * ⇧⌃⌥← are not it. Everywhere else nothing — Windows' own Snap and the Linux desktop's win.
  */

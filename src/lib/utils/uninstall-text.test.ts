@@ -56,7 +56,7 @@ describe('uninstall text (plan 18, 2.2)', () => {
   it('every refusal has a reason', () => {
     for (const r of [
       'system',
-      'trove',
+      'velkrys',
       'noUninstaller',
       'link',
       'notApp',
@@ -66,13 +66,13 @@ describe('uninstall text (plan 18, 2.2)', () => {
     ] as const) {
       expect(reasonText(r).length).toBeGreaterThan(0);
     }
-    expect(reasonText('noUninstaller')).toBe('No uninstaller Trove can run safely');
+    expect(reasonText('noUninstaller')).toBe('No uninstaller Velkrys can run safely');
     expect(reasonText('noMatch')).toBe('No uninstaller found');
   });
 
-  it('on Ubuntu the Trove refusal says it cannot uninstall itself', () => {
-    expect(reasonText('trove', true)).toBe('This is Trove — it cannot uninstall itself');
-    expect(reasonText('trove')).toBe('This is Trove');
+  it('on Ubuntu the Velkrys refusal says it cannot uninstall itself', () => {
+    expect(reasonText('velkrys', true)).toBe('This is Velkrys — it cannot uninstall itself');
+    expect(reasonText('velkrys')).toBe('This is Velkrys');
   });
 });
 
@@ -87,7 +87,7 @@ describe('uninstall text on a Mac (plan 18, Phase 3)', () => {
     stamp: 's1',
   };
   beforeEach(() => {
-    vi.stubGlobal('window', { __TROVE_PLATFORM__: { os: 'macos', thisPcLabel: 'x' } });
+    vi.stubGlobal('window', { __VELKRYS_PLATFORM__: { os: 'macos', thisPcLabel: 'x' } });
   });
   afterEach(() => {
     vi.unstubAllGlobals();
@@ -121,7 +121,7 @@ describe('uninstall text on a Mac (plan 18, Phase 3)', () => {
     expect(n).toEqual({
       kind: 'warning',
       message:
-        'macOS did not let Trove use the Trash, so X was not moved. Drag it to the Trash in Finder.',
+        'macOS did not let Velkrys use the Trash, so X was not moved. Drag it to the Trash in Finder.',
     });
     expect(n.message).not.toMatch(/delete|permanent|for good/i);
   });
@@ -130,7 +130,7 @@ describe('uninstall text on a Mac (plan 18, Phase 3)', () => {
 describe('uninstall text takes its bin word from "I\'m coming from" (plan 19)', () => {
   const app: Uninstallable = { ...row, name: 'X', program: '/Applications/X.app' };
   beforeEach(() => {
-    vi.stubGlobal('window', { __TROVE_PLATFORM__: { os: 'macos', thisPcLabel: 'x' } });
+    vi.stubGlobal('window', { __VELKRYS_PLATFORM__: { os: 'macos', thisPcLabel: 'x' } });
   });
   afterEach(() => {
     vi.unstubAllGlobals();

@@ -49,7 +49,7 @@ export interface ApplicationsMenuHandlers {
   /**
    * Plan 18: the last item, after a divider — hands the job to the OS's own uninstaller after a
    * confirm (`state/uninstall.svelte.ts`). Greyed with its reason in the hint column when it
-   * cannot act. Trove itself never deletes the app's files from here.
+   * cannot act. Velkrys itself never deletes the app's files from here.
    */
   uninstall?: {
     state: (a: AppEntry) => { enabled: boolean; reason: string };

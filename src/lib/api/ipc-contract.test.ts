@@ -17,6 +17,7 @@ import type { ptyFollow } from '$lib/api/pty';
 import type { recycleList } from '$lib/api/recycle';
 import type { takeLastSession } from '$lib/api/session';
 import type { drives, knownFolders } from '$lib/api/shell';
+import type { driveDetails } from '$lib/api/drive';
 import type { shellVerbs, detectCommonCommands, shellMenu } from '$lib/api/shell-verbs';
 import type { systemTheme } from '$lib/api/theme';
 import type { removeMovedOriginals, dragOut, dropModifiers, folderSpace } from '$lib/api/transfer';
@@ -158,7 +159,7 @@ const locker = {
     app: str,
     exe: str,
     canEnd: bool,
-    noEnd: { nullable: { oneOf: ['trove', 'terminal', 'windows', 'otherSession'] } },
+    noEnd: { nullable: { oneOf: ['velkrys', 'terminal', 'windows', 'otherSession'] } },
   },
 } as const;
 const transferFailure = {
@@ -271,8 +272,31 @@ const cases: Record<string, unknown> = {
       totalBytes: { nullable: num },
       freeBytes: { nullable: num },
       network: { optional: bool },
+      driveType: {
+        optional: {
+          oneOf: ['fixed', 'external', 'removable', 'optical', 'network', 'ram', 'unknown'],
+        },
+      },
+      fileSystem: { optional: { nullable: str } },
+      canRename: { optional: bool },
+      ejectable: { optional: bool },
     }),
   },
+  drive_details: obj<Ret<typeof driveDetails>>({
+    path: str,
+    label: str,
+    fileSystem: { nullable: str },
+    driveType: {
+      oneOf: ['fixed', 'external', 'removable', 'optical', 'network', 'ram', 'unknown'],
+    },
+    totalBytes: { nullable: num },
+    freeBytes: { nullable: num },
+    letter: { nullable: str },
+    mountPoint: { nullable: str },
+    device: { nullable: str },
+    bus: { nullable: str },
+    readOnly: bool,
+  }),
   known_folders: {
     array: obj<Ret<typeof knownFolders>[number]>({
       key: { oneOf: ['desktop', 'downloads', 'documents', 'pictures', 'music', 'videos'] },
@@ -337,7 +361,7 @@ const cases: Record<string, unknown> = {
       folder: str,
       path: str,
       removable: {
-        oneOf: ['yes', 'system', 'trove', 'noUninstaller', 'link', 'notApp', 'elsewhere'],
+        oneOf: ['yes', 'system', 'velkrys', 'noUninstaller', 'link', 'notApp', 'elsewhere'],
       },
       program: str,
       stamp: str,

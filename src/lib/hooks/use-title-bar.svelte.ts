@@ -38,11 +38,11 @@ export const useTitleBar = () => {
     return () => void unlisten.then((f) => f());
   });
 
-  // The OS title follows the active tab — "Downloads - Trove" in the taskbar and Alt+Tab,
-  // as Explorer's does; an empty tab is just "Trove".
+  // The OS title follows the active tab — "Downloads - Velkrys" in the taskbar and Alt+Tab,
+  // as Explorer's does; an empty tab is just "Velkrys".
   $effect(() => {
     const label = locationLabel(tabs.active.location);
-    void win.setTitle(label ? `${label} - Trove` : 'Trove');
+    void win.setTitle(label ? `${label} - Velkrys` : 'Velkrys');
   });
 
   const buttons = $derived<CaptionButton[]>([

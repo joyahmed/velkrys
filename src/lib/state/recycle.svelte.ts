@@ -33,7 +33,7 @@ class RecycleState {
 
   /**
    * The open view's timer read (`startBinPoll`): picks up what was binned or restored outside
-   * Trove. Quieter than a silent read — it never touches `error` (an operation's message must
+   * Velkrys. Quieter than a silent read — it never touches `error` (an operation's message must
    * not vanish two seconds later, and a passing failure is F5's to report), and a listing that
    * draws the same rows leaves `items` as it is, so nothing re-renders. Before the first read
    * there is nothing on screen to keep current.

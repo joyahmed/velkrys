@@ -5,7 +5,7 @@
 //
 // ⛔ End task loses unsaved work. It always asks first (Enter = Cancel), asks the program to
 // close politely, and only offers Force end — a second question — if it is still running.
-// Trove itself (any Trove window), its terminal pane's shell, Explorer, services, critical
+// Velkrys itself (any Velkrys window), its terminal pane's shell, Explorer, services, critical
 // programs and programs in another Windows session get no End task at all: Rust marks them
 // `canEnd: false` with the reason (`noEnd`) and refuses them again if asked anyway.
 import { endLockingApp, whoIsLocking, type LockedPath, type Locker } from '$lib/api/lockers';
@@ -15,12 +15,12 @@ import { notices } from '$lib/state/notices.svelte';
 
 /** What a program Windows needs says instead of an End task button. */
 export const WINDOWS_NEEDS = 'Windows needs this program; close it yourself.';
-/** Trove (this window or another) holds it: there is nobody else to name. */
-export const TROVE_ITSELF = 'Trove itself has this file open';
+/** Velkrys (this window or another) holds it: there is nobody else to name. */
+export const VELKRYS_ITSELF = 'Velkrys itself has this file open';
 /** The terminal pane's shell, or a program started in it, holds it. */
-export const TERMINAL_HAS_IT = "Trove's terminal has this file open — close it there";
+export const TERMINAL_HAS_IT = "Velkrys's terminal has this file open — close it there";
 /** It runs for another person signed in, or in Windows' own session. */
-export const OTHER_SESSION = 'It runs in another Windows session; Trove cannot end it.';
+export const OTHER_SESSION = 'It runs in another Windows session; Velkrys cannot end it.';
 
 const nameOf = (path: string) => path.split(/[\\/]/).at(-1) || path;
 
@@ -38,21 +38,21 @@ export const endable = (lockers: Locker[]) => lockers.find((l) => l.canEnd) ?? n
 
 /** Why `locker` gets no End task, in the words the person sees. */
 export const whyNoEnd = (locker: Locker) => {
-  if (locker.noEnd === 'trove') return TROVE_ITSELF;
+  if (locker.noEnd === 'velkrys') return VELKRYS_ITSELF;
   if (locker.noEnd === 'terminal') return TERMINAL_HAS_IT;
   return `${locker.app}: ${locker.noEnd === 'otherSession' ? OTHER_SESSION : WINDOWS_NEEDS}`;
 };
 
 /**
  * What a held file's notice or progress row says: who holds it ("Microsoft Word has
- * report.docx open"), then `more`, then — when none of them may be ended — why not. Trove's
+ * report.docx open"), then `more`, then — when none of them may be ended — why not. Velkrys's
  * own window or terminal says only that.
  */
 export const heldMessage = (path: string, lockers: Locker[], more = '') => {
   const message = `${lockedMessage(path, lockers)}${more}`;
   if (endable(lockers)) return message;
   const why = lockers[0]?.noEnd;
-  if (why === 'trove') return `${TROVE_ITSELF}${more}`;
+  if (why === 'velkrys') return `${VELKRYS_ITSELF}${more}`;
   if (why === 'terminal') return `${TERMINAL_HAS_IT}${more}`;
   return `${message}. ${why === 'otherSession' ? OTHER_SESSION : WINDOWS_NEEDS}`;
 };

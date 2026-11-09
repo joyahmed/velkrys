@@ -2,7 +2,7 @@
    so Windows and Linux never match.
 
    ⭐ FINDER, NOT EXPLORER: the file list, the sidebar, the Details / Preview pane and the status
-   bar, drawn the way Finder draws them. The structure stays Trove's; only paint, type and the
+   bar, drawn the way Finder draws them. The structure stays Velkrys's; only paint, type and the
    selection idiom change:
      - selection is a rounded FILL — the system's selected-content blue with white text while the
        list owns focus, the unemphasized grey when it does not (Finder's two states). No Fluent

@@ -1,5 +1,5 @@
 // A macOS app is a folder named `Something.app` (a "bundle"). Finder launches it on a
-// double-click instead of opening it; Trove does the same, and calls it "App" with the app
+// double-click instead of opening it; Velkrys does the same, and calls it "App" with the app
 // glyph. Only on a Mac: on Windows and Linux a folder named `x.app` is just a folder.
 import type { FileEntry } from '$lib/types/fs';
 import { onMac } from './platform';

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build Trove as a release .app and install it to /Applications on this Mac.
+# Build Velkrys as a release .app and install it to /Applications on this Mac.
 # Run after every merge so the installed copy is what was just built:
 #   bash scripts/install-mac.sh
 # Uses its own cargo target dir, so it never fights a running `tauri dev`.
@@ -9,18 +9,18 @@ set -euo pipefail
 
 repo="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$repo"
-export CARGO_TARGET_DIR="${CARGO_TARGET_DIR:-$HOME/.cache/trove-target-install}"
+export CARGO_TARGET_DIR="${CARGO_TARGET_DIR:-$HOME/.cache/velkrys-target-install}"
 hash="$(git rev-parse --short HEAD)"
 dirty="$(git status --porcelain --untracked-files=no | head -1)"
 
-# Quit every running RELEASE/installed Trove first, not only the installed one: a copy built
-# elsewhere (e.g. the ~/.cache/trove-target-reopen bundle, which has no TroveCommit) keeps the
+# Quit every running RELEASE/installed Velkrys first, not only the installed one: a copy built
+# elsewhere (e.g. the ~/.cache/velkrys-target-reopen bundle, which has no VelkrysCommit) keeps the
 # hotkey and the single-instance lock, so the new install would open into the old process.
 # A `tauri dev` run is NEVER touched: skipped when its executable sits under a `target/debug`
 # dir, or when any ancestor process is a dev server (cargo, tauri, bun, node, vite).
 # TERM then KILL per pid (an AppleEvent quit by bundle id could reach the dev copy).
-# TROVE_QUIT_DRY=1 only prints what would be quit; TROVE_QUIT_ONLY=1 runs just this step.
-is_dev_trove() { # $1 = pid; true (0) for a `tauri dev` run
+# VELKRYS_QUIT_DRY=1 only prints what would be quit; VELKRYS_QUIT_ONLY=1 runs just this step.
+is_dev_velkrys() { # $1 = pid; true (0) for a `tauri dev` run
   local pid="$1" exe cur="$1" name
   exe="$(ps -o comm= -p "$pid" 2>/dev/null || true)"
   [[ "$exe" == */target/debug/* ]] && return 0
@@ -33,11 +33,11 @@ is_dev_trove() { # $1 = pid; true (0) for a `tauri dev` run
   done
   return 1
 }
-release_pids() { # pids of running Troves that are not a dev run
+release_pids() { # pids of running Velkrys that are not a dev run
   local pid
-  for pid in $(pgrep -ix trove || true); do
-    if is_dev_trove "$pid"; then
-      echo "Skipping dev Trove $pid ($(ps -o comm= -p "$pid" 2>/dev/null))" >&2
+  for pid in $(pgrep -ix velkrys || true); do
+    if is_dev_velkrys "$pid"; then
+      echo "Skipping dev Velkrys $pid ($(ps -o comm= -p "$pid" 2>/dev/null))" >&2
     else
       echo "$pid"
     fi
@@ -53,43 +53,43 @@ wait_gone() { # $1 = tries of 0.5 s, then the pids
   done
   ! alive "$@"
 }
-quit_troves() {
+quit_velkrys() {
   local pids
   # shellcheck disable=SC2207
   pids=($(release_pids))
   if ((${#pids[@]} == 0)); then
-    echo "No release Trove running."
+    echo "No release Velkrys running."
     return 0
   fi
-  for p in "${pids[@]}"; do echo "Quitting Trove $p: $(ps -o comm= -p "$p" 2>/dev/null)"; done
-  if [[ "${TROVE_QUIT_DRY:-}" == 1 ]]; then
+  for p in "${pids[@]}"; do echo "Quitting Velkrys $p: $(ps -o comm= -p "$p" 2>/dev/null)"; done
+  if [[ "${VELKRYS_QUIT_DRY:-}" == 1 ]]; then
     echo "(dry run: nothing quit)"
     return 0
   fi
   kill -TERM "${pids[@]}" 2>/dev/null || true
   wait_gone 20 "${pids[@]}" || { kill -KILL "${pids[@]}" 2>/dev/null || true; wait_gone 10 "${pids[@]}" || true; }
   if alive "${pids[@]}"; then
-    echo "install-mac.sh: Trove still running (${pids[*]})" >&2
+    echo "install-mac.sh: Velkrys still running (${pids[*]})" >&2
     return 1
   fi
-  echo "All release Trove processes quit."
+  echo "All release Velkrys processes quit."
 }
-[[ "${TROVE_QUIT_ONLY:-}" == 1 ]] && { quit_troves; exit; }
+[[ "${VELKRYS_QUIT_ONLY:-}" == 1 ]] && { quit_velkrys; exit; }
 
-echo "Building Trove at $hash${dirty:+ (with uncommitted changes)}..."
+echo "Building Velkrys at $hash${dirty:+ (with uncommitted changes)}..."
 bun install --frozen-lockfile >/dev/null
 bun run tauri build --bundles app
 
-app="$CARGO_TARGET_DIR/release/bundle/macos/Trove.app"
+app="$CARGO_TARGET_DIR/release/bundle/macos/Velkrys.app"
 [[ -d "$app" ]] || { echo "install-mac.sh: no bundle at $app" >&2; exit 1; }
 
-quit_troves
+quit_velkrys
 
-rm -rf /Applications/Trove.app
-ditto "$app" /Applications/Trove.app
-# record which commit is installed, readable with: defaults read /Applications/Trove.app/Contents/Info TroveCommit
-/usr/libexec/PlistBuddy -c "Add :TroveCommit string $hash" /Applications/Trove.app/Contents/Info.plist 2>/dev/null ||
-  /usr/libexec/PlistBuddy -c "Set :TroveCommit $hash" /Applications/Trove.app/Contents/Info.plist
-codesign --force --deep --sign - /Applications/Trove.app >/dev/null 2>&1 || true
+rm -rf /Applications/Velkrys.app
+ditto "$app" /Applications/Velkrys.app
+# record which commit is installed, readable with: defaults read /Applications/Velkrys.app/Contents/Info VelkrysCommit
+/usr/libexec/PlistBuddy -c "Add :VelkrysCommit string $hash" /Applications/Velkrys.app/Contents/Info.plist 2>/dev/null ||
+  /usr/libexec/PlistBuddy -c "Set :VelkrysCommit $hash" /Applications/Velkrys.app/Contents/Info.plist
+codesign --force --deep --sign - /Applications/Velkrys.app >/dev/null 2>&1 || true
 
-echo "Installed /Applications/Trove.app at $hash."
+echo "Installed /Applications/Velkrys.app at $hash."

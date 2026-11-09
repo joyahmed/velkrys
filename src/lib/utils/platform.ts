@@ -1,13 +1,13 @@
-// The OS Trove runs on (the host) and the words it shows. Rust injects the host facts
+// The OS Velkrys runs on (the host) and the words it shows. Rust injects the host facts
 // (`core/shell.rs`, `platform_init_script`, now read via `platform-facts.ts`) before any page
 // script runs. Two axes (plan 19): `onMac` / `onWindows` / icons / protocol are the HOST; the
 // words (`binName`, `propertiesLabel`, `thisPcLabel`) follow the "I'm coming from" STYLE, read at
 // call time, so a settings change renames them without a restart.
 // Off Tauri (tests, a plain browser) nothing is set and Windows applies.
 import { comingFrom, type OsStyle } from '$lib/state/coming-from.svelte';
-import { injected, type TrovePlatform } from '$lib/utils/platform-facts';
+import { injected, type VelkrysPlatform } from '$lib/utils/platform-facts';
 
-export { injected, type TrovePlatform };
+export { injected, type VelkrysPlatform };
 
 /** Every name This PC goes by. ⛔ The parser accepts all three on every OS (B.2.2), so a label
  * outside this list is refused rather than shown, or `parseLocation(locationText(THIS_PC))`
@@ -15,11 +15,11 @@ export { injected, type TrovePlatform };
 export const THIS_PC_LABELS = ['This PC', 'This Mac', 'This Computer'] as const;
 
 /**
- * Whether a file's icon is drawn by Trove (by category, `data/file-categories.ts`) rather than
+ * Whether a file's icon is drawn by Velkrys (by category, `data/file-categories.ts`) rather than
  * asked of the shell. Only off Windows: the shell icon is a stub there (`icons.rs`, plan 14).
  * Off Tauri nothing is injected and Windows' behaviour applies, like every switch in this file.
  */
-export const drawnFileIcons = (platform: TrovePlatform | undefined = injected()): boolean =>
+export const drawnFileIcons = (platform: VelkrysPlatform | undefined = injected()): boolean =>
   platform !== undefined && platform.os !== 'windows';
 
 /**
@@ -32,33 +32,33 @@ export const drawnFileIcons = (platform: TrovePlatform | undefined = injected())
  */
 export const protocolOrigin = (
   scheme: string,
-  platform: TrovePlatform | undefined = injected(),
+  platform: VelkrysPlatform | undefined = injected(),
 ): string =>
   platform === undefined || platform.os === 'windows'
     ? `http://${scheme}.localhost`
     : `${scheme}://localhost`;
 
 /** Windows, or nothing injected (tests, a plain browser): every switch here defaults to Windows. */
-export const onWindows = (platform: TrovePlatform | undefined = injected()): boolean =>
+export const onWindows = (platform: VelkrysPlatform | undefined = injected()): boolean =>
   platform === undefined || platform.os === 'windows';
 
 /** The Microsoft Store (MSIX) build (plan 22). Off Tauri, or a build that sends no channel, it
  * is the direct download. */
-export const storeBuild = (platform: TrovePlatform | undefined = injected()): boolean =>
+export const storeBuild = (platform: VelkrysPlatform | undefined = injected()): boolean =>
   platform?.channel === 'msstore';
 
 /** A build that updates itself (plan 22.5): the cargo feature `updater` on a GitHub download.
  * Off Tauri, in the Store build and in every build without the feature, false: no update line. */
-export const selfUpdates = (platform: TrovePlatform | undefined = injected()): boolean =>
+export const selfUpdates = (platform: VelkrysPlatform | undefined = injected()): boolean =>
   platform?.updater === true;
 
 /** A build that reads RAR (plan 16 phase 5): the cargo feature `rar`, on by default. Off Tauri
  * and in a build without it (a distro that ships only OSI code), false: no RAR row anywhere. */
-export const readsRar = (platform: TrovePlatform | undefined = injected()): boolean =>
+export const readsRar = (platform: VelkrysPlatform | undefined = injected()): boolean =>
   platform?.rar === true;
 
 /** A Mac build. Off Tauri nothing is injected and Windows' chords apply, like every switch here. */
-export const onMac = (platform: TrovePlatform | undefined = injected()): boolean =>
+export const onMac = (platform: VelkrysPlatform | undefined = injected()): boolean =>
   platform?.os === 'macos';
 
 /** What the details command is called: "Properties" in Windows and Linux style, Finder's
@@ -90,7 +90,7 @@ export const launchLabel = (style: OsStyle = comingFrom.style): string => LAUNCH
 
 /**
  * A sentence from Rust, in the chosen style's bin word (plan 19 Q3 / 3.2). Rust names the host's
- * real bin ("Trove needs Full Disk Access to show the Trash"); with "coming from Windows" picked
+ * real bin ("Velkrys needs Full Disk Access to show the Trash"); with "coming from Windows" picked
  * that must read "Recycle Bin". Only the bin as a noun is rewritten — after "the", "a" or "no" —
  * so a file named "Trash.txt" quoted in the same sentence keeps its name. Display time, so a
  * settings change renames a message already on screen.
@@ -102,14 +102,14 @@ export const inBinWords = (text: string, style: OsStyle = comingFrom.style): str
   );
 
 /** An Ubuntu (Linux) build. Off Tauri nothing is injected and Windows applies. */
-export const onLinux = (platform: TrovePlatform | undefined = injected()): boolean =>
+export const onLinux = (platform: VelkrysPlatform | undefined = injected()): boolean =>
   platform?.os === 'linux';
 
 /** The menu verb: Finder says "Move to Trash" for an app; Windows and Linux "Uninstall". The verb
  * is the HOST's (it names what this machine will actually do, plan 18); the bin word in it is the
  * STYLE's (plan 19): "Move to Recycle Bin" with Windows picked. */
 export const uninstallVerb = (
-  platform: TrovePlatform | undefined = injected(),
+  platform: VelkrysPlatform | undefined = injected(),
   style: OsStyle = comingFrom.style,
 ): string => (onMac(platform) ? `Move to ${binName(style)}` : 'Uninstall');
 

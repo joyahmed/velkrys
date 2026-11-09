@@ -39,7 +39,7 @@ class TerminalState {
   error = $state<string | null>(null);
   pendingOutput = $state<string[]>([]);
   /**
-   * The live session is a `plain` shell (Trove's `/bin/sh`, no rc, known prompt) — set only once
+   * The live session is a `plain` shell (Velkrys's `/bin/sh`, no rc, known prompt) — set only once
    * its id is assigned, cleared by any other spawn and by kill. It never follows navigation.
    */
   plain = $state(false);
@@ -198,7 +198,7 @@ class TerminalState {
   /**
    * Type `text` at the shell's prompt WITHOUT Enter (plan 08 E3: selected paths, quoted). Opens
    * the pane first when it is closed and waits for its shell to come up. A `plain` shell is
-   * Trove's own, holding a typed uninstall line, so it gets nothing. `false` = nothing written.
+   * Velkrys's own, holding a typed uninstall line, so it gets nothing. `false` = nothing written.
    */
   async typeIntoPrompt(text: string): Promise<boolean> {
     if (!text) return false;
@@ -292,7 +292,7 @@ class TerminalState {
    * The shell reported a new folder (a `cd` typed in the pane): move the active tab there when
    * the pane follows the folder. The backend sends only folders that exist and only on a
    * change, so a prompt redrawn in place never pulls the listing back from where the user went.
-   * A plain shell is Trove's own and never moves the listing.
+   * A plain shell is Velkrys's own and never moves the listing.
    */
   applyCwd(e: PtyCwd) {
     if (e.sessionId !== this.sessionId || this.plain) return;

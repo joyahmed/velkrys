@@ -1,15 +1,15 @@
-# Trove's app icon: a Windows-yellow two-tone folder filling the canvas, with a faceted
+# Velkrys's app icon: a Windows-yellow two-tone folder filling the canvas, with a faceted
 # accent-blue gem sitting in it — the trove. Drawn 4x and downsampled to 1024 px.
 #
 # THIS FILE IS THE SOURCE OF TRUTH. There is no SVG for this mark and there never was
-# (docs/brand/trove.svg belongs to a different, rejected mark — see the banner in it).
+# (docs/brand/velkrys.svg belongs to a different, rejected mark — see the banner in it).
 # The 1024 master is not hand-art: it is this script's output, reproducible exactly.
 #
 # Regenerate every app asset:
-#   python docs/brand/icon.py docs/brand/trove-icon-1024.png
-#   bunx tauri icon docs/brand/trove-icon-1024.png -o src-tauri/icons
+#   python docs/brand/icon.py docs/brand/velkrys-icon-1024.png
+#   bunx tauri icon docs/brand/velkrys-icon-1024.png -o src-tauri/icons
 #   rm -rf src-tauri/icons/android src-tauri/icons/ios   # this repo ships Windows/NSIS only
-#   python -c "from PIL import Image; Image.open('docs/brand/trove-icon-1024.png').convert('RGBA').resize((128,128), Image.LANCZOS).save('static/favicon.png')"
+#   python -c "from PIL import Image; Image.open('docs/brand/velkrys-icon-1024.png').convert('RGBA').resize((128,128), Image.LANCZOS).save('static/favicon.png')"
 #
 # Determinism, measured 2026-09-26 on Pillow 11.3.0 / CPython 3.9: rerunning this script
 # reproduced the committed master with 0 of 1048576 pixels differing, and `tauri icon`
@@ -18,8 +18,8 @@
 # tauri-CLI version artefact on a file this repo does not ship.
 #
 # ── THEN FORCE THE WINDOWS RESOURCE TO REBUILD, OR YOU WILL SHIP THE OLD ICON ─────────
-#   rm -rf src-tauri/target/*/build/trove-*
-#   rm -f src-tauri/target/release/trove.exe src-tauri/target/release/trove.pdb
+#   rm -rf src-tauri/target/*/build/velkrys-*
+#   rm -f src-tauri/target/release/velkrys.exe src-tauri/target/release/velkrys.pdb
 #   bun run build:exe
 #
 # tauri_build::build() emits rerun-if-changed for tauri.conf.json and capabilities and
@@ -28,10 +28,10 @@
 # alone and cargo keeps the stale build-script output (out/resource.lib, with the previous
 # icon baked in) and relinks it into a brand-new binary. The build is green, the on-disk
 # hashes agree, and the exe carries the old mark. This has already shipped once (c14d2c9).
-# `cargo clean -p trove` is NOT enough — measured: it removed 8.6 GiB and still left
-# target/*/build/trove-*/out/resource.lib. Delete those paths by hand, as above.
+# `cargo clean -p velkrys` is NOT enough — measured: it removed 8.6 GiB and still left
+# target/*/build/velkrys-*/out/resource.lib. Delete those paths by hand, as above.
 #
-# Then prove it from the ARTEFACT, never from the PNGs on disk: parse trove.exe's PE
+# Then prove it from the ARTEFACT, never from the PNGs on disk: parse velkrys.exe's PE
 # resource directory, pull the RT_ICON entries, and check they are byte-identical to
 # src-tauri/icons/icon.ico's entries. The tray icon is separate — tray.rs embeds
 # icons/32x32.png via include_image!, which stores it DECODED, so the PNG bytes are not
@@ -46,7 +46,7 @@
 # The full record of what those passes tried, measured, and learned — including three
 # rejected tones with WCAG contrast numbers on both Windows 11 taskbar grounds, and the
 # note that a literal chest silhouette reads as a bread loaf and a table lamp — is kept
-# in docs/brand/trove.svg. READ IT BEFORE PROPOSING A REDESIGN. Do not repeat those
+# in docs/brand/velkrys.svg. READ IT BEFORE PROPOSING A REDESIGN. Do not repeat those
 # passes; they are expensive and they have already been run.
 #
 # The short version of what THIS mark answers:

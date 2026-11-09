@@ -13,7 +13,7 @@ pub fn update_ready(pending: State<'_, Pending>) -> Option<String> {
 }
 
 /// The person clicked "Restart to update": install the waiting update and start again. On
-/// Windows the installer itself closes Trove and opens the new one; elsewhere we restart.
+/// Windows the installer itself closes Velkrys and opens the new one; elsewhere we restart.
 #[tauri::command(async)]
 pub fn update_restart(app: AppHandle, pending: State<'_, Pending>) -> Result<(), String> {
     let ready = pending

@@ -50,9 +50,9 @@ export const reasonText = (
 ): string =>
   ({
     system: onMac() ? 'Part of macOS' : linux ? 'Ubuntu needs this package' : 'Part of Windows',
-    // Ubuntu: a snap or Flatpak tile can be this very Trove, and it looks like any other app
-    trove: linux ? 'This is Trove — it cannot uninstall itself' : 'This is Trove',
-    noUninstaller: 'No uninstaller Trove can run safely',
+    // Ubuntu: a snap or Flatpak tile can be this very Velkrys, and it looks like any other app
+    velkrys: linux ? 'This is Velkrys — it cannot uninstall itself' : 'This is Velkrys',
+    noUninstaller: 'No uninstaller Velkrys can run safely',
     link: 'This is a link, not the app',
     notApp: 'Not an app bundle',
     elsewhere: `Only apps in Applications can be moved to the ${binName()}`,
@@ -75,7 +75,7 @@ export const outcomeNotice = (row: Uninstallable, outcome: UninstallOutcome): No
   if (outcome === 'noTrash')
     return {
       kind: 'warning',
-      message: `macOS did not let Trove use the ${binName()}, so ${row.name} was not moved. Drag it to the ${binName()} in Finder.`,
+      message: `macOS did not let Velkrys use the ${binName()}, so ${row.name} was not moved. Drag it to the ${binName()} in Finder.`,
     };
   if (outcome === 'typedInTerminal')
     return {
@@ -86,7 +86,7 @@ export const outcomeNotice = (row: Uninstallable, outcome: UninstallOutcome): No
     return { kind: 'info', message: `${row.name} is still in the list` };
   return {
     kind: 'info',
-    message: `No answer yet from the uninstaller of ${row.name}. Trove checks again when you come back.`,
+    message: `No answer yet from the uninstaller of ${row.name}. Velkrys checks again when you come back.`,
   };
 };
 

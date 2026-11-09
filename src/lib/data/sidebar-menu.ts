@@ -2,6 +2,9 @@
 // (folders, and Home, Gallery, OneDrive, the Bin), Open in Terminal (folders). The handlers that reach outside the state come in
 // from the hook, so this file stays data + state reads.
 import type { MenuItem } from '$lib/hooks/use-menu.svelte';
+import { driveMenuItems, type DriveMenuHandlers, type DriveSurface } from '$lib/data/drive-menu';
+import { driveMenuHandlers } from '$lib/state/drive-menu-handlers';
+import { places } from '$lib/state/places.svelte';
 import { knownKeyOf, type SidebarItem } from '$lib/data/sidebar-sections';
 import { isSidebarKey, settings } from '$lib/state/settings.svelte';
 import { tabs } from '$lib/state/tabs.svelte';
@@ -10,13 +13,21 @@ import { locationText } from '$lib/utils/location';
 
 export interface SidebarMenuHandlers {
   openTerminal: (path: string) => unknown;
+  /** what the drive rows do; the real ones unless a test hands its own */
+  drive?: DriveMenuHandlers;
 }
 
 const folderPath = (item: SidebarItem) =>
   item.location?.kind === 'path' && item.location.path ? item.location.path : null;
 
-export const sidebarMenuFor = (item: SidebarItem, on: SidebarMenuHandlers): MenuItem[] => {
+export const sidebarMenuFor = (
+  item: SidebarItem,
+  on: SidebarMenuHandlers,
+  surface: Exclude<DriveSurface, 'list'> = 'sidebar',
+): MenuItem[] => {
   const path = folderPath(item);
+  // a drive row (any OS) adds Eject, Copy as path, Rename and Properties (plan 23)
+  const drive = path === null ? undefined : places.driveAt(path);
   const location = item.location;
   const known = item.knownKey;
   // Home, Gallery, OneDrive and the Bin are not folders: listed means pinned, unpinning hides
@@ -69,5 +80,6 @@ export const sidebarMenuFor = (item: SidebarItem, on: SidebarMenuHandlers): Menu
       visible: () => path !== null,
       run: () => path && on.openTerminal(path),
     },
+    ...(drive ? driveMenuItems(drive, surface, on.drive ?? driveMenuHandlers) : []),
   ];
 };

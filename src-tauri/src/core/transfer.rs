@@ -268,10 +268,10 @@ fn new_item_id_of(
     Some(item.id.to_string_lossy().into_owned())
 }
 
-/// The forms a bin item's original path can take for one file: the path as Trove holds it, and
+/// The forms a bin item's original path can take for one file: the path as Velkrys holds it, and
 /// the path through its real folder. The `trash` crate resolves the path before it deletes, so
 /// on Linux the `.trashinfo` holds the REAL folder, and the Windows Recycle Bin does the same (a
-/// live probe: a junction's target, a `subst` drive's real `C:\` path). The path as Trove holds
+/// live probe: a junction's target, a `subst` drive's real `C:\` path). The path as Velkrys holds
 /// it is kept too, for a bin that stores it as given. An item is of the file when it matches
 /// EITHER form.
 ///
@@ -1019,7 +1019,7 @@ fn bin_old(target: &Path, progress: &mut Progress) -> Result<()> {
 /// promised outcome (`Replaced::Lost`).
 ///
 /// ⛔ Was every `NoRecycleBin`, including the Mac's `Why::Denied` (Finder automation refused
-/// Trove): the conflict dialog had just promised the Trash, and the old file was overwritten
+/// Velkrys): the conflict dialog had just promised the Trash, and the old file was overwritten
 /// for good. Denied is a bin that exists but said no, so it fails the item like any other.
 fn is_bin_less(e: &Error) -> bool {
     ops::no_recycle_bin(e).is_some_and(|n| n.why != ops::Why::Denied)
@@ -1435,7 +1435,7 @@ impl Drop for Partial {
 /// 1 MB buffered copy that counts bytes, honours the cancel flag between buffers, and carries
 /// the modified time and the read-only bit over.
 ///
-/// ⛔ Never written in place. The bytes go to `.<name>.trove-partial` beside the target and
+/// ⛔ Never written in place. The bytes go to `.<name>.velkrys-partial` beside the target and
 /// replace it in one `rename` only when whole, so a cancel, a full disk or a read error midway
 /// leaves the old target exactly as it was (bytes and read-only bit) and the partial deleted.
 /// Writing straight into the target used to truncate it first and lose it on any failure.
@@ -1451,7 +1451,7 @@ fn copy_file(source: &Path, target: &Path, progress: &mut Progress) -> Result<()
     let partial = Partial {
         path: dir.join(ops::unique_name(
             dir,
-            &format!(".{name}.trove-partial"),
+            &format!(".{name}.velkrys-partial"),
             false,
         )),
         armed: true,
@@ -1557,7 +1557,7 @@ fn move_any(source: &Path, target: &Path, size: u64, progress: &mut Progress) ->
     Ok(())
 }
 
-/// A Replace by move: rename `source` to a hidden `.<name>.<launch>-<job>.trove-parked` beside
+/// A Replace by move: rename `source` to a hidden `.<name>.<launch>-<job>.velkrys-parked` beside
 /// `target` (`park_name`),
 /// so it can take the old file's place in one more rename. `None` when it cannot (another
 /// volume, a filesystem with no rename that refuses to replace, a journal that cannot be
@@ -1570,7 +1570,7 @@ fn move_any(source: &Path, target: &Path, size: u64, progress: &mut Progress) ->
 /// run side by side) both picked the same park name, and the second rename destroyed the first
 /// one's file. The park rename never writes over anything (`Progress::park`); a name taken in
 /// between is passed over for the next free one. The launch and job in the name keep parks
-/// apart from each other, from an earlier run's, and from a copy's `.trove-partial`.
+/// apart from each other, from an earlier run's, and from a copy's `.velkrys-partial`.
 fn park_beside(source: &Path, target: &Path, progress: &Progress) -> Option<PathBuf> {
     let dir = target.parent()?;
     let name = target.file_name()?.to_string_lossy();
@@ -1597,9 +1597,9 @@ fn park_beside(source: &Path, target: &Path, progress: &Progress) -> Option<Path
     None
 }
 
-/// The hidden name a move parks under: `.<name>.<launch>-<job>.trove-parked`.
+/// The hidden name a move parks under: `.<name>.<launch>-<job>.velkrys-parked`.
 ///
-/// ⛔ (G.2 review 6, 2) Was `.<name>.<job>.trove-parked`: job ids start at 1 every launch, so a
+/// ⛔ (G.2 review 6, 2) Was `.<name>.<job>.velkrys-parked`: job ids start at 1 every launch, so a
 /// park could take the very name, and the very journal entry, a crash left from an earlier run.
 /// Recovery (on its own thread, while jobs run) then took the new park for the leftover —
 /// renamed it mid-job or dropped its entry. The launch token (`LAUNCH`) keeps them apart.
@@ -1608,7 +1608,7 @@ fn park_name(name: &str, job: u64) -> String {
 }
 
 fn park_name_in(name: &str, launch: &str, job: u64) -> String {
-    format!(".{name}.{launch}-{job}.trove-parked")
+    format!(".{name}.{launch}-{job}.velkrys-parked")
 }
 
 /// This run of the app, told from every other: the process id and the start second, in hex.
@@ -1913,7 +1913,7 @@ mod tests {
 
     fn scratch(name: &str) -> PathBuf {
         let dir =
-            std::env::temp_dir().join(format!("trove-transfer-{name}-{}", std::process::id()));
+            std::env::temp_dir().join(format!("velkrys-transfer-{name}-{}", std::process::id()));
         let _ = fs::remove_dir_all(&dir);
         fs::create_dir_all(&dir).unwrap();
         dir
@@ -3702,11 +3702,11 @@ mod tests {
     }
 
     /// ⛔ Was data loss with a promise broken (G.2 review 2, A): every `NoRecycleBin` meant "no
-    /// bin here, overwrite", so the Mac's Finder refusing Trove (`Why::Denied`) overwrote the old
+    /// bin here, overwrite", so the Mac's Finder refusing Velkrys (`Why::Denied`) overwrote the old
     /// file for good right after the dialog promised the Trash. Denied now fails the item and
     /// the old file stays.
     #[test]
-    fn a_trash_that_refuses_trove_keeps_the_old_file_and_fails_the_item() {
+    fn a_trash_that_refuses_velkrys_keeps_the_old_file_and_fails_the_item() {
         for mode in [TransferMode::Copy, TransferMode::Move] {
             let root = scratch(&format!("replace-denied-{mode:?}"));
             let dest = root.join("dest");
@@ -4184,7 +4184,7 @@ mod tests {
         assert_eq!(fs::read(dest.join("a.txt")).unwrap(), b"new");
         assert_eq!(fs::read(bin_dir.join("a.txt")).unwrap(), b"old");
         assert!(!root.join("a.txt").exists());
-        let second = park_name("a.txt", 7).replace(".trove-parked", " (2).trove-parked");
+        let second = park_name("a.txt", 7).replace(".velkrys-parked", " (2).velkrys-parked");
         assert!(!dest.join(second).exists());
         fs::remove_dir_all(root).unwrap();
     }
@@ -4205,7 +4205,7 @@ mod tests {
         assert_eq!(park_name("a.txt", 1), park_name("a.txt", 1));
         let name = park_name("a.txt", 1);
         assert!(
-            name.starts_with(".a.txt.") && name.ends_with("-1.trove-parked"),
+            name.starts_with(".a.txt.") && name.ends_with("-1.velkrys-parked"),
             "{name}"
         );
         assert!(name.contains(launch_token()), "{name}");
@@ -4247,7 +4247,7 @@ mod tests {
     #[test]
     fn an_unpark_onto_a_taken_source_keeps_both() {
         let root = scratch("unpark-taken");
-        let parked = root.join(".a.txt.1.trove-parked");
+        let parked = root.join(".a.txt.1.velkrys-parked");
         let source = root.join("a.txt");
         fs::write(&parked, b"moved").unwrap();
         fs::write(&source, b"made meanwhile").unwrap();

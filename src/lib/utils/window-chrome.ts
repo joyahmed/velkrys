@@ -1,7 +1,7 @@
-// Who draws the window's buttons. Windows and Linux: Trove does (`CaptionButtons.svelte`, the
+// Who draws the window's buttons. Windows and Linux: Velkrys does (`CaptionButtons.svelte`, the
 // window is undecorated). macOS: the system does — `tauri.macos.conf.json` and
 // `commands/windows.rs` give every explorer window the native traffic lights over the tab strip
-// (titleBarStyle Overlay, hidden title), so Trove's own buttons hide and the strip moves right.
+// (titleBarStyle Overlay, hidden title), so Velkrys's own buttons hide and the strip moves right.
 // Plan 12 F / plan 10 E. Off Tauri nothing is injected and Windows' layout applies.
 import { onMac } from '$lib/utils/platform';
 
@@ -16,7 +16,7 @@ export const TAB_STRIP_PAD_PX = 10;
 
 // ⛔ `undefined` means "read what Rust injected" — the default parameter fills it — not "no OS".
 
-/** Whether Trove draws its own minimize / maximize / close. Not on a Mac: the system's are there. */
+/** Whether Velkrys draws its own minimize / maximize / close. Not on a Mac: the system's are there. */
 export const drawsCaptionButtons = (platform?: Platform): boolean => !onMac(platform);
 
 /** Classes for one caption button. Close gets its own hover (red, white icon) and never the grey

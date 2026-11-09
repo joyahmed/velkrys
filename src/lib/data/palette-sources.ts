@@ -55,7 +55,7 @@ const folderName = (path: string) => locationLabel(pathLocation(path));
  *
  * ⛔ `places.load()` resolves only when its *slowest* source does, and the drive enumeration
  * is measured in tens of seconds on a machine with a dead network mapping — 21 s and 64 s in
- * `trove.log`, which is why `state/places.svelte.ts` loads its three sources independently.
+ * `velkrys.log`, which is why `state/places.svelte.ts` loads its three sources independently.
  * A palette query that awaits the whole thing finds nothing on the machine for a minute
  * ("the supersearch can't find anything"), and worse, `places.loaded` never latches when the
  * drives fail, so *every* query pays it again. So: ask, wait this long, go with what is there.
@@ -577,7 +577,7 @@ const rankFiles = (
 type NearRoot = { path: string; kind: number; recency: number };
 
 /**
- * The 2.6 provider. First Trove's own name index (plan 21C.1, 21C.2a: the home folder and every
+ * The 2.6 provider. First Velkrys's own name index (plan 21C.1, 21C.2a: the home folder and every
  * fixed drive, every depth, from memory — a root still filling is reported to the footer and
  * walked as before); then, bounded, the near roots the index does not hold (known folders +
  * recents, 4 deep, 250 ms) and — when those give fewer than `FILES_NEAR_ENOUGH` hits — every
@@ -683,7 +683,7 @@ const filesSource = (to: Hand): PaletteSource => ({
 
 /**
  * Mac: ONE quiet row when the search left out privacy-guarded folders the person has not opened
- * in Trove (Desktop, Documents, Downloads…) — reading inside one raises macOS's prompt, so no
+ * in Velkrys (Desktop, Documents, Downloads…) — reading inside one raises macOS's prompt, so no
  * search does it on its own (`core::privacy_folders`). Allow reads each once, so macOS asks now,
  * at a moment the person chose; the palette stays open and asks its sources again
  * (`keepsOpen`). After "Search everywhere", so Enter on an empty list never raises a prompt.

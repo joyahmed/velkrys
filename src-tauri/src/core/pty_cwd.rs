@@ -13,7 +13,7 @@
 //! and it knows the session's kind (a WSL path maps to `\\wsl.localhost\<distro>\…`). The bytes
 //! themselves are passed on unchanged — the emulator ignores an OSC it does not know.
 //!
-//! ⛔ Nothing here makes a shell emit these. Trove never touches `PROMPT_COMMAND`, `precmd` or a
+//! ⛔ Nothing here makes a shell emit these. Velkrys never touches `PROMPT_COMMAND`, `precmd` or a
 //! PowerShell `prompt`; a shell that does not report its folder simply never moves the listing.
 
 use crate::core::pty::SessionKind;
@@ -454,7 +454,11 @@ mod tests {
             let uri = format!("file://{real}");
             assert!(resolve(&osc7(&uri), &SessionKind::Unix, "h").is_some());
             assert_eq!(
-                resolve(&osc7("file:///no/such/trove/dir"), &SessionKind::Unix, "h"),
+                resolve(
+                    &osc7("file:///no/such/velkrys/dir"),
+                    &SessionKind::Unix,
+                    "h"
+                ),
                 None
             );
         }
@@ -462,7 +466,7 @@ mod tests {
         {
             let r = CwdReport::Osc99(real.clone());
             assert!(resolve(&r, &SessionKind::Windows, "h").is_some());
-            let r = CwdReport::Osc99("C:\\no\\such\\trove\\dir".into());
+            let r = CwdReport::Osc99("C:\\no\\such\\velkrys\\dir".into());
             assert_eq!(resolve(&r, &SessionKind::Windows, "h"), None);
         }
     }

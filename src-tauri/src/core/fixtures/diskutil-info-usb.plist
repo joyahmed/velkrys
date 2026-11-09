@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>BusProtocol</key>
+	<string>USB</string>
+	<key>DeviceIdentifier</key>
+	<string>disk4s1</string>
+	<key>DeviceNode</key>
+	<string>/dev/disk4s1</string>
+	<key>FilesystemName</key>
+	<string>MS-DOS FAT32</string>
+	<key>Internal</key>
+	<false/>
+	<key>MountPoint</key>
+	<string>/Volumes/USB STICK</string>
+	<key>NestedKey</key>
+	<dict>
+		<key>Inner</key>
+		<dict>
+			<key>Deep</key>
+			<string>skip me</string>
+		</dict>
+		<key>Other</key>
+		<array>
+			<string>a</string>
+		</array>
+	</dict>
+	<key>Note</key>
+	<string>R&amp;D &lt;1&gt;</string>
+	<key>RemovableMedia</key>
+	<true/>
+	<key>TotalSize</key>
+	<integer>31914983424</integer>
+	<key>VolumeName</key>
+	<string>USB STICK</string>
+	<key>VolumeUUID</key>
+	<string>1C2D3E4F-0000-4000-8000-ABCDEF012345</string>
+	<key>WritableVolume</key>
+	<true/>
+</dict>
+</plist>

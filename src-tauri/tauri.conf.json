@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Trove",
-  "version": "0.1.1",
-  "identifier": "com.joyahmed.trove",
+  "productName": "Velkrys",
+  "version": "0.1.2",
+  "identifier": "com.joyahmed.velkrys",
   "build": {
     "beforeDevCommand": "bun run dev",
     "devUrl": "http://localhost:1420",
@@ -13,7 +13,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "Trove",
+        "title": "Velkrys",
         "width": 1200,
         "height": 760,
         "minWidth": 800,
@@ -48,7 +48,7 @@
   "bundle": {
     "active": true,
     "targets": ["nsis"],
-    "longDescription": "Trove is a fast file explorer for Windows, Mac and Linux. It has real tabs, stays quick in folders with 100,000 files, and has a search that finds files by name at once.",
+    "longDescription": "Velkrys is a fast file explorer for Windows, Mac and Linux. It has real tabs, stays quick in folders with 100,000 files, and has a search that finds files by name at once.",
     "resources": {
       "../LICENSES/": "LICENSES/"
     },

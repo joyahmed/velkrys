@@ -142,7 +142,7 @@ const restartThenUndo = async (label: string, record: UndoRecord) => {
 };
 
 beforeEach(() => {
-  root = mkdtempSync(join(tmpdir(), 'trove-undo-log-'));
+  root = mkdtempSync(join(tmpdir(), 'velkrys-undo-log-'));
   mkdirSync(join(root, '.bin'));
   bin.clear();
   undoJson = null;
@@ -216,7 +216,7 @@ describe('an undo saved before a restart works after it', () => {
     expect(existsSync(path)).toBe(false);
   });
 
-  it('a rename whose old name was taken while Trove was closed is refused, nothing changed', async () => {
+  it('a rename whose old name was taken while Velkrys was closed is refused, nothing changed', async () => {
     const from = file('a.txt');
     const to = join(root, 'b.txt');
     renameSync(from, to);
@@ -285,7 +285,7 @@ describe('what can no longer be undone after a restart says so', () => {
     return (await run()).undo;
   };
 
-  it('a renamed file deleted while Trove was closed', async () => {
+  it('a renamed file deleted while Velkrys was closed', async () => {
     const from = join(root, 'a.txt');
     const to = file('b.txt');
     const undo = await restarted('Rename', { kind: 'rename', from, to }, () => rmSync(to));

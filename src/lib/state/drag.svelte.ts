@@ -49,7 +49,7 @@ const leftWindow = (x: number, y: number, size: { width: number; height: number 
  * A GUESS at the volume a path lives on, for the ghost's label until the backend answers: its
  * drive letter, or its WSL distro; off Windows the deepest listed drive (`/`, `/media/…`,
  * `/Volumes/…`) the path sits under, else the root. ⛔ Never what a drop does: the drive list
- * leaves out a Mac disk image and Linux mounts, so `/Volumes/TroveTest` guessed "the root" and
+ * leaves out a Mac disk image and Linux mounts, so `/Volumes/VelkrysTest` guessed "the root" and
  * a drop onto it moved the file. The drop asks `sameVolume` (the device id) instead.
  */
 export const volumeOf = (

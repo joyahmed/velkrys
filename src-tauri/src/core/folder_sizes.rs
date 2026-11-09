@@ -196,7 +196,8 @@ mod tests {
     }
 
     fn scratch(name: &str) -> Scratch {
-        let dir = std::env::temp_dir().join(format!("trove-fsizes-{name}-{}", std::process::id()));
+        let dir =
+            std::env::temp_dir().join(format!("velkrys-fsizes-{name}-{}", std::process::id()));
         let _ = stdfs::remove_dir_all(&dir);
         stdfs::create_dir_all(&dir).unwrap();
         Scratch(dir)

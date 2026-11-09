@@ -68,7 +68,9 @@ describe('recent folders', () => {
   });
 
   it('on Linux hides a drive spelled with a trailing slash, keeps another-cased folder', () => {
-    vi.stubGlobal('window', { __TROVE_PLATFORM__: { os: 'linux', thisPcLabel: 'This Computer' } });
+    vi.stubGlobal('window', {
+      __VELKRYS_PLATFORM__: { os: 'linux', thisPcLabel: 'This Computer' },
+    });
     try {
       places.drives = [{ path: '/media/alex/USB', label: 'USB', totalBytes: 0, freeBytes: 0 }];
       settings.recentFolders = ['/media/alex/USB/', '/media/alex/usb'];

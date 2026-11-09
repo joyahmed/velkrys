@@ -6,9 +6,12 @@
 // Returns getters so the component stays live.
 import { openTerminal } from '$lib/api/shell';
 import { placeTileMenuFor } from '$lib/data/place-tile-menu';
+import { DRIVE_NOT_RENAMEABLE, renameRefusal } from '$lib/data/drive-menu';
 import { placeSections, type PlaceSection, type PlaceTile } from '$lib/data/place-tiles';
 import { useMenu, type MenuItem } from '$lib/hooks/use-menu.svelte';
 import { actions } from '$lib/state/actions.svelte';
+import { driveRename } from '$lib/state/drive-rename.svelte';
+import { places } from '$lib/state/places.svelte';
 import { recent } from '$lib/state/recent.svelte';
 import { tabs } from '$lib/state/tabs.svelte';
 import { heldByDialog } from '$lib/state/modal.svelte';
@@ -77,6 +80,20 @@ export const usePlaceView = () => {
     if (e.key === 'F5') {
       e.preventDefault();
       void tabs.active.refresh();
+      return;
+    }
+    // F2 on a drive tile edits its label in place, as Explorer's This PC does (the menu's Rename)
+    if (e.key === 'F2' && !e.ctrlKey && !e.altKey && !e.metaKey && !e.shiftKey) {
+      const key = (e.target as HTMLElement | null)?.getAttribute?.(TILE_ATTR);
+      const tile = sections.flatMap((s) => s.tiles()).find((t) => t.key === key);
+      const drive = tile?.kind === 'drive' ? places.driveAt(tile.path) : undefined;
+      if (!drive) return;
+      e.preventDefault();
+      // the menu offers no Rename here either (network, optical, a root that cannot be relabelled)
+      if (drive.canRename !== true) return void actions.notify(DRIVE_NOT_RENAMEABLE);
+      const why = renameRefusal(drive);
+      if (why !== null) actions.notify(why);
+      else driveRename.start(drive, 'tile');
       return;
     }
     const group = e.currentTarget as HTMLElement;

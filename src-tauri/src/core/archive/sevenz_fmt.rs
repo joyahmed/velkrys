@@ -70,7 +70,7 @@ fn from_7z(e: sevenz_rust2::Error) -> Error {
         E::UnsupportedCompressionMethod(m) if m.contains("AES") => password(),
         E::UnsupportedCompressionMethod(m) => Error::new(
             ErrorKind::Unsupported,
-            format!("This archive uses a compression method Trove cannot read yet ({m})"),
+            format!("This archive uses a compression method Velkrys cannot read yet ({m})"),
         ),
         E::Io(e, _) | E::FileOpen(e, _)
             if !matches!(e.kind(), ErrorKind::InvalidData | ErrorKind::UnexpectedEof) =>
@@ -393,7 +393,7 @@ fn entry_for(item: &Item) -> ArchiveEntry {
 }
 
 /// Compress `paths` into one `.7z` (LZMA2, solid) beside the first of them, named like
-/// Compress to ZIP names its zip. Written under a `.<name>.trove-partial` name and renamed into
+/// Compress to ZIP names its zip. Written under a `.<name>.velkrys-partial` name and renamed into
 /// place only when whole, never over an existing file; a cancel or any error deletes the
 /// partial.
 pub(crate) fn compress(paths: &[PathBuf], progress: &mut ArchiveProgress) -> Result<PathBuf> {
@@ -407,7 +407,7 @@ pub(crate) fn compress(paths: &[PathBuf], progress: &mut ArchiveProgress) -> Res
     let partial = Partial {
         path: dir.join(ops::unique_name(
             dir,
-            &format!(".{name}.trove-partial"),
+            &format!(".{name}.velkrys-partial"),
             false,
         )),
         armed: true,
@@ -696,7 +696,7 @@ mod tests {
         let left: Vec<String> = walkdir::WalkDir::new(&dest)
             .into_iter()
             .map(|e| e.unwrap().file_name().to_string_lossy().into_owned())
-            .filter(|n| n.contains("trove-partial"))
+            .filter(|n| n.contains("velkrys-partial"))
             .collect();
         assert!(left.is_empty(), "{left:?}");
         fs::remove_dir_all(root).unwrap();

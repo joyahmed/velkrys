@@ -92,7 +92,7 @@
      tiles — which is what made the old accent outline read as a focus ring bolted onto the tile
      rather than the edge of it. The measurements are in `app.css` beside `--color-selection`.
      ⚠️ `focused` here is the list's roving cursor (`selection.focused`, one path per tab), NOT
-     window focus — Trove has no window-blur selection state, so there are three states to get
+     window focus — Velkrys has no window-blur selection state, so there are three states to get
      right and not four: hover, selected, cursor (selected or not). -->
 <!-- svelte-ignore a11y_click_events_have_key_events, a11y_interactive_supports_focus -->
 <div

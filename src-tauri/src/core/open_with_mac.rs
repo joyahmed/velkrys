@@ -142,7 +142,7 @@ mod tests {
         assert!(apps(Path::new("")).is_empty());
         assert!(apps(Path::new("/tmp/a.zip\u{0}docs/a.txt")).is_empty());
         // a well-formed path to nothing is still a valid URL: no panic, whatever is listed
-        let _ = apps(Path::new("/no/such/dir/trove-missing.txt"));
+        let _ = apps(Path::new("/no/such/dir/velkrys-missing.txt"));
     }
 
     #[test]

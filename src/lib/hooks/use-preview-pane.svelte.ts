@@ -102,7 +102,7 @@ export const usePreviewPane = () => {
       return folderCount;
     },
     close: () => panes.close(),
-    /** "Open": the default app. There is no Open-with command in Trove yet, so no twin button. */
+    /** "Open": the default app. There is no Open-with command in Velkrys yet, so no twin button. */
     open: (entry: FileEntry) => void actions.open(entry),
     /** "Reveal": navigate the tab to the file's folder and select it there (as Gallery does). */
     reveal: async (entry: FileEntry) => {

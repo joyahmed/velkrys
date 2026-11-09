@@ -7,7 +7,7 @@ import type { PtyCwd, PtyExit } from '$lib/types/pty';
 
 /**
  * Spawn a shell at `path` ('' = the user profile); output chunks arrive on `onOutput`.
- * `plain`: Trove's own `/bin/sh` in the home folder, no rc file, prompt `PLAIN_PROMPT`
+ * `plain`: Velkrys's own `/bin/sh` in the home folder, no rc file, prompt `PLAIN_PROMPT`
  * (the Ubuntu uninstall types into nothing else). Refused on Windows.
  */
 export const ptySpawn = (
@@ -23,7 +23,7 @@ export const ptySpawn = (
 };
 
 /** The prompt of a `plain` shell; mirrors `PLAIN_PROMPT` in src-tauri/src/core/pty.rs. */
-export const PLAIN_PROMPT = 'trove-uninstall$ ';
+export const PLAIN_PROMPT = 'velkrys-uninstall$ ';
 
 export const ptyWrite = (sessionId: number, data: string) =>
   invoke<void>('pty_write', { sessionId, data });

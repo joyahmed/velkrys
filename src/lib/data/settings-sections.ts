@@ -126,15 +126,15 @@ const forcedByDefault = () => !storeBuild() && settings.defaultHandler.applied;
 const trayWords = () =>
   onMac() ? 'A menu bar icon' : onLinux() ? 'A system tray icon' : 'A tray icon';
 
-/** The archive kinds "Open archives inside Trove" opens, in words. RAR only in a build that reads
+/** The archive kinds "Open archives inside Velkrys" opens, in words. RAR only in a build that reads
  * it (the cargo feature `rar`), the same switch `isArchiveName` uses. */
 export const archivesInsideWords = (rar: boolean = readsRar()): string =>
   `Double-click a ${rar ? '.zip, .7z, .tar or .rar' : '.zip, .7z or .tar'} to browse it like a folder`;
 
-const FORCED_NOTE = 'On while Trove is the default file manager';
+const FORCED_NOTE = 'On while Velkrys is the default file manager';
 
 /**
- * Mac: let search into the personal folders (Desktop, Documents…) not opened in Trove yet. Allow
+ * Mac: let search into the personal folders (Desktop, Documents…) not opened in Velkrys yet. Allow
  * reads each once, so macOS asks now — never in the middle of a search. Empty elsewhere.
  */
 export const guardedAllowRows = (mac = onMac()): SettingRow[] => {
@@ -346,7 +346,7 @@ export const indexBuiltInSkips = (mac = onMac(), linux = onLinux()): string[] =>
 export const forgetIndex = async (mac = onMac()) => {
   const ok = await confirm.ask({
     title: 'Forget the search index',
-    message: `The saved list of file names is deleted from this ${mac ? 'Mac' : 'PC'}. Search still works; the index builds the list again the next time Trove starts.`,
+    message: `The saved list of file names is deleted from this ${mac ? 'Mac' : 'PC'}. Search still works; the index builds the list again the next time Velkrys starts.`,
     okLabel: 'Forget',
     danger: true,
   });
@@ -449,7 +449,7 @@ export const settingsSections: SettingsSection[] = [
       {
         kind: 'radio',
         key: 'start-place',
-        label: 'Open Trove to',
+        label: 'Open Velkrys to',
         description: 'What a new tab and a launch without a folder show',
         options: [
           { key: 'home', label: 'Home' },
@@ -481,7 +481,7 @@ export const settingsSections: SettingsSection[] = [
       {
         kind: 'toggle',
         key: 'archives-open-inside',
-        label: 'Open archives inside Trove',
+        label: 'Open archives inside Velkrys',
         description: archivesInsideWords(),
         get: () => settings.archivesOpenInside,
         set: (on) => (settings.archivesOpenInside = on),
@@ -530,8 +530,8 @@ export const settingsSections: SettingsSection[] = [
           key: 'default-handler',
           label: 'Use as default file manager',
           description: onWindows()
-            ? 'Win+E, folder double-clicks and "Show in folder" open Trove. Undo any time.'
-            : 'Folder double-clicks and "Show in folder" open Trove. Undo any time.',
+            ? 'Win+E, folder double-clicks and "Show in folder" open Velkrys. Undo any time.'
+            : 'Folder double-clicks and "Show in folder" open Velkrys. Undo any time.',
           get: () => defaultHandler.checked,
           set: () => defaultHandler.toggle(),
           disabled: () => defaultHandler.busy,
@@ -633,7 +633,7 @@ export const settingsSections: SettingsSection[] = [
               kind: 'radio',
               key: 'accent-source',
               label: 'Accent colour',
-              description: "Sapphire is Trove's own; Match system uses your Windows accent",
+              description: "Sapphire is Velkrys's own; Match system uses your Windows accent",
               options: [
                 { key: 'sapphire', label: 'Sapphire' },
                 { key: 'system', label: 'Match system' },

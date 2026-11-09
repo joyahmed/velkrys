@@ -146,7 +146,7 @@ mod tests {
         }
     }
     fn scratch(tag: &str) -> Scratch {
-        let dir = std::env::temp_dir().join(format!("trove-17-{tag}-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("velkrys-17-{tag}-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         Scratch(dir)
@@ -184,7 +184,7 @@ mod tests {
             Some(&info(&[
                 ("CFBundleDisplayName", "Fake Display"),
                 ("CFBundleName", "FakeName"),
-                ("CFBundleIdentifier", "org.trove.fake"),
+                ("CFBundleIdentifier", "org.velkrys.fake"),
             ])),
         );
         // nested helper apps: never listed — one sits at depth 2, inside the walk's reach, so
@@ -199,7 +199,7 @@ mod tests {
         // two bundles share one id and one CFBundleName; listed by their own file names
         let same_id = [
             ("CFBundleName", "Twin"),
-            ("CFBundleIdentifier", "org.trove.twin"),
+            ("CFBundleIdentifier", "org.velkrys.twin"),
         ];
         bundle(&root.join("Twin.app"), Some(&info(&same_id)));
         bundle(&utilities.join("Twin Beta.app"), Some(&info(&same_id)));

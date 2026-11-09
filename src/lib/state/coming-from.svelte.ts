@@ -1,21 +1,21 @@
 // "I'm coming from" (plan 19): which system's WORDS (Recycle Bin or Trash, Properties or Get
-// Info, This PC / This Mac / This Computer) Trove uses. 'native' = the OS Trove runs on.
+// Info, This PC / This Mac / This Computer) Velkrys uses. 'native' = the OS Velkrys runs on.
 // ⛔ Style only. The host — the physical keyboard, paths, the real bin — stays `onMac()` /
 // `onWindows()` in `platform.ts`. Two axes, never one boolean.
 // ⛔ Imports only `platform-facts.ts`: importing `platform.ts` or `settings.svelte.ts` here
 // would close an import cycle (settings → custom-commands → platform → here).
-import { injected, type TrovePlatform } from '$lib/utils/platform-facts';
+import { injected, type VelkrysPlatform } from '$lib/utils/platform-facts';
 
 export type OsStyle = 'windows' | 'mac' | 'linux';
 export type ComingFrom = 'native' | OsStyle;
 
 /** localStorage key holding the last choice, so a new window paints the right words before its
  * settings are read. Written by `useComingFrom`. */
-export const COMING_FROM_STORAGE_KEY = 'trove-coming-from';
+export const COMING_FROM_STORAGE_KEY = 'velkrys-coming-from';
 
-/** The style of the OS Trove runs on. Nothing injected (tests, a plain browser) → Windows,
+/** The style of the OS Velkrys runs on. Nothing injected (tests, a plain browser) → Windows,
  * like every switch in `platform.ts`. */
-export const hostStyle = (platform: TrovePlatform | undefined = injected()): OsStyle =>
+export const hostStyle = (platform: VelkrysPlatform | undefined = injected()): OsStyle =>
   platform?.os === 'macos' ? 'mac' : platform?.os === 'linux' ? 'linux' : 'windows';
 
 /** A stored value as a choice; anything else is 'native'. */

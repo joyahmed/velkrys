@@ -166,7 +166,7 @@ export const fromRecorded = (
       if (!mac) {
         return {
           refused:
-            "Trove's own shortcuts cannot use the Windows (Super) key: the system keeps it. Use Ctrl or Alt.",
+            "Velkrys's own shortcuts cannot use the Windows (Super) key: the system keeps it. Use Ctrl or Alt.",
         };
       }
       mods.add('Ctrl');

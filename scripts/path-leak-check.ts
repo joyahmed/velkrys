@@ -1,6 +1,6 @@
 // Fails a release build that still carries a build-machine path (plan 22.0.4).
 // Counts the repo folder and the home folder inside a built binary, in both slash forms.
-// Use:  bun scripts/path-leak-check.ts src-tauri/target/release/trove.exe
+// Use:  bun scripts/path-leak-check.ts src-tauri/target/release/velkrys.exe
 // Exit 0 when every count is 0, exit 1 otherwise.
 //
 // Why a plain `cargo build --release` fails it: without the `tauri/custom-protocol` feature

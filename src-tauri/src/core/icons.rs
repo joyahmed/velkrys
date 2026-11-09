@@ -1213,7 +1213,7 @@ mod tests {
     #[test]
     fn an_svg_only_app_icon_is_served_as_svg_and_a_png_wins_when_both_exist() {
         use super::super::apps_linux::{desktop_icon, theme_chain, DesktopEntry};
-        let dir = std::env::temp_dir().join(format!("trove-svg-serve-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("velkrys-svg-serve-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         let icons = dir.join("icons");
         let put = |rel: &str, body: &[u8]| {
@@ -1301,7 +1301,7 @@ mod tests {
     #[cfg(unix)]
     #[test]
     fn a_symlinked_thumb_is_cached_by_its_target() {
-        let dir = std::env::temp_dir().join(format!("trove-linkkey-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("velkrys-linkkey-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         let (a, b, link) = (dir.join("a.png"), dir.join("b.png"), dir.join("l.png"));
@@ -1420,7 +1420,7 @@ mod tests {
     #[cfg(windows)]
     #[test]
     fn the_memory_cache_returns_the_same_bytes_twice() {
-        let dir = std::env::temp_dir().join(format!("trove-icons-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("velkrys-icons-{}", std::process::id()));
         let a = icon_png_cached(&dir, "ext/txt", 16).unwrap();
         let b = icon_png_cached(&dir, "ext/txt", 16).unwrap();
         assert!(Arc::ptr_eq(&a, &b));
@@ -1433,7 +1433,7 @@ mod tests {
         // What a folder of 500 same-type files does the first time it is listed. A key of its
         // own: the memory cache is process-global, so sharing `ext/txt` with the test above
         // would hand whichever ran second a cache hit and no disk write.
-        let dir = std::env::temp_dir().join(format!("trove-icons-race-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("velkrys-icons-race-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         // ⛔ Off Windows there is no shell to draw `ext/log` (`shell_icon_rgba` is a `None`
         // stub), so every racer got `None` and the test died at its first `expect`. The race is
@@ -1499,7 +1499,7 @@ mod tests {
 
     /// A folder with one 300 x 200 PNG in it, last changed an hour ago (so it has settled).
     fn thumb_fixture(tag: &str) -> (std::path::PathBuf, std::path::PathBuf) {
-        let dir = std::env::temp_dir().join(format!("trove-icons-{tag}-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("velkrys-icons-{tag}-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         let photo = dir.join("photo.png");
@@ -1576,7 +1576,7 @@ mod tests {
     #[cfg(not(windows))]
     #[test]
     fn off_windows_a_photo_thumbnail_is_decoded_once_and_cached() {
-        let dir = std::env::temp_dir().join(format!("trove-icons-decode-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("velkrys-icons-decode-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         let photo = dir.join("photo.png");
@@ -1607,7 +1607,7 @@ mod tests {
     #[cfg(not(windows))]
     #[test]
     fn off_windows_small_thumbnails_come_from_the_256_and_a_broken_photo_is_tried_once() {
-        let dir = std::env::temp_dir().join(format!("trove-icons-derive-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("velkrys-icons-derive-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         let photo = dir.join("photo.png");
@@ -1674,7 +1674,7 @@ mod tests {
     #[cfg(not(windows))]
     #[test]
     fn a_half_written_photo_finished_under_the_same_mtime_is_drawn() {
-        let dir = std::env::temp_dir().join(format!("trove-icons-half-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("velkrys-icons-half-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         let rgb: Vec<u8> = (0..320u32 * 240)
@@ -1800,7 +1800,7 @@ mod tests {
 
     #[test]
     fn an_atomic_write_replaces_the_file_whole_and_leaves_no_temp_behind() {
-        let dir = std::env::temp_dir().join(format!("trove-icons-atomic-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("velkrys-icons-atomic-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         let file = dir.join("file_x.png");
@@ -1838,7 +1838,7 @@ mod tests {
 
     #[test]
     fn pruning_a_real_cache_folder_removes_the_overflow_and_dead_temp_files() {
-        let dir = std::env::temp_dir().join(format!("trove-icons-prune-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("velkrys-icons-prune-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         let sub = dir.join("icons").join("thumb").join("96");
         std::fs::create_dir_all(&sub).unwrap();

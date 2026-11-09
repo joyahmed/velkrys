@@ -66,13 +66,13 @@ pub fn recycle_empty() -> Result<(), String> {
     r.map(|_| ())
 }
 
-/// Hand a shell folder Trove does not show (`::{CLSID}` other than This PC and the Recycle
+/// Hand a shell folder Velkrys does not show (`::{CLSID}` other than This PC and the Recycle
 /// Bin, or a `shell:` name) to Explorer, which still knows every one of them.
 #[cfg(windows)]
 #[tauri::command(async)]
 pub fn open_in_explorer(arg: String) -> Result<(), String> {
     if is_recycle_bin_arg(&arg) {
-        return Err("The Recycle Bin is Trove's own place; nothing to hand to Explorer".into());
+        return Err("The Recycle Bin is Velkrys's own place; nothing to hand to Explorer".into());
     }
     std::process::Command::new("explorer.exe")
         .arg(&arg)
@@ -88,7 +88,7 @@ pub fn open_in_explorer(arg: String) -> Result<(), String> {
 #[tauri::command(async)]
 pub fn open_in_explorer(arg: String) -> Result<(), String> {
     if is_recycle_bin_arg(&arg) {
-        return Err("The Recycle Bin is Trove's own place; nothing to hand to Explorer".into());
+        return Err("The Recycle Bin is Velkrys's own place; nothing to hand to Explorer".into());
     }
     Err(format!(
         "{arg}: Windows shell folders cannot be opened on this system"

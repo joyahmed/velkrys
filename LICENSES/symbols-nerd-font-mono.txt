@@ -5,7 +5,7 @@ Source: Nerd Fonts v3.5.1 release asset NerdFontsSymbolsOnly.zip
 File: SymbolsNerdFontMono-Regular.ttf, subset and converted to WOFF2 with fontTools 4.60.2.
 
 Removed: the Font Logos set (U+F300-F385, 134 glyphs named linux-*). Upstream lists its license
-as "unlicensed", so Trove does not ship it; those code points fall back to other fonts. No
+as "unlicensed", so Velkrys does not ship it; those code points fall back to other fonts. No
 other glyph was removed or changed (FontForge's private PfEd table was dropped by the subsetter).
 
 The Nerd Fonts project is under the MIT License below. The glyphs come from the upstream icon

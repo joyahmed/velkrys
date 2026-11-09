@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 const plist = readFileSync('src-tauri/Info.plist', 'utf8');
 
-// G.68: macOS shows these strings in its "Trove would like to access..." prompts. Without them the
+// G.68: macOS shows these strings in its "Velkrys would like to access..." prompts. Without them the
 // prompt has no explanation text.
 const USAGE_KEYS = [
   'NSDocumentsFolderUsageDescription',

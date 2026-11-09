@@ -92,7 +92,7 @@ fn icon_busy_response() -> tauri::http::Response<Vec<u8>> {
 #[cfg(any(target_os = "linux", test))]
 const APP_ORIGIN: &str = "tauri://localhost";
 
-/// The value for `Access-Control-Allow-Origin`: the request's `Origin` when it is Trove's own
+/// The value for `Access-Control-Allow-Origin`: the request's `Origin` when it is Velkrys's own
 /// page, otherwise nothing (no header, so the browser refuses the read).
 #[cfg(any(target_os = "linux", test))]
 fn cors_allowed_origin(origin: Option<&str>) -> Option<&'static str> {
@@ -130,7 +130,7 @@ fn preview_response(
         builder = builder.header("Content-Range", cr);
     }
     // Linux plays media from a blob the page `fetch`es here (WebKitGTK's player cannot load a
-    // custom scheme, `media-src.ts`), and the page's origin is not this one. Only Trove's own
+    // custom scheme, `media-src.ts`), and the page's origin is not this one. Only Velkrys's own
     // page may read the answer, never any other origin.
     #[cfg(target_os = "linux")]
     {
@@ -187,6 +187,8 @@ pub fn run() {
                 let _ = app.emit(LAUNCH_EVENT, launch);
             }
         }))
+        // Third: after the log, after a second launch has exited, before anything reads settings.
+        .plugin(core::from_trove::plugin()) // rename-keep
         .manage(commands::tray::Residency(std::sync::Mutex::new(None)))
         .manage(commands::launch::LaunchGate::default())
         .manage(core::index::Index::default())
@@ -207,7 +209,7 @@ pub fn run() {
             #[cfg(target_os = "linux")]
             core::reduced_motion::watch(app.handle());
             // Old open-inside-an-archive copies (plan 16 Phase 4): only those older than 7
-            // days and untouched since Trove wrote them; a copy the person changed is kept.
+            // days and untouched since Velkrys wrote them; a copy the person changed is kept.
             if let Some(root) = commands::archive::open_cache_root(app.handle()) {
                 std::thread::spawn(move || {
                     core::archive::index::clean_open_cache(
@@ -352,7 +354,7 @@ pub fn run() {
         // What This PC is called on this OS, set on `window` before any page script runs
         // (plan 10, B.2.3): every window, including detached tabs and the palette.
         .plugin(
-            tauri::plugin::Builder::<_, ()>::new("trove-platform")
+            tauri::plugin::Builder::<_, ()>::new("velkrys-platform")
                 .js_init_script(core::shell::platform_init_script())
                 .build(),
         )
@@ -436,6 +438,9 @@ pub fn run() {
             commands::startup_timing::startup_painted,
             commands::fs::compress_entries,
             commands::shell::drives,
+            commands::drive::drive_details,
+            commands::drive::rename_drive,
+            commands::drive::eject_drive,
             commands::shell::known_folders,
             commands::shell::user_profile,
             commands::shell::one_drive_root,
@@ -562,7 +567,7 @@ fn with_app_menu<R: tauri::Runtime>(builder: tauri::Builder<R>) -> tauri::Builde
 
 /// What the run loop's end writes: a move still in the debounce, and the index's unsaved
 /// changes so the next start loads them instead of walking. Also called before an update
-/// installs (`commands::updater`): on Windows the installer ends Trove with
+/// installs (`commands::updater`): on Windows the installer ends Velkrys with
 /// `std::process::exit`, which never reaches the run loop's end.
 pub(crate) fn save_on_the_way_out<R: tauri::Runtime>(app: &tauri::AppHandle<R>) {
     commands::session::save_all_bounds(app);

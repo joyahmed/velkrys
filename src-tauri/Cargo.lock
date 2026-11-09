@@ -4901,49 +4901,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "trove"
-version = "0.1.1"
-dependencies = [
- "arboard",
- "block2",
- "flate2",
- "gtk",
- "image",
- "jpeg-decoder",
- "libc",
- "log",
- "lzma-rust2",
- "memchr",
- "notify",
- "objc2",
- "objc2-core-foundation",
- "objc2-core-graphics",
- "objc2-foundation",
- "objc2-quick-look-thumbnailing",
- "png 0.17.16",
- "portable-pty",
- "serde",
- "serde_json",
- "sevenz-rust2",
- "tar",
- "tauri",
- "tauri-build",
- "tauri-plugin-global-shortcut",
- "tauri-plugin-log",
- "tauri-plugin-opener",
- "tauri-plugin-single-instance",
- "tauri-plugin-updater",
- "trash",
- "unrar",
- "walkdir",
- "windows 0.61.3",
- "windows-core 0.61.2",
- "windows-sys 0.60.2",
- "zip 2.4.2",
- "zstd",
-]
-
-[[package]]
 name = "try-lock"
 version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5101,6 +5058,49 @@ dependencies = [
  "js-sys",
  "serde_core",
  "wasm-bindgen",
+]
+
+[[package]]
+name = "velkrys"
+version = "0.1.2"
+dependencies = [
+ "arboard",
+ "block2",
+ "flate2",
+ "gtk",
+ "image",
+ "jpeg-decoder",
+ "libc",
+ "log",
+ "lzma-rust2",
+ "memchr",
+ "notify",
+ "objc2",
+ "objc2-core-foundation",
+ "objc2-core-graphics",
+ "objc2-foundation",
+ "objc2-quick-look-thumbnailing",
+ "png 0.17.16",
+ "portable-pty",
+ "serde",
+ "serde_json",
+ "sevenz-rust2",
+ "tar",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-global-shortcut",
+ "tauri-plugin-log",
+ "tauri-plugin-opener",
+ "tauri-plugin-single-instance",
+ "tauri-plugin-updater",
+ "trash",
+ "unrar",
+ "walkdir",
+ "windows 0.61.3",
+ "windows-core 0.61.2",
+ "windows-sys 0.60.2",
+ "zip 2.4.2",
+ "zstd",
 ]
 
 [[package]]

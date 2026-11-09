@@ -3,7 +3,7 @@
     ████ ARCHIVE — NOT THE SOURCE OF TRUTH. DO NOT RENDER THIS INTO src-tauri/icons. ████
 
     This file is the REJECTED notched-box mark, kept only as a record of what was tried,
-    what it cost, and why it lost. Trove's shipping icon is the FOLDER + GEM, and its
+    what it cost, and why it lost. Velkrys's shipping icon is the FOLDER + GEM, and its
     source of truth is docs/brand/icon.py — a Pillow script, not an SVG. Regenerate
     assets from that file; the recipe and the build-staleness warning live in its header.
 
@@ -36,11 +36,11 @@
     mark was still the shipping one. Read "shipped" below as "shipped, then reverted".
     ─────────────────────────────────────────────────────────────────────────────────────
 
-    Trove's mark: a closed keep — one solid mass with one slot cut from its top edge.
+    Velkrys's mark: a closed keep — one solid mass with one slot cut from its top edge.
 
     Regenerate every app asset from this file:
-      (render this SVG to docs/brand/trove-icon-1024.png at 1024x1024, transparent)
-      bunx tauri icon docs/brand/trove-icon-1024.png -o src-tauri/icons
+      (render this SVG to docs/brand/velkrys-icon-1024.png at 1024x1024, transparent)
+      bunx tauri icon docs/brand/velkrys-icon-1024.png -o src-tauri/icons
       (delete src-tauri/icons/android and src-tauri/icons/ios — this repo ships Windows only)
       (and re-cut static/favicon.png at 128x128 from the same master)
 
@@ -54,7 +54,7 @@
     and leave alpha untouched. That keeps a tone edit to exactly one visual variable.
 
     THEN FORCE THE WINDOWS RESOURCE TO REBUILD, OR YOU WILL SHIP THE OLD ICON:
-      rm -rf src-tauri/target/*/build/trove-* src-tauri/target/release/trove.exe
+      rm -rf src-tauri/target/*/build/velkrys-* src-tauri/target/release/velkrys.exe
       bun run build:exe
 
     tauri_build::build() emits rerun-if-changed for tauri.conf.json and capabilities and
@@ -63,10 +63,10 @@
     alone and cargo keeps the stale build-script output (out/resource.lib, which has the
     previous icon baked in) and relinks it into a brand-new binary. The build is green, the
     hashes agree, and the exe carries the old mark. This has already shipped once (c14d2c9).
-    `cargo clean -p trove` is NOT enough — it leaves target/*/build/trove-*/out/resource.lib
+    `cargo clean -p velkrys` is NOT enough — it leaves target/*/build/velkrys-*/out/resource.lib
     and the old exe in place. Delete those paths by hand, as above.
 
-    Then prove it from the artefact, never from the PNGs on disk: parse trove.exe's PE
+    Then prove it from the artefact, never from the PNGs on disk: parse velkrys.exe's PE
     resource directory, pull the RT_ICON entries, and check they are byte-identical to
     src-tauri/icons/icon.ico's entries. The tray icon is separate — tray.rs embeds
     icons/32x32.png via include_image!, which stores it decoded, so look for that file's

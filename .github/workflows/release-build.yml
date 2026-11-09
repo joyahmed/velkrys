@@ -102,7 +102,7 @@ jobs:
 
       - name: No build-machine path in the binary (plan 22.0.4)
         shell: bash
-        run: bun scripts/path-leak-check.ts src-tauri/target/release/trove.exe
+        run: bun scripts/path-leak-check.ts src-tauri/target/release/velkrys.exe
 
       - name: Size and SHA-256
         shell: bash
@@ -113,7 +113,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: trove-windows-x64
+          name: velkrys-windows-x64
           path: |
             src-tauri/target/release/bundle/nsis/*-setup.exe
             src-tauri/target/release/bundle/nsis/SHA256SUMS.txt
@@ -166,7 +166,7 @@ jobs:
 
       - name: No build-machine path in the binary (plan 22.0.4)
         shell: bash
-        run: bun scripts/path-leak-check.ts src-tauri/target/release/trove
+        run: bun scripts/path-leak-check.ts src-tauri/target/release/velkrys
 
       # Plan 22.3.1 proof in one call: glibc floor <= 2.35 (this runner), ldd 0 "not found",
       # desktop-file-validate exit 0 (as G.65), control fields present, one AppStream file.
@@ -182,7 +182,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: trove-linux-x64
+          name: velkrys-linux-x64
           path: |
             src-tauri/target/release/bundle/deb/*.deb
             src-tauri/target/release/bundle/appimage/*.AppImage
@@ -226,7 +226,7 @@ jobs:
 
       - name: No build-machine path in the binary (plan 22.0.4)
         shell: bash
-        run: bun scripts/path-leak-check.ts src-tauri/target/universal-apple-darwin/release/trove
+        run: bun scripts/path-leak-check.ts src-tauri/target/universal-apple-darwin/release/velkrys
 
       - name: Check signature, size and SHA-256
         run: |
@@ -241,7 +241,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: trove-macos-universal
+          name: velkrys-macos-universal
           path: |
             src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg
             src-tauri/target/universal-apple-darwin/release/bundle/SHA256SUMS.txt

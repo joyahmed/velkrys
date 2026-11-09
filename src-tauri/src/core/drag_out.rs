@@ -1,4 +1,4 @@
-//! Drag OUT of the window, one native drag per OS, so a second Trove window, the system file
+//! Drag OUT of the window, one native drag per OS, so a second Velkrys window, the system file
 //! manager, a browser's upload box or an email client can take the drop. The in-app drag hands
 //! over here the moment the pointer leaves the window, while the button is still down.
 //!
@@ -490,7 +490,7 @@ mod imp {
         // SAFETY: NSObject has no subclassing requirements and `DragSource` has no Drop.
         #[unsafe(super(NSObject))]
         #[thread_kind = MainThreadOnly]
-        #[name = "TroveDragSource"]
+        #[name = "VelkrysDragSource"]
         #[ivars = Ivars]
         struct DragSource;
 

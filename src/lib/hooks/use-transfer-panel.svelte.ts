@@ -78,7 +78,7 @@ const extractShortTitle = (job: TransferJob, what: string) => {
       : `Extracted ${what}, but it stopped early`;
   }
   if (reasons.some((r) => /password/i.test(r)))
-    return `${name} needs a password - Trove can't open protected archives yet`;
+    return `${name} needs a password - Velkrys can't open protected archives yet`;
   return `Could not extract ${name}`;
 };
 

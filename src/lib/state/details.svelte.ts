@@ -2,6 +2,7 @@
 // running contents count for a folder), the totals of several, or the current folder itself
 // when nothing is selected — Explorer's rule. The pane's hook calls `sync()` from an effect
 // over the selection and the tab, and `attach()` while it is mounted.
+import { driveDetails } from '$lib/api/drive';
 import {
   cancelFolderTotals,
   fileProps,
@@ -10,10 +11,13 @@ import {
   startFolderTotals,
 } from '$lib/api/props';
 import { listing } from '$lib/state/listing.svelte';
+import { panes } from '$lib/state/panes.svelte';
+import { places } from '$lib/state/places.svelte';
 import { selection } from '$lib/state/selection.svelte';
 import { tabs } from '$lib/state/tabs.svelte';
 import type { FileEntry } from '$lib/types/fs';
 import type { FolderTotals, Props } from '$lib/types/props';
+import type { DriveDetails } from '$lib/types/shell';
 import { isArchivePath } from '$lib/utils/archive-location';
 
 /**
@@ -66,6 +70,11 @@ class DetailsState {
   error = $state<string | null>(null);
   /** the shown item is inside an archive: read-only, so the pane offers no attribute boxes */
   inArchive = $state(false);
+
+  /** the drive being described: the volume's own numbers, never a walk of its files (plan 23.8) */
+  drive = $state<DriveDetails | null>(null);
+  /** a drive the menu's Properties asked for, and the selection and folder it was asked in */
+  #override: { path: string; count: number; focused: unknown; location: unknown } | null = null;
 
   /** running folder-count jobs → the totals they add into */
   #jobs = $state<Record<number, true>>({});
@@ -121,10 +130,20 @@ class DetailsState {
     this.#base = { files: 0, folders: 0, bytes: 0, sizeOnDisk: 0, notCounted: 0 };
     this.error = null;
     this.inArchive = false;
+    // a new selection or folder ends a Properties request from a menu
+    if (
+      this.#override &&
+      (this.#override.count !== selection.count ||
+        this.#override.focused !== selection.focused ||
+        this.#override.location !== tabs.active.location)
+    )
+      this.#override = null;
+    const asked = this.#override?.path ?? null;
     const selected = listing.rows.filter((e) => selection.has(e.path));
     this.count = selected.length;
 
-    if (selected.length > 1) {
+    if (asked === null && selected.length > 1) {
+      this.drive = null;
       this.target = 'many';
       this.props = null;
       this.entry = null;
@@ -132,9 +151,14 @@ class DetailsState {
       return;
     }
 
-    const path = selected[0]?.path ?? tabs.active.path;
+    const path = asked ?? selected[0]?.path ?? tabs.active.path;
     this.target = selected.length === 1 ? 'one' : 'none';
     this.entry = selected[0] ?? null;
+    if (path && places.driveAt(path)) {
+      await this.#describeDrive(path, gen);
+      return;
+    }
+    this.drive = null;
     if (!path) {
       this.props = null;
       this.totals = null;
@@ -162,6 +186,36 @@ class DetailsState {
       if (gen === this.#generation) this.loading = false;
     }
   }
+
+  /** A drive root: the volume's own numbers. No `fileProps`, no folder count. */
+  async #describeDrive(path: string, gen: number) {
+    this.props = null;
+    this.totals = null;
+    this.loading = true;
+    try {
+      const d = await driveDetails(path);
+      if (gen !== this.#generation) return;
+      this.drive = d;
+    } catch (e) {
+      if (gen !== this.#generation) return;
+      this.drive = null;
+      this.error = String(e);
+    } finally {
+      if (gen === this.#generation) this.loading = false;
+    }
+  }
+
+  /** Properties on a drive (sidebar, tile): open the pane on that drive until the selection moves. */
+  showDrive = (path: string) => {
+    this.#override = {
+      path,
+      count: selection.count,
+      focused: selection.focused,
+      location: tabs.active.location,
+    };
+    panes.open = 'details';
+    void this.sync();
+  };
 
   /** A multi-selection: files add their sizes at once; folders are counted in the background. */
   #sumSelection(selected: FileEntry[]) {
@@ -253,6 +307,8 @@ class DetailsState {
     this.#generation++;
     this.#cancelJobs();
     this.props = null;
+    this.drive = null;
+    this.#override = null;
     this.entry = null;
     this.totals = null;
     this.target = 'none';

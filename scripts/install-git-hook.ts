@@ -14,7 +14,9 @@ try {
   );
   for (const name of HOOKS) {
     const target = join(hooks, name);
-    if (existsSync(target) && !readFileSync(target, 'utf8').includes(`Trove ${name}`)) {
+    const installed = existsSync(target) ? readFileSync(target, 'utf8') : null;
+    const ours = [`Velkrys ${name}`, `Trove ${name}`]; // rename-keep: hooks from before the rename
+    if (installed !== null && !ours.some((mark) => installed.includes(mark))) {
       console.log(`install-git-hook: ${target} is not ours, left alone`);
       continue;
     }

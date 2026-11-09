@@ -1,7 +1,7 @@
 // The list's right-click menu: which item set (row or background), opened at the pointer,
 // with Explorer's select-on-right-click rule. One instance per list; `useMenu` owns
 // open/close (outside click, Escape) and the on-screen clamp. On Windows the menu opens with
-// Trove's items at once and Windows' own arrive into the same menu (plan 08 D.1).
+// Velkrys's items at once and Windows' own arrive into the same menu (plan 08 D.1).
 import { backgroundMenuFor, rowMenuFor } from '$lib/data/context-menus';
 import { columnsMenu } from '$lib/data/menus';
 import { SHELL_SLOT, fillSlot } from '$lib/data/shell-menu';

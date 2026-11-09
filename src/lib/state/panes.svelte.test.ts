@@ -22,6 +22,30 @@ describe('panes.toggle(preview)', () => {
     expect(notices.list).toHaveLength(0);
   });
 
+  it('closes a showing preview at 800px when the sidebar is off (it takes no width)', () => {
+    setWidth(800);
+    settings.navPane = false;
+    try {
+      panes.open = 'preview';
+      panes.toggle('preview');
+      expect(panes.open).toBeNull();
+      expect(notices.list).toHaveLength(0);
+    } finally {
+      settings.navPane = true;
+    }
+  });
+
+  it('maxWidth reserves no sidebar width when the sidebar is off', () => {
+    const on = panes.maxWidth;
+    settings.navPane = false;
+    try {
+      expect(panes.maxWidth).toBe(`max(200px, calc(100vw - 360px))`);
+      expect(on).not.toBe(panes.maxWidth);
+    } finally {
+      settings.navPane = true;
+    }
+  });
+
   it('opens the preview from closed even on a narrow window', () => {
     setWidth(800);
     panes.toggle('preview');

@@ -5,18 +5,18 @@ import type { DirListing, SyncStatus } from '$lib/types/fs';
 export const readDir = (path: string) => invoke<DirListing>('read_dir', { path });
 /**
  * The palette preview's item count, or null when the folder may not be read without asking: a
- * Mac privacy-guarded folder not opened in Trove yet, a network share (no prompt, no listing).
+ * Mac privacy-guarded folder not opened in Velkrys yet, a network share (no prompt, no listing).
  */
 export const paletteFolderCount = (path: string) =>
   invoke<number | null>('palette_folder_count', { path });
 /**
- * Mac: the privacy-guarded folders (Desktop, Documents, Downloads…) not opened in Trove yet,
+ * Mac: the privacy-guarded folders (Desktop, Documents, Downloads…) not opened in Velkrys yet,
  * which searches leave out. Empty off a Mac.
  */
 export const unopenedGuardedFolders = () => invoke<string[]>('unopened_guarded_folders');
 /**
  * "Not searched … — Allow": read each folder once so macOS asks for it now, and remember the ones
- * it let Trove into. Resolves to the folders now opened (a refused one is left out).
+ * it let Velkrys into. Resolves to the folders now opened (a refused one is left out).
  */
 export const allowGuardedFolders = (paths: string[]) =>
   invoke<string[]>('allow_guarded_folders', { paths });
@@ -48,7 +48,7 @@ export const createFile = (dir: string, baseName: string, ext: string) =>
  * stick): NOTHING was deleted. Only the backend can tell (core/ops.rs `trash`), so callers ask
  * this error, never the path. `String(e)` is the backend's sentence, like every other failure.
  */
-/** `denied`: macOS refused Trove the Trash (Finder's Apple Events denied, and the file manager's
+/** `denied`: macOS refused Velkrys the Trash (Finder's Apple Events denied, and the file manager's
  * move failed too — core/trash_mac.rs). Items of the batch not in `paths` already went to it. */
 export type NoBinReason = 'noBin' | 'off' | 'tooBig' | 'denied';
 /** What Rust rejects `trash_entries` with when there is no bin (`TrashError::NoBin`); any other
@@ -112,6 +112,6 @@ export type ElevatedOp =
   | { kind: 'createFolder'; dir: string }
   | { kind: 'delete'; paths: string[] };
 
-/** Runs `op` in a copy of Trove started through UAC that does only that and exits (plan 05 5.6).
+/** Runs `op` in a copy of Velkrys started through UAC that does only that and exits (plan 05 5.6).
  * Answers the new path (rename, new folder) or '' (delete). */
 export const retryElevated = (op: ElevatedOp) => invoke<string>('retry_elevated', { op });

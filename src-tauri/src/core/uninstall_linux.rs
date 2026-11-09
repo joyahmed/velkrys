@@ -3,12 +3,12 @@
 //! The owner comes from where the `.desktop` file lives and from `dpkg -S`, never from the
 //! file's text: a Flatpak export (its link resolves into `flatpak/app/<app-id>/`) → that app id;
 //! snapd's folder → the snap name in the file name; a file in the person's own
-//! `~/.local/share/applications` → no package (Trove never deletes it); the rest → the one
+//! `~/.local/share/applications` → no package (Velkrys never deletes it); the rest → the one
 //! package `dpkg -S` names for that exact path.
 //!
 //! The hand-off is never silent. GNOME Software on `PATH` → `gnome-software --details=<id>`,
 //! where the person presses Uninstall and polkit asks. Else the removal command is TYPED, not
-//! run, into a fresh shell in Trove's terminal (`state/uninstall.svelte.ts`); Enter is the
+//! run, into a fresh shell in Velkrys's terminal (`state/uninstall.svelte.ts`); Enter is the
 //! person's, `sudo` asks the password, apt lists what it removes and asks Y/n.
 //!
 //! ⛔ Every word of a command is allow-listed here (a package, snap or Flatpak name rule), so a
@@ -43,7 +43,7 @@ pub enum Owner {
     Deb(String),
     Snap(String),
     Flatpak(String),
-    /// no package Trove can name: a user's own `.desktop`, an unowned or ambiguous file
+    /// no package Velkrys can name: a user's own `.desktop`, an unowned or ambiguous file
     None,
 }
 
@@ -52,7 +52,7 @@ pub enum Owner {
 pub enum Source {
     Snap(Owner),
     Flatpak(Owner),
-    /// the person's own entry: no package, never deleted by Trove
+    /// the person's own entry: no package, never deleted by Velkrys
     UserLocal,
     /// ask `dpkg -S`
     Deb,
@@ -301,7 +301,7 @@ pub fn is_desktop_meta(name: &str) -> bool {
 }
 
 /// Why a simulated removal is refused, or `Ok` when apt would remove only ordinary packages.
-/// `info` is `dpkg-query` over `sim.removed`. ⛔ Anything Trove cannot read is a refusal: an
+/// `info` is `dpkg-query` over `sim.removed`. ⛔ Anything Velkrys cannot read is a refusal: an
 /// unreadable line, a simulation that does not remove `target`, a removed package `dpkg-query`
 /// says nothing about.
 pub fn apt_verdict(
@@ -347,7 +347,7 @@ pub fn apt_verdict(
         why.push("packages apt calls essential".into());
     }
     Err(format!(
-        "Trove will not remove {target}: apt would also remove {}. Nothing was typed or started.",
+        "Velkrys will not remove {target}: apt would also remove {}. Nothing was typed or started.",
         why.join(" and ")
     ))
 }
@@ -355,7 +355,7 @@ pub fn apt_verdict(
 /// The refusal when the simulation cannot be read or did not run.
 fn unchecked(target: &str) -> String {
     format!(
-        "Trove could not check what removing {target} would also remove, so it will not offer it."
+        "Velkrys could not check what removing {target} would also remove, so it will not offer it."
     )
 }
 
@@ -365,7 +365,7 @@ fn unchecked(target: &str) -> String {
 pub fn apt_check(pkg: &str) -> Result<(), String> {
     use std::process::{Command as Proc, Stdio};
     if !valid_deb(pkg) {
-        return Err("That package name is not one Trove can check.".into());
+        return Err("That package name is not one Velkrys can check.".into());
     }
     // valid_deb: the name starts with a letter or digit, so apt never reads it as an option
     let out = Proc::new("apt-get")
@@ -421,14 +421,14 @@ pub fn hand_off(
     Some((line, true))
 }
 
-/// Trove's bundle identifier (`identifier` in `tauri.conf.json`; a test keeps the two equal).
-/// A Flatpak of Trove carries it as its app id.
-pub const TROVE_IDENTIFIER: &str = "com.joyahmed.trove";
+/// Velkrys's bundle identifier (`identifier` in `tauri.conf.json`; a test keeps the two equal).
+/// A Flatpak of Velkrys carries it as its app id.
+pub const VELKRYS_IDENTIFIER: &str = "com.joyahmed.velkrys";
 
-/// The snap names and Flatpak ids that are this very Trove: their rows are `Removable::Trove`,
-/// so Trove never offers to uninstall itself (the deb case is `Ctx::trove_pkg`).
+/// The snap names and Flatpak ids that are this very Velkrys: their rows are `Removable::Velkrys`,
+/// so Velkrys never offers to uninstall itself (the deb case is `Ctx::velkrys_pkg`).
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
-pub struct TroveSelf {
+pub struct VelkrysSelf {
     pub snaps: Vec<String>,
     pub flatpaks: Vec<String>,
 }
@@ -439,20 +439,20 @@ fn snap_of_path(path: &str) -> Option<String> {
     rest.split('/').next().map(String::from)
 }
 
-/// Who Trove is when packaged. Snap: `SNAP_INSTANCE_NAME`, `SNAP_NAME`, and the snap that
-/// `exe` or `$SNAP` sits in under `/snap/<name>/`. Flatpak: `FLATPAK_ID`, and Trove's own
-/// identifier (any Flatpak with that id is a Trove). Names that break the snap / Flatpak rules
+/// Who Velkrys is when packaged. Snap: `SNAP_INSTANCE_NAME`, `SNAP_NAME`, and the snap that
+/// `exe` or `$SNAP` sits in under `/snap/<name>/`. Flatpak: `FLATPAK_ID`, and Velkrys's own
+/// identifier (any Flatpak with that id is a Velkrys). Names that break the snap / Flatpak rules
 /// are dropped, never matched.
-pub fn trove_self(
+pub fn velkrys_self(
     snap_name: Option<&str>,
     snap_instance: Option<&str>,
     snap_env: Option<&str>,
     exe: Option<&str>,
     flatpak_id: Option<&str>,
     identifier: &str,
-) -> TroveSelf {
-    // ⛔ the env vars are inherited: a deb Trove started from a snap terminal (VS Code) carries
-    // that snap's SNAP_NAME. Trust them only when Trove itself runs from /snap/.
+) -> VelkrysSelf {
+    // ⛔ the env vars are inherited: a deb Velkrys started from a snap terminal (VS Code) carries
+    // that snap's SNAP_NAME. Trust them only when Velkrys itself runs from /snap/.
     let in_snap = exe.and_then(snap_of_path).is_some();
     let mut snaps: Vec<String> = [snap_instance, snap_name]
         .into_iter()
@@ -473,7 +473,7 @@ pub fn trove_self(
         .collect();
     flatpaks.sort();
     flatpaks.dedup();
-    TroveSelf { snaps, flatpaks }
+    VelkrysSelf { snaps, flatpaks }
 }
 
 /// What the pure part needs to know about the machine, so tests can fake it.
@@ -486,14 +486,14 @@ pub struct Ctx<'a> {
     pub canonical: &'a dyn Fn(&str) -> Option<String>,
     /// the file's bytes, read now: an edited entry gets a new id
     pub contents: &'a dyn Fn(&str) -> Option<Vec<u8>>,
-    /// `parse_dpkg_s` of one `dpkg -S` over every Deb-source path (and Trove's own exe)
+    /// `parse_dpkg_s` of one `dpkg -S` over every Deb-source path (and Velkrys's own exe)
     pub deb_owner: &'a HashMap<String, String>,
     pub deb_info: &'a HashMap<String, DebInfo>,
     pub has_gnome_software: bool,
-    /// the package that owns Trove's own executable, if any
-    pub trove_pkg: Option<&'a str>,
-    /// the snap names and Flatpak ids that are Trove itself
-    pub trove_self: &'a TroveSelf,
+    /// the package that owns Velkrys's own executable, if any
+    pub velkrys_pkg: Option<&'a str>,
+    /// the snap names and Flatpak ids that are Velkrys itself
+    pub velkrys_self: &'a VelkrysSelf,
 }
 
 /// The owner of one tile, `dpkg -S` already asked.
@@ -534,14 +534,14 @@ pub fn rows(apps: &[AppEntry], ctx: &Ctx) -> Vec<Uninstallable> {
                 Owner::Snap(_) | Owner::Flatpak(_) => (String::new(), Removable::Yes),
                 Owner::None => (String::new(), Removable::NoUninstaller),
             };
-            let is_trove = match &owner {
-                Owner::Deb(p) => ctx.trove_pkg == Some(p.as_str()),
-                Owner::Snap(s) => ctx.trove_self.snaps.contains(s),
-                Owner::Flatpak(f) => ctx.trove_self.flatpaks.contains(f),
+            let is_velkrys = match &owner {
+                Owner::Deb(p) => ctx.velkrys_pkg == Some(p.as_str()),
+                Owner::Snap(s) => ctx.velkrys_self.snaps.contains(s),
+                Owner::Flatpak(f) => ctx.velkrys_self.flatpaks.contains(f),
                 Owner::None => false,
             };
-            if is_trove {
-                removable = Removable::Trove;
+            if is_velkrys {
+                removable = Removable::Velkrys;
             }
             let line = hand_off(&owner, &app.aumid, ctx.has_gnome_software);
             if line.is_none() && removable == Removable::Yes {
@@ -592,7 +592,7 @@ pub fn list() -> Result<Vec<Uninstallable>, String> {
             .ok()
             .map(|c| c.to_string_lossy().into_owned())
     };
-    let trove_exe = std::env::current_exe()
+    let velkrys_exe = std::env::current_exe()
         .ok()
         .map(|p| p.to_string_lossy().into_owned())
         .filter(|p| dpkg_safe_path(p));
@@ -611,7 +611,7 @@ pub fn list() -> Result<Vec<Uninstallable>, String> {
         })
         .map(|a| a.path.clone())
         .collect();
-    ask.extend(trove_exe.clone());
+    ask.extend(velkrys_exe.clone());
     let read = |args: &[String], cmd: &str| -> String {
         if args.is_empty() {
             return String::new();
@@ -646,18 +646,18 @@ pub fn list() -> Result<Vec<Uninstallable>, String> {
     } else {
         parse_dpkg_query(&read(&q_args, "dpkg-query"))
     };
-    let trove_pkg = trove_exe.and_then(|e| deb_owner.get(&e).cloned());
+    let velkrys_pkg = velkrys_exe.and_then(|e| deb_owner.get(&e).cloned());
     let env = |k: &str| std::env::var(k).ok();
     let exe = std::env::current_exe()
         .ok()
         .map(|p| p.to_string_lossy().into_owned());
-    let trove_self = trove_self(
+    let velkrys_self = velkrys_self(
         env("SNAP_NAME").as_deref(),
         env("SNAP_INSTANCE_NAME").as_deref(),
         env("SNAP").as_deref(),
         exe.as_deref(),
         env("FLATPAK_ID").as_deref(),
-        TROVE_IDENTIFIER,
+        VELKRYS_IDENTIFIER,
     );
     let path_var = std::env::var_os("PATH");
     let has_gnome_software =
@@ -674,8 +674,8 @@ pub fn list() -> Result<Vec<Uninstallable>, String> {
             deb_owner: &deb_owner,
             deb_info: &deb_info,
             has_gnome_software,
-            trove_pkg: trove_pkg.as_deref(),
-            trove_self: &trove_self,
+            velkrys_pkg: velkrys_pkg.as_deref(),
+            velkrys_self: &velkrys_self,
         },
     ))
 }
@@ -699,13 +699,13 @@ mod tests {
         let owners = parse_dpkg_s(
             "gnome-mines: /usr/share/applications/org.gnome.Mines.desktop\n\
              coreutils: /usr/share/applications/coreutils-fake.desktop\n\
-             trove: /usr/bin/trove\n\
-             trove: /usr/share/applications/trove.desktop\n",
+             velkrys: /usr/bin/velkrys\n\
+             velkrys: /usr/share/applications/velkrys.desktop\n",
         );
         let info = parse_dpkg_query(
             "gnome-mines\t1:40.1-1\tno\toptional\n\
              coreutils\t9.4-3ubuntu6\tyes\trequired\n\
-             trove\t0.9.0\tno\toptional\n",
+             velkrys\t0.9.0\tno\toptional\n",
         );
         (owners, info)
     }
@@ -722,7 +722,7 @@ mod tests {
     fn with_ctx<T>(gs: bool, f: impl FnOnce(&Ctx) -> T) -> T {
         let (owners, info) = fixtures();
         let contents = |p: &str| Some(format!("[Desktop Entry]\nExec={p}\n").into_bytes());
-        let me = TroveSelf::default();
+        let me = VelkrysSelf::default();
         let ctx = Ctx {
             home: Some(HOME),
             data_home: None,
@@ -732,8 +732,8 @@ mod tests {
             deb_owner: &owners,
             deb_info: &info,
             has_gnome_software: gs,
-            trove_pkg: Some("trove"),
-            trove_self: &me,
+            velkrys_pkg: Some("velkrys"),
+            velkrys_self: &me,
         };
         f(&ctx)
     }
@@ -929,14 +929,14 @@ mod tests {
             "coreutils-fake.desktop",
             "/usr/share/applications/coreutils-fake.desktop",
         );
-        let trove = app(
-            "Trove",
-            "trove.desktop",
-            "/usr/share/applications/trove.desktop",
+        let velkrys = app(
+            "Velkrys",
+            "velkrys.desktop",
+            "/usr/share/applications/velkrys.desktop",
         );
-        let r = with_ctx(false, |c| rows(&[core, trove, mines()], c));
+        let r = with_ctx(false, |c| rows(&[core, velkrys, mines()], c));
         assert_eq!(r[0].removable, Removable::System);
-        assert_eq!(r[1].removable, Removable::Trove);
+        assert_eq!(r[1].removable, Removable::Velkrys);
         assert_eq!(r[2].removable, Removable::Yes);
         assert_eq!(r[2].version, "1:40.1-1");
         // only a removable row carries something to run
@@ -963,7 +963,7 @@ mod tests {
         let r = with_ctx(false, |c| rows(&[mines()], c));
         assert_eq!(r[0].program, "sudo apt remove gnome-mines");
         assert!(r[0].typed);
-        // the command Trove would act on is exactly the line the confirm shows
+        // the command Velkrys would act on is exactly the line the confirm shows
         assert_eq!(
             r[0].command.as_ref().map(|c| c.program.as_str()),
             Some(r[0].program.as_str())
@@ -1081,70 +1081,77 @@ mod tests {
     }
 
     #[test]
-    fn trove_self_reads_snap_and_flatpak_identity() {
+    fn velkrys_self_reads_snap_and_flatpak_identity() {
         // not packaged: only the identifier, which no snap shares
-        let plain = trove_self(
+        let plain = velkrys_self(
             None,
             None,
             None,
-            Some("/usr/bin/trove"),
+            Some("/usr/bin/velkrys"),
             None,
-            TROVE_IDENTIFIER,
+            VELKRYS_IDENTIFIER,
         );
         assert!(plain.snaps.is_empty());
-        assert_eq!(plain.flatpaks, vec![TROVE_IDENTIFIER.to_string()]);
+        assert_eq!(plain.flatpaks, vec![VELKRYS_IDENTIFIER.to_string()]);
         // a parallel-installed snap: instance, name and the /snap/<instance>/ paths
-        let snap = trove_self(
-            Some("trove"),
-            Some("trove_beta"),
-            Some("/snap/trove_beta/42"),
-            Some("/snap/trove_beta/42/usr/bin/trove"),
+        let snap = velkrys_self(
+            Some("velkrys"),
+            Some("velkrys_beta"),
+            Some("/snap/velkrys_beta/42"),
+            Some("/snap/velkrys_beta/42/usr/bin/velkrys"),
             None,
-            TROVE_IDENTIFIER,
+            VELKRYS_IDENTIFIER,
         );
         assert_eq!(
             snap.snaps,
-            vec!["trove".to_string(), "trove_beta".to_string()]
+            vec!["velkrys".to_string(), "velkrys_beta".to_string()]
         );
         // the exe path alone is enough when the env is gone
-        let by_exe = trove_self(None, None, None, Some("/snap/trove/7/bin/trove"), None, "x");
-        assert_eq!(by_exe.snaps, vec!["trove".to_string()]);
+        let by_exe = velkrys_self(
+            None,
+            None,
+            None,
+            Some("/snap/velkrys/7/bin/velkrys"),
+            None,
+            "x",
+        );
+        assert_eq!(by_exe.snaps, vec!["velkrys".to_string()]);
         assert!(by_exe.flatpaks.is_empty());
         // inherited snap env with a deb exe (started from a VS Code snap terminal): not a snap
-        let inherited = trove_self(
+        let inherited = velkrys_self(
             Some("code"),
             Some("code"),
             Some("/snap/code/100"),
-            Some("/usr/bin/trove"),
+            Some("/usr/bin/velkrys"),
             None,
-            TROVE_IDENTIFIER,
+            VELKRYS_IDENTIFIER,
         );
         assert!(inherited.snaps.is_empty());
         // a Flatpak under another id still knows itself; junk is dropped, never matched
-        let flat = trove_self(
+        let flat = velkrys_self(
             Some("Bad Name"),
             None,
             None,
             None,
-            Some("io.x.Trove"),
+            Some("io.x.Velkrys"),
             "a;b",
         );
         assert!(flat.snaps.is_empty());
-        assert_eq!(flat.flatpaks, vec!["io.x.Trove".to_string()]);
+        assert_eq!(flat.flatpaks, vec!["io.x.Velkrys".to_string()]);
     }
 
     #[test]
     fn the_identifier_matches_tauri_conf() {
         let conf: serde_json::Value =
             serde_json::from_str(include_str!("../../tauri.conf.json")).unwrap();
-        assert_eq!(conf["identifier"], TROVE_IDENTIFIER);
+        assert_eq!(conf["identifier"], VELKRYS_IDENTIFIER);
     }
 
     #[test]
-    fn trove_as_a_snap_or_flatpak_refuses_itself() {
+    fn velkrys_as_a_snap_or_flatpak_refuses_itself() {
         let (owners, info) = fixtures();
         let contents = |p: &str| Some(format!("Exec={p}").into_bytes());
-        let me = TroveSelf {
+        let me = VelkrysSelf {
             snaps: vec!["hello-world".into()],
             flatpaks: vec!["org.deskflow.deskflow".into()],
         };
@@ -1157,22 +1164,22 @@ mod tests {
             deb_owner: &owners,
             deb_info: &info,
             has_gnome_software: true,
-            trove_pkg: None,
-            trove_self: &me,
+            velkrys_pkg: None,
+            velkrys_self: &me,
         };
         let r = rows(&[hello_snap(), flat(), mines()], &ctx);
-        assert_eq!(r[0].removable, Removable::Trove);
-        assert_eq!(r[1].removable, Removable::Trove);
+        assert_eq!(r[0].removable, Removable::Velkrys);
+        assert_eq!(r[1].removable, Removable::Velkrys);
         assert!(r[0].command.is_none() && r[1].command.is_none());
         assert!(r[0].program.is_empty() && r[1].program.is_empty());
         // everything else is untouched
         assert_eq!(r[2].removable, Removable::Yes);
         // and with no self match, the same snap and Flatpak are removable
-        let none = TroveSelf::default();
+        let none = VelkrysSelf::default();
         let r = rows(
             &[hello_snap(), flat()],
             &Ctx {
-                trove_self: &none,
+                velkrys_self: &none,
                 ..ctx
             },
         );
@@ -1184,7 +1191,7 @@ mod tests {
         let (owners, info) = fixtures();
         let make = |exec: &'static str| {
             let contents = move |_: &str| Some(format!("Exec={exec}").into_bytes());
-            let me = TroveSelf::default();
+            let me = VelkrysSelf::default();
             let ctx = Ctx {
                 home: Some(HOME),
                 data_home: None,
@@ -1194,8 +1201,8 @@ mod tests {
                 deb_owner: &owners,
                 deb_info: &info,
                 has_gnome_software: false,
-                trove_pkg: None,
-                trove_self: &me,
+                velkrys_pkg: None,
+                velkrys_self: &me,
             };
             rows(&[mines()], &ctx).remove(0).id
         };
@@ -1310,7 +1317,7 @@ mod tests {
         .unwrap_err();
         assert_eq!(
             e,
-            "Trove will not remove nautilus: apt would also remove ubuntu-desktop, \
+            "Velkrys will not remove nautilus: apt would also remove ubuntu-desktop, \
              ubuntu-desktop-minimal (your desktop). Nothing was typed or started."
         );
         // the graphical session would go with it

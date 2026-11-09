@@ -1,6 +1,9 @@
 <script lang="ts">
-  import type { SidebarItem, UsageLevel } from '$lib/data/sidebar-sections';
+  import type { SidebarItem } from '$lib/data/sidebar-sections';
   import Glyph from '$lib/components/ui/Glyph.svelte';
+  import UsageBar from '$lib/components/ui/UsageBar.svelte';
+  import DriveRenameBox from '$lib/components/ui/DriveRenameBox.svelte';
+  import { driveRename } from '$lib/state/drive-rename.svelte';
 
   interface Props {
     item: SidebarItem;
@@ -45,11 +48,9 @@
       .join(' — '),
   );
 
-  const FILL: Record<UsageLevel, string> = {
-    ok: 'bg-text-secondary/55',
-    low: 'bg-caution',
-    critical: 'bg-critical',
-  };
+  const renaming = $derived(
+    item.location?.kind === 'path' && driveRename.isTarget(item.location.path, 'sidebar'),
+  );
 </script>
 
 <div class="group relative mr-1 shrink-0">
@@ -106,7 +107,9 @@
          icon or out to the panel edge; the label and bar centre as one block on the icon. -->
     <span class="flex min-w-0 flex-1 flex-col">
       <span class="flex min-w-0 items-baseline gap-2 {item.usage ? 'leading-4' : ''}">
-        <span class="min-w-0 flex-1 truncate">{item.label}</span>
+        {#if renaming}<DriveRenameBox />{:else}<span class="min-w-0 flex-1 truncate"
+            >{item.label}</span
+          >{/if}
         {#if item.tag}<span class="text-text-secondary shrink-0 text-xs">{item.tag}</span>{/if}
         {#if item.running}
           <span
@@ -123,12 +126,7 @@
           />{/if}
       </span>
       {#if item.usage}
-        <span class="bg-text-secondary/15 mt-[3px] h-[2px] overflow-hidden rounded-full">
-          <span
-            class="block h-full rounded-full {FILL[item.usage.level]}"
-            style:width="{Math.max(2, Math.round(item.usage.fraction * 100))}%"
-          ></span>
-        </span>
+        <UsageBar fraction={item.usage.fraction} level={item.usage.level} />
         <span class="sr-only">, {item.usage.caption}</span>
       {/if}
     </span>

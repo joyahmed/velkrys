@@ -35,6 +35,7 @@ use crate::commands::uninstall::Outcome;
 use crate::core::clipboard::ClipboardPaths;
 use crate::core::default_handler::Status;
 use crate::core::drag_out::{DragEffect, DragOutcome};
+use crate::core::drive::{DriveDetails, DriveType};
 use crate::core::folder_sizes::DriveKind;
 use crate::core::fs::{CloudState, DirListing, FileEntry, PathKind};
 use crate::core::keys::Held;
@@ -219,10 +220,10 @@ fn samples() -> Vec<(&'static str, Vec<Value>)> {
                     },
                     Locker {
                         pid: 1,
-                        app: "Trove".into(),
-                        exe: "trove.exe".into(),
+                        app: "Velkrys".into(),
+                        exe: "velkrys.exe".into(),
                         can_end: false,
-                        no_end: Some(NoEnd::Trove),
+                        no_end: Some(NoEnd::Velkrys),
                     },
                     Locker {
                         pid: 2,
@@ -381,6 +382,10 @@ fn samples() -> Vec<(&'static str, Vec<Value>)> {
                     total_bytes: Some(100),
                     free_bytes: Some(40),
                     network: false,
+                    drive_type: DriveType::Fixed,
+                    file_system: Some("ext4".into()),
+                    can_rename: false,
+                    ejectable: false,
                 },
                 DriveInfo {
                     path: "/mnt/nas".into(),
@@ -388,8 +393,59 @@ fn samples() -> Vec<(&'static str, Vec<Value>)> {
                     total_bytes: None,
                     free_bytes: None,
                     network: true,
+                    drive_type: DriveType::Network,
+                    file_system: Some("nfs".into()),
+                    can_rename: false,
+                    ejectable: false,
                 },
             ])],
+        ),
+        (
+            "drive_details",
+            vec![
+                // Windows: a USB stick, with its letter
+                v(DriveDetails {
+                    path: "E:\\".into(),
+                    label: "STICK".into(),
+                    file_system: Some("exFAT".into()),
+                    drive_type: DriveType::Removable,
+                    total_bytes: Some(64_000_000_000),
+                    free_bytes: Some(12_000_000_000),
+                    letter: Some("E:".into()),
+                    mount_point: None,
+                    device: None,
+                    bus: Some("USB".into()),
+                    read_only: false,
+                }),
+                // macOS: an external disk, with its device and mount point
+                v(DriveDetails {
+                    path: "/Volumes/Backup".into(),
+                    label: "Backup".into(),
+                    file_system: Some("apfs".into()),
+                    drive_type: DriveType::External,
+                    total_bytes: Some(1_000_000_000_000),
+                    free_bytes: Some(400_000_000_000),
+                    letter: None,
+                    mount_point: Some("/Volumes/Backup".into()),
+                    device: Some("/dev/disk4s1".into()),
+                    bus: Some("USB".into()),
+                    read_only: false,
+                }),
+                // the drive would not say: unknown is null, never 0
+                v(DriveDetails {
+                    path: "/mnt/nas".into(),
+                    label: "nas".into(),
+                    file_system: None,
+                    drive_type: DriveType::Unknown,
+                    total_bytes: None,
+                    free_bytes: None,
+                    letter: None,
+                    mount_point: Some("/mnt/nas".into()),
+                    device: None,
+                    bus: None,
+                    read_only: true,
+                }),
+            ],
         ),
         (
             "known_folders",
@@ -574,7 +630,7 @@ fn samples() -> Vec<(&'static str, Vec<Value>)> {
             vec![v([
                 Removable::Yes,
                 Removable::System,
-                Removable::Trove,
+                Removable::Velkrys,
                 Removable::NoUninstaller,
                 Removable::Link,
                 Removable::NotApp,
@@ -628,7 +684,7 @@ fn samples() -> Vec<(&'static str, Vec<Value>)> {
         (
             "default_handler_info",
             vec![v(HandlerInfo {
-                exe_path: "/opt/trove/trove".into(),
+                exe_path: "/opt/velkrys/velkrys".into(),
                 stable: true,
             })],
         ),

@@ -64,23 +64,29 @@ const PLACE_BY_TEXT: Record<string, Location> = {
   'recycle bin': RECYCLE_BIN,
   trash: RECYCLE_BIN,
   '::{645ff040-5081-101b-9f08-00aa002f954e}': RECYCLE_BIN,
-  'trove:home': HOME,
-  'trove:gallery': GALLERY,
-  'trove:applications': APPLICATIONS,
+  'velkrys:home': HOME,
+  'velkrys:gallery': GALLERY,
+  'velkrys:applications': APPLICATIONS,
+  'trove:home': HOME, // rename-keep: written by builds from before the rename
+  'trove:gallery': GALLERY, // rename-keep
+  'trove:applications': APPLICATIONS, // rename-keep
 };
 
 /** How a saved session writes a place tab: fixed and language-free, so a session written in one
  * UI language (or coming-from style) reads back in another. Explorer's CLSIDs where it has one. */
 const PLACE_TOKEN: Record<PlaceKind, string> = {
-  home: 'trove:home',
+  home: 'velkrys:home',
   'this-pc': '::{20d04fe0-3aea-1069-a2d8-08002b30309d}',
-  gallery: 'trove:gallery',
-  applications: 'trove:applications',
+  gallery: 'velkrys:gallery',
+  applications: 'velkrys:applications',
   'recycle-bin': '::{645ff040-5081-101b-9f08-00aa002f954e}',
 };
 
 /** A token this build does not know yet (a newer build's place) starts with this; never a path. */
-const TOKEN_PREFIX = 'trove:';
+const TOKEN_PREFIX = 'velkrys:';
+
+/** The same prefix in a session saved before the rename; read as `TOKEN_PREFIX`, never written. */
+const OLD_TOKEN_PREFIX = 'trove:'; // rename-keep
 
 /** A tab as the session saves it (plan 15 G.45): a folder's path, a place's token, or '' for a
  * tab that is not restored (an archive, an empty tab). Inverse of `tabLocation`. */
@@ -90,11 +96,14 @@ export const tabToken = (loc: Location): string => {
   return PLACE_TOKEN[loc.kind];
 };
 
-/** A saved tab → its location; null for '' or an unknown `trove:` token, so it is skipped. A
+/** A saved tab → its location; null for '' or an unknown `velkrys:` token, so it is skipped. A
  * folder is its path as written: a folder saved as `Home` stays a folder, not the place. */
 export const tabLocation = (token: string): Location | null => {
   if (token === '') return null;
-  const lower = token.toLowerCase();
+  const text = token.toLowerCase();
+  const lower = text.startsWith(OLD_TOKEN_PREFIX)
+    ? TOKEN_PREFIX + text.slice(OLD_TOKEN_PREFIX.length)
+    : text;
   const place = Object.values(PLACE_TOKEN).includes(lower) ? PLACE_BY_TEXT[lower] : undefined;
   if (place) return place;
   return lower.startsWith(TOKEN_PREFIX) ? null : pathLocation(token);
@@ -231,7 +240,7 @@ const resolveDots = (path: string): string => {
 /**
  * The scheme of typed text that is a link — `https://…`, `file:///…`, `mailto:…` — lower-cased;
  * null for anything else. A WSL distro (`Ubuntu:/home`) has one slash after its colon, never two,
- * and `trove:home` has none, so neither is a link.
+ * and `velkrys:home` has none, so neither is a link.
  */
 export const urlScheme = (text: string): string | null => {
   const m = /^([a-z][a-z0-9+.-]*):\/\//i.exec(text.trim()) ?? /^(mailto):/i.exec(text.trim());

@@ -532,14 +532,14 @@ mod tests {
 
     #[test]
     fn a_missing_recent_folder_is_an_empty_list() {
-        let dir = std::env::temp_dir().join("trove-recent-does-not-exist");
+        let dir = std::env::temp_dir().join("velkrys-recent-does-not-exist");
         assert!(recent_files(&dir).is_empty());
     }
 
     #[test]
     fn resolves_existing_file_targets_only_newest_first() {
         let scratch = std::env::temp_dir().join(format!(
-            "trove-recent-{}-{}",
+            "velkrys-recent-{}-{}",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
@@ -620,7 +620,7 @@ mod tests {
 
     #[test]
     fn xbel_files_skip_missing_targets_and_folders() {
-        let scratch = std::env::temp_dir().join(format!("trove-xbel-{}", std::process::id()));
+        let scratch = std::env::temp_dir().join(format!("velkrys-xbel-{}", std::process::id()));
         std::fs::create_dir_all(scratch.join("folder")).unwrap();
         let a = scratch.join("a b.txt");
         std::fs::write(&a, "a").unwrap();

@@ -15,7 +15,7 @@ use serde::Serialize;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 
-/// What happened, said only as far as Trove can know it.
+/// What happened, said only as far as Velkrys can know it.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum Outcome {
@@ -30,12 +30,12 @@ pub enum Outcome {
     /// for good, so there is no fallback: the person drags it to the Trash in Finder)
     #[cfg_attr(not(target_os = "macos"), allow(dead_code))]
     NoTrash,
-    /// Ubuntu without GNOME Software: Trove started nothing. The checks passed, and the
+    /// Ubuntu without GNOME Software: Velkrys started nothing. The checks passed, and the
     /// frontend types the confirmed line (no newline) into a fresh shell; Enter is the person's.
     TypedInTerminal,
 }
 
-/// How long one uninstall may hold the lock before Trove stops waiting (plan 18, 1.5).
+/// How long one uninstall may hold the lock before Velkrys stops waiting (plan 18, 1.5).
 #[cfg(not(test))]
 pub const WAIT_CAP: Duration = Duration::from_secs(10 * 60);
 
@@ -346,7 +346,7 @@ mod tests {
     #[test]
     fn apt_guard_runs_before_anything_is_typed_or_started() {
         let refusal =
-            "Trove will not remove x: apt would also remove ubuntu-desktop (your desktop). \
+            "Velkrys will not remove x: apt would also remove ubuntu-desktop (your desktop). \
                        Nothing was typed or started.";
         for typed in [true, false] {
             let mut a = row("a", "A", Removable::Yes);
@@ -456,7 +456,8 @@ mod tests {
 
     /// One fake `X.app` under a scratch `Applications`, listed as the Mac list would.
     fn mac_fixture(tag: &str) -> (std::path::PathBuf, Uninstallable) {
-        let dir = std::env::temp_dir().join(format!("trove-18b-cmd-{tag}-{}", std::process::id()));
+        let dir =
+            std::env::temp_dir().join(format!("velkrys-18b-cmd-{tag}-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         let app = dir.join("Applications/X.app");
         std::fs::create_dir_all(app.join("Contents/MacOS")).unwrap();
@@ -469,7 +470,7 @@ mod tests {
             &[dir.join("Applications/X.app")],
             &crate::core::uninstall_mac::Ctx {
                 roots: &roots,
-                trove_exe: None,
+                velkrys_exe: None,
                 system: &crate::core::uninstall_mac::system_roots(),
                 probe: &probe,
             },
@@ -502,7 +503,7 @@ mod tests {
             &[dir.join("Applications/X.app")],
             &crate::core::uninstall_mac::Ctx {
                 roots: &[dir.join("Applications")],
-                trove_exe: None,
+                velkrys_exe: None,
                 system: &crate::core::uninstall_mac::system_roots(),
                 probe: &Probe(false),
             },

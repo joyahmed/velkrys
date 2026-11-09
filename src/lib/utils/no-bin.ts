@@ -1,7 +1,7 @@
 // The "no Recycle Bin here" refusal and its question, shared by everything that puts what it
 // made in the bin on Undo (state/actions, state/archives).
 import type { NoRecycleBin } from '$lib/api/fs';
-import { binName, onMac, injected, type TrovePlatform } from '$lib/utils/platform';
+import { binName, onMac, injected, type VelkrysPlatform } from '$lib/utils/platform';
 
 /**
  * A network share, a mapped drive, WSL or a USB stick has no Recycle Bin: Windows deletes there
@@ -27,7 +27,7 @@ export const noBinQuestion = (
   if (reason === 'off')
     return `The ${bin} is turned off for ${place} — permanently delete ${what}?`;
   if (reason === 'denied')
-    return `macOS did not let Trove use the ${bin} — permanently delete ${what}?`;
+    return `macOS did not let Velkrys use the ${bin} — permanently delete ${what}?`;
   if (reason === 'tooBig')
     return `Too big for the ${bin} on ${place} — permanently delete ${what}?`;
   return `${place} has no ${bin} — permanently delete ${what}?`;
@@ -40,7 +40,7 @@ export const noBinQuestion = (
  */
 export const replaceDetail = (
   noBin: string | null | undefined,
-  platform: TrovePlatform | undefined = injected(),
+  platform: VelkrysPlatform | undefined = injected(),
 ) => {
   const bin = binName();
   // the Mac Trash cannot be read back by the app, so Undo cannot return the old files

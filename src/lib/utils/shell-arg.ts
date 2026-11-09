@@ -1,5 +1,5 @@
 // What a launch argument means. Explorer's callers pass shell folders as `::{CLSID}` (a
-// desktop double-click on the Recycle Bin, Win+E's This PC) or as `shell:<name>`; Trove shows
+// desktop double-click on the Recycle Bin, Win+E's This PC) or as `shell:<name>`; Velkrys shows
 // two of those itself and hands every other one back to explorer.exe, which knows them all.
 import { parseLocation } from '$lib/utils/location';
 

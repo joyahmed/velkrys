@@ -170,7 +170,7 @@ mod tests {
     impl Scratch {
         fn new(tag: &str) -> Self {
             let dir =
-                std::env::temp_dir().join(format!("trove-preview-{tag}-{}", std::process::id()));
+                std::env::temp_dir().join(format!("velkrys-preview-{tag}-{}", std::process::id()));
             let _ = std::fs::remove_dir_all(&dir);
             std::fs::create_dir_all(&dir).unwrap();
             Scratch(dir)

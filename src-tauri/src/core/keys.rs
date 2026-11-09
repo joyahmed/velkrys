@@ -1,5 +1,5 @@
 //! The copy and move keys held right now, read from the OS. A drop from another app reaches
-//! Trove through Tauri's drag-drop event, which carries no modifiers, and the window has no
+//! Velkrys through Tauri's drag-drop event, which carries no modifiers, and the window has no
 //! focus (so no key events) while another app's drag is over it. The frontend decides with
 //! these the way it decides an in-app drop (`effectFor` in src/lib/state/drag.svelte.ts).
 

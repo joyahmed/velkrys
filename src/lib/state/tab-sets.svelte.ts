@@ -52,7 +52,7 @@ class TabSetsState {
       active: plan.active,
       savedAt: Date.now(),
     });
-    if (!next) return actions.notify(`Trove keeps ${MAX_TAB_SETS} tab sets — delete one first`);
+    if (!next) return actions.notify(`Velkrys keeps ${MAX_TAB_SETS} tab sets — delete one first`);
     settings.tabSets = next;
     actions.notify(`Saved tab set “${clash?.name ?? name}”`);
   }

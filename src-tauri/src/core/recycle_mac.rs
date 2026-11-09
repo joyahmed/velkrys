@@ -22,8 +22,8 @@ use std::path::{Path, PathBuf};
 
 use crate::core::recycle::RecycleItem;
 
-/// What the person sees when macOS will not let Trove read the Trash.
-pub const NEEDS_FULL_DISK_ACCESS: &str = "Trove needs Full Disk Access to show the Trash. Open System Settings → Privacy & Security → Full Disk Access.";
+/// What the person sees when macOS will not let Velkrys read the Trash.
+pub const NEEDS_FULL_DISK_ACCESS: &str = "Velkrys needs Full Disk Access to show the Trash. Open System Settings → Privacy & Security → Full Disk Access.";
 
 /// What Restore says on macOS, should anything still call it (the view turns it off).
 pub const NO_RESTORE: &str = "Restore is not available on macOS: the Trash does not record where an item came from. Drag it out of the Trash in Finder instead.";
@@ -36,7 +36,9 @@ pub fn home_trash() -> Result<PathBuf, String> {
     std::env::var_os("HOME")
         .filter(|h| !h.is_empty())
         .map(|h| PathBuf::from(h).join(".Trash"))
-        .ok_or_else(|| "Trove could not find your home folder, so it cannot find the Trash.".into())
+        .ok_or_else(|| {
+            "Velkrys could not find your home folder, so it cannot find the Trash.".into()
+        })
 }
 
 /// Each volume's Trash for user `uid`: `<volumes>/<name>/.Trashes/<uid>`, where it exists.
@@ -64,7 +66,7 @@ pub fn trash_dirs() -> Result<Vec<PathBuf>, String> {
     use std::os::unix::fs::MetadataExt;
     let home = home_trash()?;
     let mut dirs = vec![home.clone()];
-    // whose Trash: the owner of the home folder, which is the person running Trove
+    // whose Trash: the owner of the home folder, which is the person running Velkrys
     if let Some(uid) = home
         .parent()
         .and_then(|h| std::fs::metadata(h).ok())
@@ -81,7 +83,7 @@ pub fn trash_dirs() -> Result<Vec<PathBuf>, String> {
 pub fn read_error(e: &io::Error) -> String {
     match e.kind() {
         io::ErrorKind::PermissionDenied => NEEDS_FULL_DISK_ACCESS.to_string(),
-        _ => "Trove could not read the Trash. Try again, or open it in Finder.".to_string(),
+        _ => "Velkrys could not read the Trash. Try again, or open it in Finder.".to_string(),
     }
 }
 
@@ -89,7 +91,7 @@ pub fn read_error(e: &io::Error) -> String {
 pub fn delete_error(name: &str, e: &io::Error) -> String {
     match e.kind() {
         io::ErrorKind::PermissionDenied => format!(
-            "Trove is not allowed to delete {name}. Check Full Disk Access in System Settings → Privacy & Security."
+            "Velkrys is not allowed to delete {name}. Check Full Disk Access in System Settings → Privacy & Security."
         ),
         io::ErrorKind::NotFound => format!("{name} is not in the Trash any more."),
         _ => format!("Could not delete {name} from the Trash."),
@@ -237,7 +239,7 @@ mod tests {
     impl Scratch {
         fn new(tag: &str) -> Self {
             let p = std::env::temp_dir().join(format!(
-                "trove-fake-trash-{tag}-{}-{}",
+                "velkrys-fake-trash-{tag}-{}-{}",
                 std::process::id(),
                 std::time::SystemTime::now()
                     .duration_since(std::time::UNIX_EPOCH)
@@ -368,7 +370,7 @@ mod tests {
         let file = s.0.join("not-a-folder");
         std::fs::write(&file, b"").unwrap();
         let e = list_in(&[file]).unwrap_err();
-        assert!(e.starts_with("Trove could not read the Trash"), "{e}");
+        assert!(e.starts_with("Velkrys could not read the Trash"), "{e}");
         assert!(!e.contains('{') && !e.contains("Error"), "{e}");
     }
 

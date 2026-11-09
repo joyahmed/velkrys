@@ -1,4 +1,4 @@
-// Uninstall from the Applications place (plan 18, Phases 2-4). Trove asks first, then hands the job
+// Uninstall from the Applications place (plan 18, Phases 2-4). Velkrys asks first, then hands the job
 // to the OS's own way (Windows: the app's own uninstaller; Mac: the bundle goes to the Trash) and
 // re-lists to say what happened. A Mac app is never deleted for good, not even as a fallback.
 //
@@ -9,7 +9,7 @@
 // One uninstall at a time. After an uninstaller that handed off and exited early, the list is
 // re-read on window focus (and F5) for up to 10 minutes.
 // Ubuntu (plan 18, Phase 4): GNOME Software opens on the app, or — without it — the removal line
-// is typed (no newline) into a FRESH plain shell (`/bin/sh`, no rc file, Trove's own prompt) and
+// is typed (no newline) into a FRESH plain shell (`/bin/sh`, no rc file, Velkrys's own prompt) and
 // only after that exact prompt showed; Enter is the person's. ⛔ Never written into a live session
 // or the person's own shell (vim, tmux, a Y/n prompt would take the letters as commands): copied.
 import { clipboardWriteText } from '$lib/api/clipboard';
@@ -31,9 +31,9 @@ import {
   reasonText,
 } from '$lib/utils/uninstall-text';
 
-/** How long after an uninstall Trove keeps re-checking on focus. */
+/** How long after an uninstall Velkrys keeps re-checking on focus. */
 export const WATCH_MS = 10 * 60 * 1000;
-/** How long a fresh shell may take to print its prompt before Trove copies instead of typing. */
+/** How long a fresh shell may take to print its prompt before Velkrys copies instead of typing. */
 export const PROMPT_MS = 5000;
 
 /**
@@ -80,7 +80,7 @@ export const matchRow = (app: AppEntry, rows: readonly Uninstallable[]): Uninsta
   return byName.length === 1 ? byName[0] : null;
 };
 
-/** A Store (packaged) app: started by id only, nothing on disk Trove can see. */
+/** A Store (packaged) app: started by id only, nothing on disk Velkrys can see. */
 export const isStoreApp = (app: AppEntry) => !app.lnkPath && !app.target && app.aumid !== '';
 
 /** What the menu item does for one tile. */
@@ -123,7 +123,7 @@ export const checkApp = (
 class UninstallState {
   rows = $state.raw<Uninstallable[]>([]);
   loaded = $state(false);
-  /** an uninstaller Trove started has not ended yet */
+  /** an uninstaller Velkrys started has not ended yet */
   running = $state(false);
   /** the row whose uninstaller ended while it was still listed, and until when to look again */
   #watch: { row: Uninstallable; until: number } | null = null;

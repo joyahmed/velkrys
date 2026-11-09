@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Build Trove's Mac .dmg WITHOUT Tauri's dmg bundler (it scripts Finder over AppleScript, which
+# Build Velkrys's Mac .dmg WITHOUT Tauri's dmg bundler (it scripts Finder over AppleScript, which
 # opens windows and fails headless). Builds the .app with tauri, then packs it with hdiutil.
 #   bash scripts/build-dmg-mac.sh [--universal] [--out DIR] [--allow-dirty]
-# Output: <out>/Trove-<shorthash>[-dirty].dmg (default out: dist-mac). Ad-hoc signed, never notarized.
+# Output: <out>/Velkrys-<shorthash>[-dirty].dmg (default out: dist-mac). Ad-hoc signed, never notarized.
 # Does not install, open or mount anything. Honors CARGO_TARGET_DIR (plan 22.4).
 set -euo pipefail
 
@@ -47,34 +47,34 @@ if ((universal)); then
   tdir="$CARGO_TARGET_DIR/universal-apple-darwin/release"
 fi
 
-echo "Building Trove at $hash${dirty:+ (with uncommitted changes)}..."
+echo "Building Velkrys at $hash${dirty:+ (with uncommitted changes)}..."
 bun install --frozen-lockfile >/dev/null
 bun run tauri build "${args[@]}"
 
-app="$tdir/bundle/macos/Trove.app"
+app="$tdir/bundle/macos/Velkrys.app"
 [[ -d "$app" ]] || { echo "build-dmg-mac.sh: no bundle at $app" >&2; exit 1; }
 
-work="$(mktemp -d "${TMPDIR:-/tmp}/trove-dmg.XXXXXX")"
+work="$(mktemp -d "${TMPDIR:-/tmp}/velkrys-dmg.XXXXXX")"
 mnt=""
 trap '[[ -n "${mnt:-}" ]] && hdiutil detach "$mnt" -force >/dev/null 2>&1; rm -rf "$work"' EXIT
 stage="$work/stage"
 mkdir -p "$stage" "$out"
-ditto "$app" "$stage/Trove.app"
-# stamp the commit, readable with: defaults read Trove.app/Contents/Info TroveCommit
-plist="$stage/Trove.app/Contents/Info.plist"
-/usr/libexec/PlistBuddy -c "Add :TroveCommit string $hash" "$plist" 2>/dev/null ||
-  /usr/libexec/PlistBuddy -c "Set :TroveCommit $hash" "$plist"
+ditto "$app" "$stage/Velkrys.app"
+# stamp the commit, readable with: defaults read Velkrys.app/Contents/Info VelkrysCommit
+plist="$stage/Velkrys.app/Contents/Info.plist"
+/usr/libexec/PlistBuddy -c "Add :VelkrysCommit string $hash" "$plist" 2>/dev/null ||
+  /usr/libexec/PlistBuddy -c "Set :VelkrysCommit $hash" "$plist"
 # stamping breaks the seal, so re-sign ad-hoc
-codesign --force --deep --sign - "$stage/Trove.app" >/dev/null ||
+codesign --force --deep --sign - "$stage/Velkrys.app" >/dev/null ||
   { echo "build-dmg-mac.sh: re-sign failed" >&2; exit 1; }
 # no build-machine path may be left in the binary (plan 22.0.4)
-bun scripts/path-leak-check.ts "$stage/Trove.app/Contents/MacOS/trove" ||
+bun scripts/path-leak-check.ts "$stage/Velkrys.app/Contents/MacOS/velkrys" ||
   { echo "build-dmg-mac.sh: binary carries a build-machine path" >&2; exit 1; }
 ln -s /Applications "$stage/Applications"
 
-dmg="$out/Trove-$hash${dirty:+-dirty}.dmg"
+dmg="$out/Velkrys-$hash${dirty:+-dirty}.dmg"
 rm -f "$dmg"
-hdiutil create -volname Trove -srcfolder "$stage" -ov -format UDZO "$dmg" >/dev/null
+hdiutil create -volname Velkrys -srcfolder "$stage" -ov -format UDZO "$dmg" >/dev/null
 
 echo "dmg:    $dmg"
 echo "size:   $(du -h "$dmg" | cut -f1) ($(stat -f %z "$dmg") bytes)"
@@ -85,7 +85,7 @@ hdiutil imageinfo "$dmg" | grep -E '^(Format|Format Description|Checksum Type|Si
 mnt="$work/mnt"
 mkdir -p "$mnt"
 hdiutil attach "$dmg" -nobrowse -readonly -noautoopen -mountpoint "$mnt" >/dev/null
-sig="$(codesign -dv "$mnt/Trove.app" 2>&1 || true)"
+sig="$(codesign -dv "$mnt/Velkrys.app" 2>&1 || true)"
 hdiutil detach "$mnt" >/dev/null
 mnt=""
 echo "$sig" | grep -E 'Signature|Identifier' || true

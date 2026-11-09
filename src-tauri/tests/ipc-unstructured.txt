@@ -89,3 +89,5 @@ open_apps_settings  # answers ()
 update_ready  # string, number, or Vec<String> response
 update_restart  # answers ()
 mapped_drives  # string, number, or Vec<String> response
+rename_drive  # answers one `drives` row (same shape as the drives fixture)
+eject_drive  # bool

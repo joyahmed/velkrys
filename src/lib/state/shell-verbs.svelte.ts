@@ -74,15 +74,15 @@ class ShellVerbsState {
   };
 
   /**
-   * Windows' own items for the slot in `trove` (plan 08 D.1): the shell's menu for `paths`
-   * (or the empty space of the folder `paths[0]`), minus what `trove` already shows. Past
+   * Windows' own items for the slot in `velkrys` (plan 08 D.1): the shell's menu for `paths`
+   * (or the empty space of the folder `paths[0]`), minus what `velkrys` already shows. Past
    * `SHELL_DEADLINE_MS` the answer is dropped and the slot says so in one greyed row; a shell
    * that refuses (a virtual folder, an unreadable path) leaves nothing behind.
    */
   menuRows = async (
     target: { paths: string[]; background: boolean; dir: string },
     extended: boolean,
-    trove: MenuItem[],
+    velkrys: MenuItem[],
   ): Promise<MenuItem[]> => {
     const started = performance.now();
     const got = await withDeadline(
@@ -99,7 +99,7 @@ class ShellVerbsState {
     }
     const { token, items } = got.value;
     logInfo(`shellMenu: ${items.length} rows in ${Math.round(performance.now() - started)} ms`);
-    return shellRows(items, trove, (id) => this.invokeMenu(token, id, target.dir));
+    return shellRows(items, velkrys, (id) => this.invokeMenu(token, id, target.dir));
   };
 
   invokeMenu = async (token: number, id: number, dir: string) => {

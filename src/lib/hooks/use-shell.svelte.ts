@@ -83,7 +83,7 @@ const applyExternalDrag = (e: ExternalDragEvent) => {
  */
 const applyLaunch = async (launch: Launch, tab = tabs.active) => {
   actions.cancelRename(); // a launch mid-rename would commit the box against the wrong folder
-  // A shell folder Trove does not show (Control Panel, Network, `shell:AppsFolder`…) goes back
+  // A shell folder Velkrys does not show (Control Panel, Network, `shell:AppsFolder`…) goes back
   // to Explorer; the tab stays where it is. This PC and the Recycle Bin are our own places.
   if (launch.path && classifyLaunchArg(launch.path) === 'explorer') {
     try {
@@ -203,7 +203,7 @@ export const useShell = () => {
     // its own `loaded` $state to decide whether to skip (`places.svelte.ts:18`,
     // `wsl:14`, `shell-verbs:16`, `settings:363`) and then *writes* it `true` when done. Read
     // inside an effect, that read is a dependency — so each completed load re-fired this whole
-    // effect, and `trove.log` showed the body running 4–5× per launch: every OS-facing
+    // effect, and `velkrys.log` showed the body running 4–5× per launch: every OS-facing
     // subscription below torn down and rebuilt three or four times before the window was up,
     // and `known_folders` / `drives` asked four times over. This is once-on-mount setup and
     // must not be reactive.

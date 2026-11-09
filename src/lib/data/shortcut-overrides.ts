@@ -45,7 +45,7 @@ export const RESERVED_CHORDS: Record<OsStyle, readonly Reserved[]> = {
     { chord: 'Alt+Shift+Tab', why: "Windows' app switcher" },
     { chord: 'Ctrl+Alt+Tab', why: "Windows' sticky app switcher" },
     { chord: 'Alt+F4', why: 'Close window in Windows' },
-    { chord: 'Alt+Space', why: "the window menu in Windows (Trove's Spotlight default too)" },
+    { chord: 'Alt+Space', why: "the window menu in Windows (Velkrys's Spotlight default too)" },
   ],
   linux: [
     { chord: 'Alt+Tab', why: "the Linux desktop's app switcher" },
@@ -118,7 +118,7 @@ export const rebindRefusal = (id: string, chord: string, where: Where = {}): str
       ? 'Properties'
       : hit.id !== undefined
         ? actionLabel(hit.id)
-        : 'a built-in Trove shortcut';
+        : 'a built-in Velkrys shortcut';
     return `${shown} is already ${name}. Pick another key, or change that one first.`;
   }
   for (const listId of LIST_OWNED) {

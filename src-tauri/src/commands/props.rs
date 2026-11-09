@@ -80,7 +80,7 @@ pub fn set_file_attributes(
         let name = file_name(&path);
         match e.kind() {
             std::io::ErrorKind::PermissionDenied => {
-                format!("Trove can't change \"{name}\": access is denied.")
+                format!("Velkrys can't change \"{name}\": access is denied.")
             }
             std::io::ErrorKind::NotFound => format!("\"{name}\" is no longer there."),
             _ => format!("Couldn't change \"{name}\"."),
@@ -168,7 +168,7 @@ mod tests {
         let said = file_props(row.clone()).unwrap_err();
         assert_eq!(
             said,
-            "\"a.txt\" is inside an archive, so Trove can't read it as a file."
+            "\"a.txt\" is inside an archive, so Velkrys can't read it as a file."
         );
         let said = set_file_attributes(row, Some(true), None).unwrap_err();
         assert!(said.starts_with("\"a.txt\" is inside an archive"), "{said}");
@@ -176,7 +176,7 @@ mod tests {
 
     #[test]
     fn props_of_a_missing_path_hides_the_os_text() {
-        let said = file_props("/no/such/dir/zz-trove-gone.bin".into()).unwrap_err();
-        assert_eq!(said, "\"zz-trove-gone.bin\" is no longer there.");
+        let said = file_props("/no/such/dir/zz-velkrys-gone.bin".into()).unwrap_err();
+        assert_eq!(said, "\"zz-velkrys-gone.bin\" is no longer there.");
     }
 }

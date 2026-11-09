@@ -113,3 +113,22 @@ describe('tabs.openForLaunch', () => {
     expect(tabs.openForLaunch('::{645FF040-5081-101B-9F08-00AA002F954E}')).not.toBeNull();
   });
 });
+
+describe('tabs.retargetPrefix', () => {
+  it('moves only the tabs inside the renamed mount point, in place', async () => {
+    const { vi } = await import('vitest');
+    const { pathLocation } = await import('$lib/utils/location');
+    while (tabs.list.length > 1) tabs.close(tabs.list.length - 1);
+    tabs.open('');
+    const [inside, outside] = tabs.list;
+    inside!.navigate = vi.fn(async () => {});
+    outside!.navigate = vi.fn(async () => {});
+    inside!.location = pathLocation('/Volumes/Old/a');
+    outside!.location = pathLocation('/Volumes/Other/a');
+    tabs.retargetPrefix('/Volumes/Old', '/Volumes/New');
+    expect(inside!.navigate).toHaveBeenCalledWith(pathLocation('/Volumes/New/a'), {
+      replace: true,
+    });
+    expect(outside!.navigate).not.toHaveBeenCalled();
+  });
+});

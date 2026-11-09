@@ -9,7 +9,7 @@
 //! menu does: terminal apps, D-Bus activation), else the entry's `Exec` with the files — no
 //! shell, as `apps_linux.rs` launches an app.
 //!
-//! Not modelled (GIO does them, Trove's list may be shorter): MIME subclasses (an app for
+//! Not modelled (GIO does them, Velkrys's list may be shorter): MIME subclasses (an app for
 //! `text/plain` is not offered for `text/x-python`) and aliases.
 //!
 //! Everything but the `env_*` functions is pure and tested on every OS.
@@ -255,7 +255,7 @@ pub fn open_argvs(
         .ok_or_else(|| format!("{} has no Exec line", entry.name))?;
     exec_with_files(exec, files).ok_or_else(|| {
         format!(
-            "{}'s Exec line needs a shell, which Trove never runs",
+            "{}'s Exec line needs a shell, which Velkrys never runs",
             entry.name
         )
     })

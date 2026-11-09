@@ -62,7 +62,7 @@ const ribbonGlyph = (loc: Location, underHome: boolean): GlyphName => {
 const BROWSER_SCHEMES: readonly string[] = ['http', 'https', 'ftp', 'mailto'];
 
 /** The event the bar listens for to open its ▾ list (`historyTarget`); the window's F4 sends it. */
-export const ADDRESS_HISTORY_EVENT = 'trove:address-history';
+export const ADDRESS_HISTORY_EVENT = 'velkrys:address-history';
 
 /** Explorer's keys for the address bar's ▾ list: Alt+↓ in the field, F4 (the window's shortcut too). */
 export const isHistoryKey = (e: Pick<KeyboardEvent, 'key' | 'altKey' | 'ctrlKey' | 'shiftKey'>) =>
@@ -159,7 +159,7 @@ export const useAddressBar = () => {
     const scheme = urlScheme(draft);
     if (scheme !== null && scheme !== 'file') {
       if (!BROWSER_SCHEMES.includes(scheme))
-        return void actions.notify(`Trove does not open ${scheme}: links`, 'error');
+        return void actions.notify(`Velkrys does not open ${scheme}: links`, 'error');
       try {
         await openUrl(draft.trim());
       } catch (e) {
@@ -170,7 +170,7 @@ export const useAddressBar = () => {
     const to = parseLocation(draft, home);
     if (sameLocation(to, tabs.active.location)) return;
     if (to.kind === 'path' && (await pathKind(to.path)) === 'file') {
-      // a zip / 7z / tar typed by its path opens inside Trove, as a double-click does
+      // a zip / 7z / tar typed by its path opens inside Velkrys, as a double-click does
       if (settings.archivesOpenInside && isBrowsableArchive(to.path))
         return void (await tabs.active.navigate(archiveLocation(to.path)));
       try {

@@ -67,7 +67,7 @@ const driveLetter = (path: string) => /^([A-Za-z]:)/.exec(path)?.[1] ?? null;
  * `own` is the OS's answer for the folder itself (`folderSpace`). Off Windows it wins: its
  * free bytes, and the name of the listed drive mounted at its root — or, for a volume the list
  * leaves out (a Mac disk image, a hidden Linux mount), the mount root's last part
- * (`/Volumes/TroveTest` → `TroveTest`). The longest-prefix guess alone named the boot disk.
+ * (`/Volumes/VelkrysTest` → `VelkrysTest`). The longest-prefix guess alone named the boot disk.
  */
 export const freeSpaceText = (
   path: string,

@@ -1,6 +1,6 @@
 //! macOS only: the app's life as a Mac app — the Dock icon brings a window back, closing the
-//! last window leaves the app running (⌘Q quits), and Finder's "Open With → Trove", a folder
-//! dropped on the Dock icon and `open -a Trove <dir>` open that folder.
+//! last window leaves the app running (⌘Q quits), and Finder's "Open With → Velkrys", a folder
+//! dropped on the Dock icon and `open -a Velkrys <dir>` open that folder.
 //!
 //! Windows and Linux never compile this file; their launches are argv and the single-instance
 //! handler in `lib.rs`.
@@ -63,7 +63,7 @@ pub fn launch_for_url(url: &Url, kind: impl Fn(&Path) -> Kind) -> Option<Launch>
 /// Set on `RunEvent::Ready`, which Tauri sends right after `setup`, so after the config's
 /// windows exist.
 ///
-/// ⛔ A cold start from Finder (`open -a Trove <dir>`, "Open With") delivers `Opened` BEFORE
+/// ⛔ A cold start from Finder (`open -a Velkrys <dir>`, "Open With") delivers `Opened` BEFORE
 /// `Ready`: no window exists yet, not even the config's `main`. Building `main` there made
 /// Tauri's own setup panic a moment later — "a webview with label `main` already exists" — and
 /// the launch died with no window. Seen on the bundle, 2026-10-07. Before `Ready`, park only.
@@ -240,7 +240,10 @@ mod tests {
             launch_for_url(&url("https://example.com/"), |_| Kind::Folder),
             None
         );
-        assert_eq!(launch_for_url(&url("trove://open"), |_| Kind::Folder), None);
+        assert_eq!(
+            launch_for_url(&url("velkrys://open"), |_| Kind::Folder),
+            None
+        );
     }
 
     #[test]
@@ -248,10 +251,10 @@ mod tests {
         let dir = std::env::temp_dir();
         assert_eq!(kind_on_disk(&dir), Kind::Folder);
         assert_eq!(
-            kind_on_disk(&dir.join("trove-no-such-entry-7f3a")),
+            kind_on_disk(&dir.join("velkrys-no-such-entry-7f3a")),
             Kind::Missing
         );
-        let file = dir.join(format!("trove-dock-test-{}", std::process::id()));
+        let file = dir.join(format!("velkrys-dock-test-{}", std::process::id()));
         std::fs::write(&file, b"x").unwrap();
         assert_eq!(kind_on_disk(&file), Kind::File);
         std::fs::remove_file(&file).unwrap();

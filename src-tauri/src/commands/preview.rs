@@ -29,7 +29,7 @@ pub fn refuse_archive_row(path: &str) -> Result<(), String> {
     log::warn!("archive row given to a real-path command");
     log::debug!("archive row given to a real-path command: {path:?}");
     Err(format!(
-        "\"{}\" is inside an archive, so Trove can't read it as a file.",
+        "\"{}\" is inside an archive, so Velkrys can't read it as a file.",
         name_of(path)
     ))
 }
@@ -43,7 +43,7 @@ pub fn read_failed(op: &str, path: &str, err: &std::io::Error) -> String {
     let name = name_of(path);
     match err.kind() {
         ErrorKind::NotFound => format!("\"{name}\" is no longer there."),
-        ErrorKind::PermissionDenied => format!("Trove can't read \"{name}\": access is denied."),
+        ErrorKind::PermissionDenied => format!("Velkrys can't read \"{name}\": access is denied."),
         _ => format!("Couldn't read \"{name}\"."),
     }
 }
@@ -59,7 +59,7 @@ mod tests {
         let said = read_text_head(row.to_string(), None).unwrap_err();
         assert_eq!(
             said,
-            "\"notes.txt\" is inside an archive, so Trove can't read it as a file."
+            "\"notes.txt\" is inside an archive, so Velkrys can't read it as a file."
         );
         assert!(!said.contains("NUL"), "{said}");
         // the archive's top-level row, `/` form
@@ -79,7 +79,7 @@ mod tests {
         let denied = Error::new(ErrorKind::PermissionDenied, "os error 13 raw");
         assert_eq!(
             read_failed("t", p, &denied),
-            "Trove can't read \"notes.txt\": access is denied."
+            "Velkrys can't read \"notes.txt\": access is denied."
         );
         let other = Error::other("disk on fire");
         assert_eq!(read_failed("t", p, &other), "Couldn't read \"notes.txt\".");
@@ -91,7 +91,7 @@ mod tests {
 
     #[test]
     fn a_missing_file_reads_as_gone_through_the_command() {
-        let said = read_text_head("/no/such/dir/zz-trove-missing.txt".into(), None).unwrap_err();
-        assert_eq!(said, "\"zz-trove-missing.txt\" is no longer there.");
+        let said = read_text_head("/no/such/dir/zz-velkrys-missing.txt".into(), None).unwrap_err();
+        assert_eq!(said, "\"zz-velkrys-missing.txt\" is no longer there.");
     }
 }

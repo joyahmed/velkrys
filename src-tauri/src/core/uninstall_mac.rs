@@ -1,7 +1,7 @@
 //! macOS uninstall (plan 18, Phase 3): move the `.app` bundle to the Trash, after pre-checks.
 //!
-//! Trove never deletes an app. The move goes through `Launcher::trash` → `ops::trash` →
-//! `trash_mac` (Finder first, so Put Back works; the file manager when macOS refuses Trove
+//! Velkrys never deletes an app. The move goes through `Launcher::trash` → `ops::trash` →
+//! `trash_mac` (Finder first, so Put Back works; the file manager when macOS refuses Velkrys
 //! Apple Events for Finder; a typed `NoRecycleBin` when both fail). A `NoRecycleBin` is NOT
 //! followed by a permanent delete here: the person is told to drag the app to the Trash in
 //! Finder (plan 18 rule "never a fake Trash").
@@ -18,7 +18,7 @@
 //! - not a real folder named `*.app` holding a `Contents` folder → `NotApp`.
 //! - not directly in `/Applications` or `~/Applications` (or one folder deeper, `Utilities`), or
 //!   on a network volume (`statfs` filesystem type) → `Elsewhere`.
-//! - the bundle Trove itself runs from → `Trove`.
+//! - the bundle Velkrys itself runs from → `Velkrys`.
 //! - running: any process whose executable (`proc_pidpath`), any argv entry (`KERN_PROCARGS2`:
 //!   the exec path and every argument, so `/bin/sh X.app/Contents/MacOS/run` counts) or working
 //!   folder (`PROC_PIDVNODEPATHINFO` `pvi_cdir`) lies inside the bundle, compared by path
@@ -57,8 +57,8 @@ pub trait Probe {
 pub struct Ctx<'a> {
     /// the Applications folders an app may be moved from (`/Applications`, `~/Applications`)
     pub roots: &'a [PathBuf],
-    /// Trove's own executable, to refuse the bundle holding it
-    pub trove_exe: Option<&'a Path>,
+    /// Velkrys's own executable, to refuse the bundle holding it
+    pub velkrys_exe: Option<&'a Path>,
     /// what counts as "part of macOS": `SYSTEM_ROOTS` live, a temp folder in tests
     pub system: &'a [PathBuf],
     pub probe: &'a dyn Probe,
@@ -127,8 +127,8 @@ pub fn may_trash(path: &Path, ctx: &Ctx) -> Removable {
     if !inside {
         return Removable::Elsewhere;
     }
-    if ctx.trove_exe.is_some_and(|exe| exe.starts_with(path)) {
-        return Removable::Trove;
+    if ctx.velkrys_exe.is_some_and(|exe| exe.starts_with(path)) {
+        return Removable::Velkrys;
     }
     Removable::Yes
 }
@@ -462,7 +462,7 @@ pub fn live_list() -> Result<Vec<Uninstallable>, String> {
     let system = system_roots();
     let ctx = Ctx {
         roots: &roots,
-        trove_exe: exe.as_deref(),
+        velkrys_exe: exe.as_deref(),
         system: &system,
         probe: &LiveProbe,
     };
@@ -484,7 +484,7 @@ mod tests {
         }
     }
     fn scratch(tag: &str) -> Scratch {
-        let dir = std::env::temp_dir().join(format!("trove-18b-{tag}-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("velkrys-18b-{tag}-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(dir.join("Applications")).unwrap();
         Scratch(std::fs::canonicalize(&dir).unwrap())
@@ -523,7 +523,7 @@ mod tests {
             path,
             &Ctx {
                 roots: &roots,
-                trove_exe: None,
+                velkrys_exe: None,
                 system: &system_roots(),
                 probe,
             },
@@ -536,7 +536,7 @@ mod tests {
             paths,
             &Ctx {
                 roots: &roots,
-                trove_exe: None,
+                velkrys_exe: None,
                 system: &system_roots(),
                 probe,
             },
@@ -555,12 +555,12 @@ mod tests {
     #[test]
     fn a_user_app_passes_and_goes_through_the_launcher_once() {
         let s = scratch("ok");
-        let app = fake_app(&s.0.join("Applications/TroveTestApp.app"));
+        let app = fake_app(&s.0.join("Applications/VelkrysTestApp.app"));
         let probe = FakeProbe::default();
         let fresh = rows(std::slice::from_ref(&app), &s.0, &probe);
         assert_eq!(fresh[0].removable, Removable::Yes);
-        assert_eq!(fresh[0].name, "TroveTestApp");
-        assert!(!fresh[0].id.contains("TroveTestApp"), "the id is opaque");
+        assert_eq!(fresh[0].name, "VelkrysTestApp");
+        assert!(!fresh[0].id.contains("VelkrysTestApp"), "the id is opaque");
         let rec = Recorder::new(Waited::Exited);
         let moved = trash_app(&fresh[0].id, &seen(&fresh[0]), &fresh, &probe, &rec).unwrap();
         assert_eq!(moved, app);
@@ -657,7 +657,7 @@ mod tests {
         let probe = FakeProbe::default();
         let ctx = Ctx {
             roots: &roots,
-            trove_exe: None,
+            velkrys_exe: None,
             system: &system,
             probe: &probe,
         };
@@ -760,11 +760,11 @@ mod tests {
             }
         }
         let s = scratch("scanerr");
-        let app = fake_app(&s.0.join("Applications/TroveTestApp.app"));
+        let app = fake_app(&s.0.join("Applications/VelkrysTestApp.app"));
         let fresh = rows(&[app], &s.0, &FakeProbe::default());
         let rec = Recorder::new(Waited::Exited);
         let r = trash_app(&fresh[0].id, &seen(&fresh[0]), &fresh, &Failing, &rec).unwrap_err();
-        assert_eq!(r.sentence(), "Quit TroveTestApp first.");
+        assert_eq!(r.sentence(), "Quit VelkrysTestApp first.");
         assert!(rec.calls.borrow().is_empty());
     }
 
@@ -823,25 +823,25 @@ mod tests {
     }
 
     #[test]
-    fn trove_refused() {
-        let s = scratch("trove");
-        let app = fake_app(&s.0.join("Applications/Trove.app"));
-        let exe = app.join("Contents/MacOS/Trove");
+    fn velkrys_refused() {
+        let s = scratch("velkrys");
+        let app = fake_app(&s.0.join("Applications/Velkrys.app"));
+        let exe = app.join("Contents/MacOS/Velkrys");
         let roots = [s.0.join("Applications")];
         let probe = FakeProbe::default();
         let ctx = Ctx {
             roots: &roots,
-            trove_exe: Some(&exe),
+            velkrys_exe: Some(&exe),
             system: &system_roots(),
             probe: &probe,
         };
-        assert_eq!(may_trash(&app, &ctx), Removable::Trove);
+        assert_eq!(may_trash(&app, &ctx), Removable::Velkrys);
     }
 
     #[test]
     fn running_app_refused() {
         let s = scratch("run");
-        let app = fake_app(&s.0.join("Applications/TroveTestApp.app"));
+        let app = fake_app(&s.0.join("Applications/VelkrysTestApp.app"));
         let fresh = rows(&[app], &s.0, &FakeProbe::default());
         let running = FakeProbe {
             running: true,
@@ -849,8 +849,8 @@ mod tests {
         };
         let rec = Recorder::new(Waited::Exited);
         let r = trash_app(&fresh[0].id, &seen(&fresh[0]), &fresh, &running, &rec).unwrap_err();
-        assert_eq!(r, Refusal::Running("TroveTestApp".into()));
-        assert_eq!(r.sentence(), "Quit TroveTestApp first.");
+        assert_eq!(r, Refusal::Running("VelkrysTestApp".into()));
+        assert_eq!(r.sentence(), "Quit VelkrysTestApp first.");
         assert!(rec.calls.borrow().is_empty());
     }
 

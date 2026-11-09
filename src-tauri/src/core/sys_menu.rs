@@ -2,7 +2,7 @@
 //! never from inside the browser process's call.
 //!
 //! The hang (seen twice on the screen 2026-10-21):
-//! Trove not holding Alt+Space, focus in the page, Alt+Space opens the window menu, Esc closes
+//! Velkrys not holding Alt+Space, focus in the page, Alt+Space opens the window menu, Esc closes
 //! it, and the page never answers again — CDP times out on `/json`, Close is ignored,
 //! `IsHungAppWindow` is false, the process has to be killed.
 //!
@@ -67,7 +67,7 @@ const WM_EXITMENULOOP: u32 = 0x0212;
 /// `TrackPopupMenu` loop sends TRUE), after which the webview must be handed the keyboard again.
 ///
 /// The second bug (screen, 2026-10-21): Alt+Space, Esc, and the page gets no keys until it is
-/// clicked once, though the Trove window stays foreground. When the menu loop ends Windows puts
+/// clicked once, though the Velkrys window stays foreground. When the menu loop ends Windows puts
 /// focus back on our top-level window, not on WebView2's child window, so keys go nowhere the
 /// page can see. The fix asks the webview for focus again — but only once the menu loop has
 /// fully returned (a message POSTED here, handled on a later loop iteration): a focus call made
@@ -91,7 +91,7 @@ const MF_SYSMENU: isize = 0x2000;
 /// is gone but the thread is still in menu mode (`GUI_INMENUMODE | GUI_SYSTEMMENUMODE`) —
 /// Windows drops back to "menu bar" level, the window menu's own item highlighted. Every key
 /// then belongs to the menu loop: ArrowDown reopens the window menu, the page sees nothing,
-/// and only a click or a second Esc ends it. Trove has no menu bar to move along, so the popup
+/// and only a click or a second Esc ends it. Velkrys has no menu bar to move along, so the popup
 /// closing is always the end: `EndMenu` (a flag and a posted message, no webview call) ends it.
 #[cfg_attr(not(windows), allow(dead_code))]
 pub fn ends_menu_after(msg: u32, lparam: isize) -> bool {
@@ -154,7 +154,7 @@ fn refocus_msg() -> u32 {
     use windows_sys::Win32::UI::WindowsAndMessaging::RegisterWindowMessageW;
     static MSG: OnceLock<u32> = OnceLock::new();
     *MSG.get_or_init(|| {
-        let name: Vec<u16> = "trove.sys_menu.refocus"
+        let name: Vec<u16> = "velkrys.sys_menu.refocus"
             .encode_utf16()
             .chain(Some(0))
             .collect();
@@ -177,7 +177,10 @@ fn end_menu_msg() -> u32 {
     use windows_sys::Win32::UI::WindowsAndMessaging::RegisterWindowMessageW;
     static MSG: OnceLock<u32> = OnceLock::new();
     *MSG.get_or_init(|| {
-        let name: Vec<u16> = "trove.sys_menu.end".encode_utf16().chain(Some(0)).collect();
+        let name: Vec<u16> = "velkrys.sys_menu.end"
+            .encode_utf16()
+            .chain(Some(0))
+            .collect();
         // SAFETY: `name` is a NUL-terminated UTF-16 string that outlives the call.
         unsafe { RegisterWindowMessageW(name.as_ptr()) }
     })
@@ -332,7 +335,7 @@ mod tests {
             CreateWindowExW, DefWindowProcW, DestroyWindow, PeekMessageW, RegisterClassW,
             SendMessageW, MSG, PM_REMOVE, WNDCLASSW, WS_OVERLAPPED,
         };
-        let name: Vec<u16> = "trove_test_sys_menu_window"
+        let name: Vec<u16> = "velkrys_test_sys_menu_window"
             .encode_utf16()
             .chain(Some(0))
             .collect();
@@ -394,7 +397,7 @@ mod tests {
             CreateWindowExW, DefWindowProcW, DestroyWindow, DispatchMessageW, PeekMessageW,
             RegisterClassW, SendMessageW, MSG, PM_REMOVE, WNDCLASSW, WS_OVERLAPPED,
         };
-        let name: Vec<u16> = "trove_test_sys_menu_refocus"
+        let name: Vec<u16> = "velkrys_test_sys_menu_refocus"
             .encode_utf16()
             .chain(Some(0))
             .collect();

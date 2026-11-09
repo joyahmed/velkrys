@@ -35,7 +35,7 @@ describe('settings sanitize', () => {
   // Alt+Space), but a chord already in settings.json is the person's and is kept as written —
   // including alt+space, which an older install saved and cannot be told apart from a choice.
   it('defaults to ctrl+alt+space on Linux and keeps a saved chord', () => {
-    vi.stubGlobal('window', { __TROVE_PLATFORM__: { os: 'linux', thisPcLabel: 'x' } });
+    vi.stubGlobal('window', { __VELKRYS_PLATFORM__: { os: 'linux', thisPcLabel: 'x' } });
     try {
       expect(sanitize(null).spotlightHotkey).toBe('ctrl+alt+space');
       expect(sanitize({ spotlightHotkey: '' }).spotlightHotkey).toBe('ctrl+alt+space');
@@ -258,7 +258,7 @@ describe('settings sanitize', () => {
     }
   });
 
-  // Joy's real file at %APPDATA%\com.joyahmed.trove\settings.json has no `folderViews` — it was
+  // Joy's real file at %APPDATA%\com.joyahmed.velkrys\settings.json has no `folderViews` — it was
   // written before per-folder view state existed. Its absence must be silent, and everything
   // else in it must come through untouched.
   it('a settings file written before per-folder views existed loads with none', () => {
@@ -641,7 +641,7 @@ describe('settings across windows', () => {
   it('a saved tab set and a rebind go out in the patch and land in the other window', () => {
     settings.takeChanges(settings.snapshot());
     const set = {
-      name: 'Trove work',
+      name: 'Velkrys work',
       tabs: ['/Users/alex/a', '/Users/alex/b'],
       active: 1,
       savedAt: 1,
@@ -684,5 +684,13 @@ describe('settings across windows', () => {
     expect(merged).toHaveBeenCalledTimes(1);
     expect(merged.mock.calls[0]?.[0]).toEqual({ theme: 'light', showHidden: true });
     expect(written).not.toHaveBeenCalled();
+  });
+});
+
+describe('settings.retargetPrefix', () => {
+  it('moves pins under a renamed mount point and leaves the others', () => {
+    settings.pins = ['/Volumes/Old', '/Volumes/Old/a', '/Volumes/Older/a', 'C:\\x'];
+    settings.retargetPrefix('/Volumes/Old', '/Volumes/New');
+    expect(settings.pins).toEqual(['/Volumes/New', '/Volumes/New/a', '/Volumes/Older/a', 'C:\\x']);
   });
 });

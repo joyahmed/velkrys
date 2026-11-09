@@ -1,11 +1,14 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   cancelFolderTotals,
   fileProps,
   setFileAttributes,
   startFolderTotals,
 } from '$lib/api/props';
+import { driveDetails } from '$lib/api/drive';
 import { details } from './details.svelte';
+import { panes } from './panes.svelte';
+import { places } from './places.svelte';
 import { selection } from './selection.svelte';
 import { tabs } from './tabs.svelte';
 import type { FileEntry } from '$lib/types/fs';
@@ -20,6 +23,11 @@ vi.mock('$lib/api/props', () => ({
   startFolderTotals: vi.fn(),
   cancelFolderTotals: vi.fn(async () => {}),
   onFolderTotals: vi.fn(async () => () => {}),
+}));
+vi.mock('$lib/api/drive', () => ({
+  driveDetails: vi.fn(),
+  renameDrive: vi.fn(),
+  ejectDrive: vi.fn(),
 }));
 vi.mock('$lib/api/fs', () => ({ readDir: vi.fn(async (path: string) => ({ path, entries: [] })) }));
 vi.mock('$lib/api/shell', () => ({
@@ -246,6 +254,76 @@ describe('details', () => {
       await details.sync();
       expect(startFolderTotals).not.toHaveBeenCalled();
       expect(details.totals).toMatchObject({ files: 1, folders: 1, bytes: 42, done: true });
+    });
+  });
+
+  describe('a drive', () => {
+    const info = {
+      path: 'D:\\',
+      label: 'Data',
+      driveType: 'fixed' as const,
+      fileSystem: 'NTFS',
+      totalBytes: 100,
+      freeBytes: 40,
+      letter: 'D:',
+      mountPoint: null,
+      device: null,
+      bus: null,
+      readOnly: false,
+    };
+
+    beforeEach(() => {
+      vi.mocked(driveDetails).mockReset();
+      vi.mocked(driveDetails).mockResolvedValue(info);
+      vi.mocked(startFolderTotals).mockClear();
+      vi.mocked(fileProps).mockClear();
+      places.drives = [{ path: 'D:\\', label: 'Data', totalBytes: 100, freeBytes: 40 }];
+      panes.open = null;
+    });
+    afterEach(() => {
+      places.drives = [];
+      panes.open = null;
+    });
+
+    it('a drive root is described, never walked', async () => {
+      tabs.active.location = pathLocation('D:\\');
+      await details.sync();
+      expect(driveDetails).toHaveBeenCalledWith('D:\\');
+      expect(details.drive).toEqual(info);
+      expect(details.props).toBeNull();
+      expect(fileProps).not.toHaveBeenCalled();
+      expect(startFolderTotals).not.toHaveBeenCalled();
+    });
+
+    it('a folder on the drive is an ordinary folder', async () => {
+      tabs.active.location = pathLocation('D:\\docs');
+      await details.sync();
+      expect(driveDetails).not.toHaveBeenCalled();
+      expect(details.drive).toBeNull();
+    });
+
+    it('showDrive opens the pane; a new selection clears it', async () => {
+      tabs.active.location = pathLocation('C:\\scratch');
+      await details.sync();
+      expect(details.drive).toBeNull();
+      details.showDrive('D:\\');
+      expect(panes.open).toBe('details');
+      await vi.waitFor(() => expect(details.drive).toEqual(info));
+      // a sync with nothing changed (the pane mounting) keeps it
+      await details.sync();
+      expect(details.drive).toEqual(info);
+      selection.click('C:\\scratch\\a.txt', { ctrl: false, shift: false }, []);
+      await details.sync();
+      expect(details.drive).toBeNull();
+      expect(details.props?.name).toBe('a.txt');
+    });
+
+    it('a failed read shows the message and no stale drive', async () => {
+      vi.mocked(driveDetails).mockRejectedValue('no answer');
+      tabs.active.location = pathLocation('D:\\');
+      await details.sync();
+      expect(details.drive).toBeNull();
+      expect(details.error).toBe('no answer');
     });
   });
 });

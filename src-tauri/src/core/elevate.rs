@@ -18,6 +18,10 @@ pub const OP_ARG: &str = "--elevated-op";
 /// Where the helper writes its answer.
 pub const RESULT_ARG: &str = "--result";
 
+/// What the person sees when they decline the UAC box (Windows error 1223).
+#[cfg(windows)]
+pub const CANCELLED: &str = "Retry as administrator was cancelled";
+
 /// The one operation an elevated helper may run. Nothing that lists or opens anything.
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde(
@@ -26,9 +30,21 @@ pub const RESULT_ARG: &str = "--result";
     rename_all_fields = "camelCase"
 )]
 pub enum ElevatedOp {
-    Rename { path: String, new_name: String },
-    CreateFolder { dir: String },
-    Delete { paths: Vec<String> },
+    Rename {
+        path: String,
+        new_name: String,
+    },
+    CreateFolder {
+        dir: String,
+    },
+    Delete {
+        paths: Vec<String>,
+    },
+    /// Sets a drive's label (`E:\`). Windows only.
+    SetVolumeLabel {
+        root: String,
+        label: String,
+    },
 }
 
 /// The helper's answer, as the temp file carries it.
@@ -59,7 +75,21 @@ pub fn perform(op: &ElevatedOp) -> io::Result<String> {
             let paths: Vec<PathBuf> = paths.iter().map(PathBuf::from).collect();
             ops::delete_permanently(&paths).map(|()| String::new())
         }
+        ElevatedOp::SetVolumeLabel { root, label } => set_volume_label(root, label),
     }
+}
+
+#[cfg(windows)]
+fn set_volume_label(root: &str, label: &str) -> io::Result<String> {
+    crate::core::drive_windows::set_label(root, label).map(|()| String::new())
+}
+
+#[cfg(not(windows))]
+fn set_volume_label(_root: &str, _label: &str) -> io::Result<String> {
+    Err(io::Error::new(
+        io::ErrorKind::Unsupported,
+        "renaming a drive this way is only on Windows",
+    ))
 }
 
 #[cfg_attr(not(windows), allow(dead_code))] // only Windows elevates; tested everywhere
@@ -118,7 +148,7 @@ pub fn read_outcome(file: &Path, exit: u32) -> Result<String, String> {
         Some(Outcome::Ok(s)) => Ok(s),
         Some(Outcome::Err(e)) => Err(e),
         None => Err(format!(
-            "the administrator copy of Trove gave no answer (exit code {exit})"
+            "the administrator copy of Velkrys gave no answer (exit code {exit})"
         )),
     }
 }
@@ -147,7 +177,7 @@ pub fn run_elevated(op: &ElevatedOp) -> Result<String, String> {
         .map(|d| d.as_nanos())
         .unwrap_or(0);
     let result = std::env::temp_dir().join(format!(
-        "trove-elevated-{}-{stamp}.json",
+        "velkrys-elevated-{}-{stamp}.json",
         std::process::id()
     ));
     let params = format!(
@@ -172,7 +202,7 @@ pub fn run_elevated(op: &ElevatedOp) -> Result<String, String> {
     if ok == 0 || info.hProcess.is_null() {
         let err = io::Error::last_os_error();
         return Err(match err.raw_os_error() {
-            Some(1223) => "Retry as administrator was cancelled".into(),
+            Some(1223) => CANCELLED.into(),
             _ => err.to_string(),
         });
     }
@@ -198,7 +228,7 @@ mod tests {
     use super::*;
 
     fn tmp(name: &str) -> PathBuf {
-        let d = std::env::temp_dir().join(format!("trove-elev-{name}-{}", std::process::id()));
+        let d = std::env::temp_dir().join(format!("velkrys-elev-{name}-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&d);
         std::fs::create_dir_all(&d).unwrap();
         d
@@ -228,6 +258,27 @@ mod tests {
         );
         let op: ElevatedOp = serde_json::from_str(r#"{"kind":"createFolder","dir":"d"}"#).unwrap();
         assert_eq!(op, ElevatedOp::CreateFolder { dir: "d".into() });
+        let json = r#"{"kind":"setVolumeLabel","root":"E:\\","label":"X"}"#;
+        let op: ElevatedOp = serde_json::from_str(json).unwrap();
+        assert_eq!(
+            op,
+            ElevatedOp::SetVolumeLabel {
+                root: "E:\\".into(),
+                label: "X".into()
+            }
+        );
+        assert_eq!(serde_json::to_string(&op).unwrap(), json);
+    }
+
+    #[test]
+    fn a_label_op_survives_the_hex_round_trip() {
+        let op = ElevatedOp::SetVolumeLabel {
+            root: "E:\\".into(),
+            label: "My \"Disk\" ü".into(),
+        };
+        let hex = encode(&op);
+        assert!(hex.bytes().all(|b| b.is_ascii_hexdigit()));
+        assert_eq!(decode(&hex), Some(op));
     }
 
     #[test]
@@ -239,8 +290,11 @@ mod tests {
 
     #[test]
     fn a_normal_start_is_not_the_helper() {
-        assert_eq!(helper_main(&["trove.exe".into()]), None);
-        assert_eq!(helper_main(&["trove.exe".into(), r"C:\docs".into()]), None);
+        assert_eq!(helper_main(&["velkrys.exe".into()]), None);
+        assert_eq!(
+            helper_main(&["velkrys.exe".into(), r"C:\docs".into()]),
+            None
+        );
     }
 
     #[test]
@@ -251,7 +305,7 @@ mod tests {
             dir: d.to_string_lossy().into_owned(),
         };
         let args = vec![
-            "trove.exe".into(),
+            "velkrys.exe".into(),
             OP_ARG.into(),
             encode(&op),
             RESULT_ARG.into(),

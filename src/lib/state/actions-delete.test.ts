@@ -365,7 +365,7 @@ describe('Delete where the backend says there is no Recycle Bin', () => {
     const run = actions.deleteSelected();
     await settle();
     expect(confirm.pending?.message).toMatch(
-      /^macOS did not let Trove use the (Trash|Recycle Bin) — permanently delete this file\?$/,
+      /^macOS did not let Velkrys use the (Trash|Recycle Bin) — permanently delete this file\?$/,
     );
     confirm.answer(false);
     await run;

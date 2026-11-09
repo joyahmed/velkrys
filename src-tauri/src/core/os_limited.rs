@@ -9,7 +9,7 @@
 //!
 //! The Trash *view* on macOS does not come through here: `recycle_mac` reads `~/.Trash` as a
 //! folder, and the undo of a Delete (`restore_from_trash`) does not come through here either: it
-//! moves back what `trash_mac` recorded when Trove sent it (`trash_mac::put_back`). What is left on
+//! moves back what `trash_mac` recorded when Velkrys sent it (`trash_mac::put_back`). What is left on
 //! this Mac twin is the undo of a Replace (`undo_replace`, `bin_readable`, `transfer::TrashBin`),
 //! which still needs to read the Trash — so it answers with a sentence that says so, rather than an
 //! empty list: an empty Trash that is really "I cannot look" is exactly the silent shape plan 8
@@ -20,7 +20,7 @@ pub use trash::os_limited::{list, purge_all, restore_all};
 
 #[cfg(target_os = "macos")]
 mod mac {
-    const WHY: &str = "Trove cannot put items back from the Trash on macOS. Drag them out of the Trash in Finder instead.";
+    const WHY: &str = "Velkrys cannot put items back from the Trash on macOS. Drag them out of the Trash in Finder instead.";
 
     fn unsupported() -> trash::Error {
         trash::Error::Unknown {

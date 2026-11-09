@@ -72,6 +72,10 @@ pub fn parse_user_dirs(text: &str, home: &Path) -> Vec<(&'static str, PathBuf)> 
 pub struct DriveRoot {
     pub path: String,
     pub network: bool,
+    /// The device behind it (`/dev/sdb1`, `/dev/disk4s1`), when the mount table says (plan 23).
+    pub source: Option<String>,
+    /// The file system type as the mount table spells it (`vfat`, `ext4`, `msdos`, `apfs`).
+    pub fstype: Option<String>,
 }
 
 impl DriveRoot {
@@ -79,6 +83,8 @@ impl DriveRoot {
         Self {
             path: path.to_string(),
             network: false,
+            source: None,
+            fstype: None,
         }
     }
 }
@@ -169,6 +175,13 @@ pub fn linux_drive_roots(mounts: &str, user: &str) -> Vec<DriveRoot> {
             continue;
         };
         let point = unescape_mount(point);
+        // `/` is always listed; the table says what is behind it (the last `/` row wins, as
+        // the topmost mount does)
+        if point == "/" {
+            out[0].source = Some(source.to_string());
+            out[0].fstype = Some(fstype.to_string());
+            continue;
+        }
         let leaf_under = |prefix: &str| {
             point
                 .strip_prefix(prefix)
@@ -184,6 +197,8 @@ pub fn linux_drive_roots(mounts: &str, user: &str) -> Vec<DriveRoot> {
             out.push(DriveRoot {
                 path: point,
                 network: crate::core::mounts::is_network_fs(fstype),
+                source: Some(source.to_string()),
+                fstype: Some(fstype.to_string()),
             });
         }
     }
@@ -259,6 +274,10 @@ const MAC_NOT_A_DRIVE: &[&str] = &["autofs", "devfs"];
 pub fn mac_drive_roots(mounts: &[MacMount], images: &[String]) -> Vec<DriveRoot> {
     let root_source = mounts.iter().find(|m| m.point == "/").map(|m| &m.source);
     let mut out = vec![DriveRoot::local("/")];
+    if let Some(m) = mounts.iter().find(|m| m.point == "/") {
+        out[0].source = Some(m.source.clone());
+        out[0].fstype = Some(m.fstype.clone());
+    }
     for m in mounts {
         let Some(name) = m.point.strip_prefix("/Volumes/") else {
             continue;
@@ -277,6 +296,8 @@ pub fn mac_drive_roots(mounts: &[MacMount], images: &[String]) -> Vec<DriveRoot>
             out.push(DriveRoot {
                 path: m.point.clone(),
                 network: crate::core::mounts::is_network_fs(&m.fstype),
+                source: Some(m.source.clone()),
+                fstype: Some(m.fstype.clone()),
             });
         }
     }
@@ -596,6 +617,25 @@ process ID      : 1234
             .map(|r| r.path.as_str())
             .collect();
         assert_eq!(network, ["/Volumes/media"]);
+    }
+
+    #[test]
+    fn linux_drive_roots_keep_the_source_and_fstype() {
+        let roots = linux_drive_roots(UBUNTU_MOUNTS, "alex");
+        let by = |p: &str| roots.iter().find(|r| r.path == p).expect(p);
+        let root = by("/");
+        assert_eq!(root.source.as_deref(), Some("/dev/nvme0n1p2"));
+        assert_eq!(root.fstype.as_deref(), Some("ext4"));
+        let stick = by("/media/alex/KINGSTON USB");
+        assert_eq!(stick.source.as_deref(), Some("/dev/sda1"));
+        assert_eq!(stick.fstype.as_deref(), Some("vfat"));
+        // a Mac mount keeps them too
+        let mac = mac_drive_roots(&parse_mac_mount(MAC_MOUNT), &[]);
+        assert!(mac
+            .iter()
+            .filter(|r| r.path != "/")
+            .all(|r| r.source.is_some() && r.fstype.is_some()));
+        assert!(mac[0].source.is_some(), "the Mac root keeps its device");
     }
 
     #[test]

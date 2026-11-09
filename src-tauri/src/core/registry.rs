@@ -582,7 +582,7 @@ mod expand_tests {
     #[test]
     fn only_expand_sz_is_expanded() {
         let raw = r"%ProgramFiles%\7-Zip\Uninstall.exe".to_string();
-        // REG_SZ: Windows never expands it, so neither does Trove
+        // REG_SZ: Windows never expands it, so neither does Velkrys
         assert_eq!(expand_if(raw.clone(), false, &env), raw);
         assert_eq!(
             expand_if(raw, true, &env),
@@ -595,7 +595,7 @@ mod expand_tests {
 pub(crate) mod tests {
     use super::*;
 
-    /// Every scratch root shares the `Software\trove-test` parent and each guard deletes that
+    /// Every scratch root shares the `Software\velkrys-test` parent and each guard deletes that
     /// parent once it is empty; tests run on parallel threads, so the guards serialize on this
     /// lock or one deletes the parent between another's create and write.
     pub(crate) static SCRATCH_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
@@ -605,7 +605,7 @@ pub(crate) mod tests {
         SCRATCH_LOCK.lock().unwrap_or_else(|e| e.into_inner())
     }
 
-    /// A throw-away root under HKCU\Software\trove-test, deleted on drop. Nothing in
+    /// A throw-away root under HKCU\Software\velkrys-test, deleted on drop. Nothing in
     /// these tests goes anywhere near HKCU\Software\Classes.
     pub(crate) struct Scratch(
         pub String,
@@ -619,7 +619,10 @@ pub(crate) mod tests {
                 .map(|d| d.subsec_nanos())
                 .unwrap_or(0);
             Scratch(
-                format!("Software\\trove-test\\{tag}-{}-{nanos}", std::process::id()),
+                format!(
+                    "Software\\velkrys-test\\{tag}-{}-{nanos}",
+                    std::process::id()
+                ),
                 scratch_lock(),
             )
         }
@@ -631,7 +634,7 @@ pub(crate) mod tests {
     impl Drop for Scratch {
         fn drop(&mut self) {
             let _ = delete_tree(&self.0);
-            let _ = delete_key_if_empty("Software\\trove-test");
+            let _ = delete_key_if_empty("Software\\velkrys-test");
         }
     }
 

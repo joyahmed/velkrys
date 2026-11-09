@@ -11,7 +11,7 @@ pub fn who_is_locking(paths: Vec<String>, error: String) -> Vec<LockedPath> {
 }
 
 /// Ask the program `pid` that holds `path` to close; `force` kills it. The frontend has asked
-/// the person first; this side still refuses Trove, Explorer, services and critical programs.
+/// the person first; this side still refuses Velkrys, Explorer, services and critical programs.
 #[tauri::command(async)]
 pub fn end_locking_app(path: String, pid: u32, force: bool) -> Result<Ended, String> {
     lockers::end(Path::new(&path), pid, force)

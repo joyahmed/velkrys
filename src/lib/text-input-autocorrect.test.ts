@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 // Plan 15 D.7 (Mac screen run 2026-10-21): WKWebView applies macOS autocorrect and
 // auto-capitalisation to any text field that does not opt out, so typing `trovetest` in
-// "Filter apps" became "Trove test" and `trovete` became "Trivet". Every Trove text field holds
+// "Filter apps" became "Velkrys test" and `trovete` became "Trivet". Every Velkrys text field holds
 // a name, path, filter, query or command, never prose, so every one must opt out. This scans the
 // sources, so a new field without the attributes fails here.
 const REQUIRED = [
@@ -35,7 +35,7 @@ describe('text fields opt out of autocorrect', () => {
     const names = textFields.map((f) => f.file);
     expect(names.some((n) => n.endsWith('ApplicationsView.svelte'))).toBe(true);
     expect(names.some((n) => n.endsWith('AddressBar.svelte'))).toBe(true);
-    expect(names.some((n) => n.endsWith('RenameBox.svelte'))).toBe(true);
+    expect(names.some((n) => n.endsWith('NameField.svelte'))).toBe(true);
     expect(names.some((n) => n.endsWith('PaletteInput.svelte'))).toBe(true);
     expect(names.some((n) => n.endsWith('SearchBox.svelte'))).toBe(true);
     expect(textFields.length).toBeGreaterThanOrEqual(8);

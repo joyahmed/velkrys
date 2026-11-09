@@ -6,6 +6,8 @@ import type { Location } from '$lib/types/location';
 import { startLocation } from '$lib/utils/location';
 import { settings } from '$lib/state/settings.svelte';
 import { classifyLaunchArg } from '$lib/utils/shell-arg';
+import { isUnderPath, retargetPath } from '$lib/utils/path';
+import { pathLocation } from '$lib/utils/location';
 
 const CLOSED_MAX = 10;
 
@@ -82,6 +84,17 @@ class TabsState {
     const [tab] = this.list.splice(from, 1);
     this.list.splice(to, 0, tab);
     this.activeIndex = this.list.indexOf(active);
+  }
+
+  /**
+   * A mount point changed name (a Mac drive renamed): every tab inside the old one follows to the
+   * same place under the new one, without a history entry. Other tabs are left alone.
+   */
+  retargetPrefix(from: string, to: string) {
+    for (const tab of this.list) {
+      if (tab.location.kind === 'path' && isUnderPath(tab.path, from))
+        void tab.navigate(pathLocation(retargetPath(tab.path, from, to)), { replace: true });
+    }
   }
 
   next = () => this.activate((this.activeIndex + 1) % this.list.length);

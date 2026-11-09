@@ -19,6 +19,7 @@ pub mod archive;
 pub mod default_handler;
 #[cfg(target_os = "macos")]
 pub mod dock;
+pub mod drive;
 pub mod fs;
 pub mod gallery;
 pub mod image_dims;

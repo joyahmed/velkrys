@@ -13,7 +13,7 @@ use crate::core::recent::parse_lnk_full;
 use crate::core::search::{self, SearchQuery};
 
 /// What a custom command runs to open files with an app: `program` plus an argument line in
-/// Trove's own tokens (`%path%`, `%paths%`), split like a shell by `utils/custom-commands.ts`.
+/// Velkrys's own tokens (`%path%`, `%paths%`), split like a shell by `utils/custom-commands.ts`.
 #[derive(Debug, Clone, Default, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct OpenWith {
@@ -415,7 +415,7 @@ mod tests {
     }
     fn scratch(tag: &str) -> Scratch {
         let dir = std::env::temp_dir().join(format!(
-            "trove-spotlight-{tag}-{}-{}",
+            "velkrys-spotlight-{tag}-{}-{}",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)

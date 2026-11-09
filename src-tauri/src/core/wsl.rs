@@ -309,8 +309,8 @@ pub fn open_terminal(path: &str) -> std::io::Result<()> {
                 )
             })?
         };
-        // Detached: own process group and no stdio, so it outlives Trove; a thread reaps it when
-        // it exits so a closed terminal does not linger as a zombie while Trove runs.
+        // Detached: own process group and no stdio, so it outlives Velkrys; a thread reaps it when
+        // it exits so a closed terminal does not linger as a zombie while Velkrys runs.
         let mut child = Command::new(program)
             .args(args)
             .current_dir(path)

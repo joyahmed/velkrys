@@ -231,7 +231,7 @@ pub(crate) fn map_codes(word: &str, files: (&str, &str)) -> (Option<String>, boo
     (keep.then_some(out), file_code)
 }
 
-/// A word as Trove's `splitArgs` reads it back: quoted when it holds whitespace or a quote.
+/// A word as Velkrys's `splitArgs` reads it back: quoted when it holds whitespace or a quote.
 /// `None` for a quoted word ending in `\`: `splitArgs` would read the closing `\"` as a literal
 /// quote and lose the end of the word, and it has no other way to write one.
 fn quote(word: &str) -> Option<String> {
@@ -246,7 +246,7 @@ fn quote(word: &str) -> Option<String> {
 }
 
 /// What a custom command runs to open files with this entry: the first `Exec` word as the
-/// program, the rest as the argument line with field codes mapped to Trove's tokens.
+/// program, the rest as the argument line with field codes mapped to Velkrys's tokens.
 ///
 /// ⛔ Flatpak's `@@u … @@` markers stay verbatim around the token: `flatpak run
 /// --file-forwarding` needs them to pass the file through the document portal. Snap entries
@@ -309,7 +309,7 @@ pub fn launch_argv(path: &str, entry: &DesktopEntry, has_gio: bool) -> Result<Ve
         .ok_or_else(|| format!("{} has no Exec line", entry.name))?;
     exec_argv(exec).ok_or_else(|| {
         format!(
-            "{}'s Exec line needs a shell, which Trove never runs",
+            "{}'s Exec line needs a shell, which Velkrys never runs",
             entry.name
         )
     })
@@ -755,7 +755,7 @@ mod tests {
         }
     }
     fn scratch(tag: &str) -> Scratch {
-        let dir = std::env::temp_dir().join(format!("trove-17-{tag}-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("velkrys-17-{tag}-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         Scratch(dir)
@@ -987,7 +987,7 @@ NoDisplay=true
     }
 
     #[test]
-    fn exec_lines_map_to_trove_commands() {
+    fn exec_lines_map_to_velkrys_commands() {
         let ow = |p: &str, a: &str| {
             Some(OpenWith {
                 program: p.into(),

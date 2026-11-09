@@ -23,25 +23,30 @@ const node = (label: string, id: number, extra: Partial<ShellMenuItem> = {}): Sh
   ...extra,
 });
 const sep = (): ShellMenuItem => node('', 0, { separator: true });
-const troveItem = (label: string): MenuItem => ({ kind: 'item', key: label, label, run: () => 0 });
+const velkrysItem = (label: string): MenuItem => ({
+  kind: 'item',
+  key: label,
+  label,
+  run: () => 0,
+});
 const labels = (items: MenuItem[]) => items.map((i) => (i.kind === 'divider' ? '---' : i.label));
 
-const trove: MenuItem[] = [
-  troveItem('Open'),
+const velkrys: MenuItem[] = [
+  velkrysItem('Open'),
   {
     kind: 'submenu',
     key: 'open-with',
     label: 'Open with',
-    items: [troveItem('Choose another app…')],
+    items: [velkrysItem('Choose another app…')],
   },
-  troveItem('Open in Terminal'),
-  troveItem('Open with Code'),
+  velkrysItem('Open in Terminal'),
+  velkrysItem('Open with Code'),
   { kind: 'divider', key: 'd-shell' },
   loadingRow(),
 ];
 
 describe('shellRows', () => {
-  it('drops the verbs Trove already does and rows Trove already shows', () => {
+  it('drops the verbs Velkrys already does and rows Velkrys already shows', () => {
     const tree = [
       node('Open', 1, { verb: 'open' }),
       node('Open with Code', 2, { verb: '{1c6d}' }),
@@ -56,10 +61,19 @@ describe('shellRows', () => {
       sep(),
       node('Properties', 9, { verb: 'properties' }),
     ];
-    const rows = shellRows(tree, trove, () => 0);
+    const rows = shellRows(tree, velkrys, () => 0);
     expect(labels(rows)).toEqual(['Edit in Notepad', '---', 'Share']);
     const edit = rows[0];
     expect(edit.kind === 'item' && edit.iconSrc).toContain('menu/ab');
+  });
+
+  it("drops the shell's Eject: Velkrys's own row runs the drive eject", () => {
+    const rows = shellRows(
+      [node('Eject', 1, { verb: 'eject' }), node('Share', 2)],
+      velkrys,
+      () => 0,
+    );
+    expect(labels(rows)).toEqual(['Share']);
   });
 
   it('keeps submenus, maps ids to run, and drops a submenu its filtering emptied', async () => {
@@ -71,7 +85,7 @@ describe('shellRows', () => {
       node('Pointless', 0, { children: [node('Delete', 18, { verb: 'delete' })] }),
       node('Scan', 40, { enabled: false }),
     ];
-    const rows = shellRows(tree, trove, run);
+    const rows = shellRows(tree, velkrys, run);
     expect(labels(rows)).toEqual(['Send to', 'Scan']);
     const send = rows[0];
     if (send.kind !== 'submenu') throw new Error('Send to is a submenu');
@@ -98,22 +112,22 @@ describe('shellRows', () => {
 
 describe('fillSlot', () => {
   it('replaces the Loading row with the rows, in place', () => {
-    const filled = fillSlot(trove, [troveItem('Share'), troveItem('Send to')]);
+    const filled = fillSlot(velkrys, [velkrysItem('Share'), velkrysItem('Send to')]);
     expect(labels(filled).slice(-3)).toEqual(['---', 'Share', 'Send to']);
     expect(filled.some((i) => i.key === SHELL_SLOT)).toBe(false);
   });
 
   it('drops the slot and its divider when the shell had nothing new', () => {
-    expect(labels(fillSlot(trove, [])).at(-1)).toBe('Open with Code');
+    expect(labels(fillSlot(velkrys, [])).at(-1)).toBe('Open with Code');
   });
 
   it('shows the late note in the same slot', () => {
-    expect(labels(fillSlot(trove, [lateRow()])).at(-1)).toBe('Windows items took too long');
+    expect(labels(fillSlot(velkrys, [lateRow()])).at(-1)).toBe('Windows items took too long');
   });
 
   it('leaves a menu without a slot alone', () => {
-    const plain = [troveItem('Refresh')];
-    expect(fillSlot(plain, [troveItem('Share')])).toBe(plain);
+    const plain = [velkrysItem('Refresh')];
+    expect(fillSlot(plain, [velkrysItem('Share')])).toBe(plain);
   });
 });
 
@@ -121,7 +135,7 @@ describe('tidyDividers', () => {
   it('drops leading, trailing and doubled dividers', () => {
     const d = (key: string): MenuItem => ({ kind: 'divider', key });
     expect(
-      labels(tidyDividers([d('a'), troveItem('x'), d('b'), d('c'), troveItem('y'), d('e')])),
+      labels(tidyDividers([d('a'), velkrysItem('x'), d('b'), d('c'), velkrysItem('y'), d('e')])),
     ).toEqual(['x', '---', 'y']);
   });
 });

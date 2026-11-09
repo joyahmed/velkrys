@@ -3,7 +3,7 @@
 //! GNOME's Settings → Accessibility → Reduce animation flips GTK's `gtk-enable-animations`.
 //! WebKitGTK 2.52 picks the new value up for `matchMedia(...).matches` within a second, but it
 //! fires no `change` event and does not re-apply `@media (prefers-reduced-motion: reduce)` CSS
-//! until something else forces a style recalc (a window resize). So Trove listens to the GTK
+//! until something else forces a style recalc (a window resize). So Velkrys listens to the GTK
 //! setting itself, on the GTK main thread, and writes the answer onto the page as
 //! `<html data-reduced-motion="reduce|no-preference">`. `app.css` keys its reduced-motion rules
 //! on that attribute when it is present and on the media query when it is not — so Windows and
@@ -23,7 +23,7 @@ pub fn script(animations_enabled: bool) -> String {
 }
 
 /// Hook `notify::gtk-enable-animations` once for the whole app. Must run on the GTK main thread
-/// (tauri's `setup` does); every open Trove window gets the new value when it changes.
+/// (tauri's `setup` does); every open Velkrys window gets the new value when it changes.
 #[cfg(target_os = "linux")]
 pub fn watch(app: &tauri::AppHandle) {
     use gtk::prelude::GtkSettingsExt;

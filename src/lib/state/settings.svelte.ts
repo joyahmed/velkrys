@@ -12,6 +12,7 @@ import {
 } from '$lib/data/file-columns';
 import type { KnownFolderKey } from '$lib/types/shell';
 import type { CommandScope, CustomCommand } from '$lib/types/shell-verbs';
+import { retargetPath } from '$lib/utils/path';
 import { seedCommandsFor } from '$lib/utils/custom-commands';
 import { sanitizeFolderViews, type FolderView } from '$lib/utils/folder-views';
 import { sanitizeTabSets, type TabSet } from '$lib/utils/tab-sets';
@@ -126,9 +127,9 @@ export interface Settings {
   palettePreview: boolean;
   /** its width in px, dragged at its left edge; `PALETTE_PREVIEW_WIDTH` bounds it */
   palettePreviewWidth: number;
-  /** double-click a zip / 7z / tar opens it inside Trove, not in another app */
+  /** double-click a zip / 7z / tar opens it inside Velkrys, not in another app */
   archivesOpenInside: boolean;
-  /** "I'm coming from": the words and the extra shortcut set; 'native' = the OS Trove runs on */
+  /** "I'm coming from": the words and the extra shortcut set; 'native' = the OS Velkrys runs on */
   comingFrom: ComingFrom;
   /** the Size column counts folders: off, on local drives only, or everywhere */
   folderSizes: FolderSizesChoice;
@@ -218,7 +219,7 @@ const DEFAULTS: Settings = {
   //   alt+space          registers, fires  ← chosen
   //   ctrl+shift+space   registers, fires
   //   ctrl+space         registers, fires
-  // ⚠️ alt+space has a price and it is deliberate: while Trove holds the chord, Alt+Space no
+  // ⚠️ alt+space has a price and it is deliberate: while Velkrys holds the chord, Alt+Space no
   // longer opens the window menu in other apps. Joy weighed that and picked it. See
   // utils/hotkeys.ts, whose note says the same thing to anyone choosing in Settings.
   // Linux gets ctrl+alt+space instead: GNOME holds Alt+Space (`defaultSpotlightHotkey`).
@@ -533,7 +534,7 @@ class SettingsState {
    * This window's values are the person's, not the shipped defaults: true after `load`, and in
    * the Spotlight window (which never loads) once it has read the file or heard a live change.
    * Until then the theme is only System's answer, so use-theme must not store it for the next
-   * window (`trove-theme`) — that would overwrite a real Light/Dark choice with a guess.
+   * window (`velkrys-theme`) — that would overwrite a real Light/Dark choice with a guess.
    */
   settled = $state(false);
   /** no settings file existed when we loaded: the first run on this machine */
@@ -808,6 +809,11 @@ class SettingsState {
     const i = this.pins.indexOf(path);
     if (i >= 0) this.pins.splice(i, 1);
     else this.pins.push(path);
+  }
+
+  /** A drive's mount point changed name (macOS): pins under the old one follow to the new one. */
+  retargetPrefix(from: string, to: string) {
+    this.pins = this.pins.map((p) => retargetPath(p, from, to));
   }
 
   isKnownFolderHidden(key: KnownFolderKey) {

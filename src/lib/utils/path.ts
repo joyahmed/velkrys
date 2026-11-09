@@ -207,3 +207,30 @@ export const fromLinuxForm = (text: string): string | null => {
   if (!m) return null;
   return wslJoin(m[1], m[2].split('/').filter(Boolean));
 };
+
+/**
+ * What lies below `root` in `path`: `''` for the root itself, `docs\a.txt` for `root\docs\a.txt`,
+ * `null` when `path` is elsewhere (`/Volumes/Backup2` is not inside `/Volumes/Backup`). Compared
+ * by `pathKey`. A root with no name of its own (`/`) holds everything and is not asked here.
+ */
+export const relativeUnder = (path: string, root: string, platform?: Platform): string | null => {
+  const base = pathKey(root.replace(TRAILING_SEPS, ''), platform);
+  if (base === '') return null;
+  const key = pathKey(path, platform);
+  if (key === base || key === `${base}${SEP}` || key === `${base}/`) return '';
+  if (!key.startsWith(base) || !ANY_SEP.test(key[base.length] ?? '')) return null;
+  return path.slice(base.length + 1);
+};
+
+/** Whether `path` is `root` or lies inside it. */
+export const isUnderPath = (path: string, root: string, platform?: Platform): boolean =>
+  relativeUnder(path, root, platform) !== null;
+
+/** `path` moved with its root: `/Volumes/Old/a` → `/Volumes/New/a`; a path elsewhere is returned as is. */
+export const retargetPath = (path: string, from: string, to: string, platform?: Platform) => {
+  const rest = relativeUnder(path, from, platform);
+  if (rest === null) return path;
+  if (rest === '') return to;
+  const sep = path[path.length - rest.length - 1];
+  return `${to.replace(TRAILING_SEPS, '')}${sep}${rest}`;
+};

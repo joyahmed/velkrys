@@ -1,5 +1,5 @@
 //! Windows: what Settings → Installed apps would list, read from the three Uninstall keys, and
-//! the `UninstallString` split into a program Trove can start safely (plan 18, 1.2-1.3).
+//! the `UninstallString` split into a program Velkrys can start safely (plan 18, 1.2-1.3).
 //!
 //! The parsers are pure and tested on every OS; only `list()` touches the registry.
 //!
@@ -35,8 +35,8 @@ pub struct Ctx<'a> {
     /// lower-cased folders that are never an app's own folder: `%ProgramFiles%`,
     /// `%ProgramFiles(x86)%`, `%LOCALAPPDATA%\Programs`, `%SystemRoot%`, the user profile
     pub shared_roots: Vec<String>,
-    /// lower-cased folder of Trove's own exe
-    pub trove_dir: String,
+    /// lower-cased folder of Velkrys's own exe
+    pub velkrys_dir: String,
 }
 
 /// `C:\X\` / `"C:\X"` → `c:\x`: lower-cased, unquoted, no trailing slash, `/` read as `\`.
@@ -96,7 +96,7 @@ fn icon_file(icon: &str) -> &str {
 /// - `MsiExec.exe /X{…}`, `rundll32.exe …` — a bare name resolves to `%SystemRoot%\System32\`
 ///   only, never the current folder or `PATH`.
 ///
-/// `None` = no uninstaller Trove will start. The program must exist, be drive-absolute and be an
+/// `None` = no uninstaller Velkrys will start. The program must exist, be drive-absolute and be an
 /// `.exe` (a quoted script or shortcut would run through its file association).
 pub fn split_command(s: &str, exists: &dyn Fn(&str) -> bool, system_root: &str) -> Option<Command> {
     let s = s.trim_start();
@@ -244,8 +244,8 @@ pub fn row_to_app(view: View, key: &str, row: &RegRow, ctx: &Ctx) -> Option<Unin
     } else {
         location
     };
-    let removable = if !ctx.trove_dir.is_empty() && own_dir == ctx.trove_dir {
-        Removable::Trove
+    let removable = if !ctx.velkrys_dir.is_empty() && own_dir == ctx.velkrys_dir {
+        Removable::Velkrys
     } else if row.no_remove == Some(1) {
         Removable::System
     } else if command.is_none() {
@@ -309,7 +309,7 @@ const VIEWS: [(View, crate::core::registry::Hive, &str); 3] = {
     ]
 };
 
-/// The machine's context: env roots and Trove's folder.
+/// The machine's context: env roots and Velkrys's folder.
 #[cfg(windows)]
 fn live_roots() -> (String, Vec<String>, String) {
     let env = |n: &str| std::env::var(n).unwrap_or_default();
@@ -338,24 +338,24 @@ fn live_roots() -> (String, Vec<String>, String) {
     .filter(|r| !r.is_empty())
     .map(|r| norm_dir(r))
     .collect();
-    let trove_dir = std::env::current_exe()
+    let velkrys_dir = std::env::current_exe()
         .ok()
         .and_then(|p| p.parent().map(|d| norm_dir(&d.to_string_lossy())))
         .unwrap_or_default();
-    (system_root, roots, trove_dir)
+    (system_root, roots, velkrys_dir)
 }
 
 /// Every program the three Uninstall keys list, as Settings would show it. Reads only.
 #[cfg(windows)]
 pub fn list() -> Result<Vec<Uninstallable>, String> {
     use crate::core::registry::{read_dword_in, read_expand_sz_in, read_sz_in, subkeys_in};
-    let (system_root, shared_roots, trove_dir) = live_roots();
+    let (system_root, shared_roots, velkrys_dir) = live_roots();
     let exists = |p: &str| std::path::Path::new(p).is_file();
     let ctx = Ctx {
         exists: &exists,
         system_root,
         shared_roots,
-        trove_dir,
+        velkrys_dir,
     };
     let mut rows = Vec::new();
     for (view, hive, base) in VIEWS {
@@ -406,7 +406,7 @@ mod tests {
                 r"c:\windows".into(),
                 r"c:\users\alex".into(),
             ],
-            trove_dir: r"c:\program files\trove".into(),
+            velkrys_dir: r"c:\program files\velkrys".into(),
         }
     }
 
@@ -502,26 +502,26 @@ mod tests {
     }
 
     #[test]
-    fn trove_is_refused() {
-        let unins = r"C:\Program Files\Trove\uninstall.exe";
+    fn velkrys_is_refused() {
+        let unins = r"C:\Program Files\Velkrys\uninstall.exe";
         let e = files(&[unins]);
         let ctx = ctx_with(&e);
         let by_location = RegRow {
-            display_name: Some("Trove".into()),
-            install_location: Some(r"C:\Program Files\Trove".into()),
+            display_name: Some("Velkrys".into()),
+            install_location: Some(r"C:\Program Files\Velkrys".into()),
             uninstall_string: Some(format!("\"{unins}\"")),
             ..RegRow::default()
         };
-        let app = row_to_app(View::User, "Trove", &by_location, &ctx).unwrap();
-        assert_eq!(app.removable, Removable::Trove);
+        let app = row_to_app(View::User, "Velkrys", &by_location, &ctx).unwrap();
+        assert_eq!(app.removable, Removable::Velkrys);
         assert_eq!(app.command, None);
         // no InstallLocation: the uninstaller's own folder tells
         let by_program = RegRow {
             install_location: None,
             ..by_location
         };
-        let app = row_to_app(View::User, "Trove", &by_program, &ctx).unwrap();
-        assert_eq!(app.removable, Removable::Trove);
+        let app = row_to_app(View::User, "Velkrys", &by_program, &ctx).unwrap();
+        assert_eq!(app.removable, Removable::Velkrys);
     }
 
     #[test]

@@ -4,10 +4,10 @@
 // black box) however well the protocol answers Range requests. There the file is fetched through
 // the protocol (`<img>` and `fetch` load custom schemes fine) and handed to the player as a blob.
 // Windows and Mac keep the protocol URL and its ranged streaming.
-import { injected, onLinux, type TrovePlatform } from '$lib/utils/platform';
+import { injected, onLinux, type VelkrysPlatform } from '$lib/utils/platform';
 
 /** Whether the player must be given a `blob:` URL rather than the protocol URL. */
-export const needsBlobMedia = (platform: TrovePlatform | undefined = injected()): boolean =>
+export const needsBlobMedia = (platform: VelkrysPlatform | undefined = injected()): boolean =>
   onLinux(platform);
 
 /** The file behind `src` as a `blob:` URL (the caller revokes it), or `null` when the protocol

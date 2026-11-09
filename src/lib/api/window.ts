@@ -48,10 +48,10 @@ export const startDragging = () => win().startDragging();
  * (`commands::window_layout::snap_window`). Rejects on Wayland, where nothing can move.
  */
 export const snapWindow = (key: SnapKey) => invoke<void>('snap_window', { key });
-/** Windows' taskbar commands, for every Trove window at once. */
+/** Windows' taskbar commands, for every Velkrys window at once. */
 export type WindowLayout = 'cascade' | 'stacked' | 'side-by-side';
 /**
- * Cascade / stack / tile every shown Trove window on this window's monitor (Spotlight: on the
+ * Cascade / stack / tile every shown Velkrys window on this window's monitor (Spotlight: on the
  * main window's). Resolves to how many moved; rejects on Wayland, where nothing can move.
  */
 export const arrangeWindows = (layout: WindowLayout) =>

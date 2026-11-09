@@ -8,7 +8,7 @@
 //!   stale. Four archives at most — a hand-rolled LRU, no crate.
 //! - `open_inner`: one entry extracted (through the same safe engine as an extract job) into
 //!   `<cache root>/<hash>/name`, made read-only, never overwritten by a second open, and
-//!   cleaned by `clean_open_cache` only when old AND untouched since Trove wrote it.
+//!   cleaned by `clean_open_cache` only when old AND untouched since Velkrys wrote it.
 
 use std::collections::{BTreeMap, VecDeque};
 use std::fs;
@@ -34,7 +34,7 @@ pub struct IndexEntry {
 }
 
 /// macOS Finder's leftovers: the `__MACOSX/` resource-fork folder and `._name` AppleDouble
-/// files. Archive Utility hides them; so does Trove (taste Q6).
+/// files. Archive Utility hides them; so does Velkrys (taste Q6).
 fn is_mac_junk(parts: &[String]) -> bool {
     parts.first().is_some_and(|p| p == "__MACOSX") || parts.iter().any(|p| p.starts_with("._"))
 }
@@ -166,7 +166,7 @@ pub fn children<'a>(all: &'a [IndexEntry], inner: &str) -> Result<Vec<&'a IndexE
         .collect())
 }
 
-/// Name of the stamp beside a copy's folder: when Trove wrote the copy (mtime, ms).
+/// Name of the stamp beside a copy's folder: when Velkrys wrote the copy (mtime, ms).
 fn stamp_of(folder: &Path) -> PathBuf {
     folder.with_extension("stamp")
 }
@@ -231,7 +231,7 @@ pub fn open_inner(cache_root: &Path, archive: &Path, inner: &str) -> Result<Path
 pub const OPEN_CACHE_MAX_AGE: Duration = Duration::from_secs(7 * 24 * 60 * 60);
 
 /// Remove the open-inside copies older than `max_age` (by their stamp). A file whose mtime is
-/// no longer the one Trove wrote was changed by the person: it is KEPT, with its folder.
+/// no longer the one Velkrys wrote was changed by the person: it is KEPT, with its folder.
 /// `remove_file` per file and `remove_dir` on what is then empty — never `remove_dir_all`.
 /// Returns how many files were removed.
 pub fn clean_open_cache(cache_root: &Path, now: SystemTime, max_age: Duration) -> usize {
@@ -422,7 +422,7 @@ mod tests {
         let cache = root.join("cache").join("archive-open");
         let changed = open_inner(&cache, &zip, "a.txt").unwrap();
         let fresh = open_inner(&cache, &zip, "b.txt").unwrap();
-        // the person saved into it somehow: its mtime is no longer the one Trove wrote
+        // the person saved into it somehow: its mtime is no longer the one Velkrys wrote
         let mut perms = fs::metadata(&changed).unwrap().permissions();
         #[allow(clippy::permissions_set_readonly_false)]
         perms.set_readonly(false);

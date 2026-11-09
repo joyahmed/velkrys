@@ -55,16 +55,18 @@ describe('focus ring outside dialogs', () => {
 
 describe('checkbox', () => {
   it('uses the themed class, not the native accent-accent square', () => {
-    expect(toggle).toContain('class="trove-check"');
+    expect(toggle).toContain('class="velkrys-check"');
     expect(toggle).not.toContain('accent-accent');
   });
   it('is transparent with a visible border unticked, accent when ticked', () => {
-    expect(css).toMatch(/\.trove-check \{[^}]*appearance: none[^}]*background-color: transparent/s);
-    expect(css).toMatch(/\.trove-check \{[^}]*border: 1px solid var\(--color-text-secondary\)/s);
-    expect(css).toMatch(/\.trove-check:checked \{[^}]*background-color: var\(--color-accent\)/s);
+    expect(css).toMatch(
+      /\.velkrys-check \{[^}]*appearance: none[^}]*background-color: transparent/s,
+    );
+    expect(css).toMatch(/\.velkrys-check \{[^}]*border: 1px solid var\(--color-text-secondary\)/s);
+    expect(css).toMatch(/\.velkrys-check:checked \{[^}]*background-color: var\(--color-accent\)/s);
   });
   it('has forced-colors overrides', () => {
     const fc = css.slice(css.indexOf('@media (forced-colors: active)'));
-    expect(fc).toMatch(/\.trove-check:checked \{[^}]*Highlight/s);
+    expect(fc).toMatch(/\.velkrys-check:checked \{[^}]*Highlight/s);
   });
 });

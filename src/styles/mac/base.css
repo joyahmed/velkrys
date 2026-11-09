@@ -48,7 +48,7 @@
   --mac-knob-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.1), 0 1px 2.5px rgb(0 0 0 / 0.28);
 
   /* The app's accent follows the Mac one, so every `bg-accent` / `text-accent` / ring on a Mac
-     is the system blue instead of Trove's indigo. White ink on it in both themes. */
+     is the system blue instead of Velkrys's indigo. White ink on it in both themes. */
   --color-accent: var(--mac-accent);
   --color-accent-text: #ffffff;
 }

@@ -2,9 +2,9 @@
 //! looking at the mounts themselves.
 //!
 //! ⛔ Why this exists: on a Mac, the first time an app touches anything on an SMB/AFP/NFS/WebDAV
-//! volume, macOS stops and asks "Trove would like to access files on a network volume" (TCC).
+//! volume, macOS stops and asks "Velkrys would like to access files on a network volume" (TCC).
 //! A tester got that prompt in a release build without ever opening a share (2026-10). So nothing
-//! Trove does on its own — the drive list, a size walk, a search from `/`, the Trash — may step
+//! Velkrys does on its own — the drive list, a size walk, a search from `/`, the Trash — may step
 //! onto a network mount; only the person opening it may. On Linux the same rule keeps a dead
 //! NFS/CIFS/sshfs server from hanging a `statvfs` or a walk.
 //!
@@ -119,12 +119,12 @@ pub fn network_share_of(path: &Path, table: &[Mount]) -> Option<String> {
 
 /// Whether a filesystem type is the automounter. Stepping onto an `autofs` point (`/net`,
 /// `/home`, `/Network/Servers` on a Mac; systemd automounts on Linux) mounts whatever it maps,
-/// often a network share, so a walk Trove starts on its own never enters one either.
+/// often a network share, so a walk Velkrys starts on its own never enters one either.
 pub fn is_automount_fs(fstype: &str) -> bool {
     fstype.trim().eq_ignore_ascii_case("autofs")
 }
 
-/// The points in `table` a walk Trove starts never enters: network shares, automounts, and on a
+/// The points in `table` a walk Velkrys starts never enters: network shares, automounts, and on a
 /// Mac every mount the kernel flags `nobrowse` or automounted (read off `statfs.f_flags`, not
 /// guessed from the name).
 ///
@@ -293,7 +293,7 @@ pub fn reach_with(path: &str, drive_is_remote: impl Fn(char) -> bool) -> Reach {
 }
 
 /// `Reach` for `path` on this machine. Off Windows every path is `Local` here: the mount
-/// table above already keeps Trove's own walks off network mounts there.
+/// table above already keeps Velkrys's own walks off network mounts there.
 pub fn reach_of(path: &str) -> Reach {
     reach_with(path, drive_is_remote)
 }

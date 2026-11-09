@@ -44,7 +44,7 @@ pub const PALETTE_WINDOW: &str = "palette";
 /// merely swallowed was never established, and is not claimed.
 ///
 /// ⚠️ `alt+space` beats the window menu rather than losing to it, which is what makes it usable
-/// — but while Trove holds the chord, Alt+Space stops opening that menu in other apps. That
+/// — but while Velkrys holds the chord, Alt+Space stops opening that menu in other apps. That
 /// trade is stated in the Settings note too (`utils/hotkeys.ts`).
 ///
 /// ⛔ **Linux is `ctrl+alt+space`** (Joy's pick 2026-10-23): GNOME binds `<Alt>space` to its
@@ -215,7 +215,7 @@ pub fn set_hotkey_recording(on: bool) {
 ///
 /// ⛔ That case is `Ok`, not `Err`. `spotlight-bridge.svelte.ts` turns an `Err` into "refused",
 /// and Settings then will not save the chord — but it did register, and clearing the GNOME key
-/// makes it work with no change in Trove.
+/// makes it work with no change in Velkrys.
 ///
 /// ⛔ The old chord is released **before** the new one is tried, and restored if the new one is
 /// refused. Registering first would leave both live; not restoring would leave the person with
@@ -243,7 +243,7 @@ pub fn register_hotkey(app: AppHandle, chord: Option<String>) -> Result<Option<S
 
     match shortcuts.on_shortcut(wanted.as_str(), on_shortcut) {
         Ok(()) => {
-            // ⚠️ Logged on BOTH paths on purpose. This was invisible in trove.log, and the
+            // ⚠️ Logged on BOTH paths on purpose. This was invisible in velkrys.log, and the
             // silence cost a wrong diagnosis: a failed Win+Space looked like a *silent* failure
             // because the toast had faded before anyone looked and the log said nothing at all.
             log::info!("spotlight hotkey: registered {wanted}");
@@ -411,7 +411,7 @@ mod tests {
     }
 }
 
-/// Where the palette goes: centred over the Trove window's top third when that window is
+/// Where the palette goes: centred over the Velkrys window's top third when that window is
 /// showing and wide enough to hold it, else on the monitor under the cursor (the window is
 /// hidden in the tray, minimized, or narrower than the palette).
 fn placement(app: &AppHandle, win: &tauri::WebviewWindow) -> Option<PhysicalPosition<i32>> {

@@ -613,7 +613,7 @@ mod tests {
             println!("SKIP usn_tail: temp dir {} is not on C:", temp.display());
             return;
         }
-        let dir = temp.join(format!("trove-usn-{}", std::process::id()));
+        let dir = temp.join(format!("velkrys-usn-{}", std::process::id()));
         std::fs::create_dir_all(&dir).expect("make temp dir");
 
         let mut tail = match UsnTail::open(&dir) {

@@ -684,7 +684,7 @@ class TransfersState {
       // or a Replace whose old file sits in the bin, needs this run's job state (G.2).
       toRecord: (): UndoRecord =>
         outputs.length === 0
-          ? { kind: 'other', reason: 'it was still running when Trove closed' }
+          ? { kind: 'other', reason: 'it was still running when Velkrys closed' }
           : partial || outputs.some((o) => o.replaced !== undefined)
             ? {
                 kind: 'other',

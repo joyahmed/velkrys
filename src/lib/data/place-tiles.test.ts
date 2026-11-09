@@ -88,7 +88,7 @@ describe('Home', () => {
     expect(placeTileCount('home')).toBe(3);
   });
 
-  it('Recent is not empty where the OS has no recent files (a Mac), when Trove visited folders', () => {
+  it('Recent is not empty where the OS has no recent files (a Mac), when Velkrys visited folders', () => {
     // Mac: Home said "Recent (0)" while the palette listed "Folder X" under RECENT
     settings.pins = [];
     places.knownFolders = [];
@@ -147,7 +147,7 @@ describe('driveTile off Windows', () => {
   afterEach(() => vi.unstubAllGlobals());
 
   it('has no letter tag: the label, or the mount path with no label', () => {
-    vi.stubGlobal('window', { __TROVE_PLATFORM__: { os: 'macos', thisPcLabel: 'This Mac' } });
+    vi.stubGlobal('window', { __VELKRYS_PLATFORM__: { os: 'macos', thisPcLabel: 'This Mac' } });
     const mac = { ...drive('Macintosh HD', GB, GB), path: '/' };
     const labelOf = (d: ReturnType<typeof drive>) => {
       const t = driveTile(d);

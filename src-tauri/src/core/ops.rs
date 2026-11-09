@@ -350,7 +350,7 @@ pub fn delete_permanently(paths: &[PathBuf]) -> Result<()> {
 /// permanently with no undo. A place whose kind cannot be told is refused too (`Other`).
 ///
 /// On a Mac the move goes through `trash_mac`: Finder first (keeps Put Back, and can ask for the
-/// admin password an app in /Applications needs), the file manager when macOS refuses Trove Apple
+/// admin password an app in /Applications needs), the file manager when macOS refuses Velkrys Apple
 /// Events for Finder, and a [`NoRecycleBin`] (`Why::Denied`) when both fail — so the caller asks,
 /// never shows the raw AppleScript error. Where each item landed is recorded, for ⌘Z
 /// (`restore_from_trash`). Uninstall comes through here too (`LiveLauncher::trash`).
@@ -361,7 +361,7 @@ pub fn trash(paths: &[PathBuf]) -> Result<()> {
 
 /// The size a Replace takes the bin to be on a Windows volume whose bin has no `MaxCapacity`
 /// value (its size never set in Properties): 1 GiB. Windows' own default is a share of the disk
-/// Trove does not compute; a bigger old file is treated as "too big for the bin" — overwritten,
+/// Velkrys does not compute; a bigger old file is treated as "too big for the bin" — overwritten,
 /// with the warning — rather than risk the bin quietly deleting it for good.
 pub const REPLACE_BIN_GUESS: u64 = 1024 * 1024 * 1024;
 
@@ -434,7 +434,7 @@ pub enum Why {
     /// the batch is bigger than the bin's "Custom size": Windows would delete it for good
     #[cfg_attr(not(windows), allow(dead_code))]
     TooBig,
-    /// macOS refused the Trash to Trove: Finder's Apple Events are denied (-1743) and the file
+    /// macOS refused the Trash to Velkrys: Finder's Apple Events are denied (-1743) and the file
     /// manager's move failed too (`trash_mac`)
     #[cfg_attr(not(any(target_os = "macos", test)), allow(dead_code))]
     Denied,
@@ -460,7 +460,7 @@ impl std::fmt::Display for NoRecycleBin {
             Why::Denied => {
                 return write!(
                     f,
-                    "macOS did not let Trove use the Trash, so nothing more was moved: {path}"
+                    "macOS did not let Velkrys use the Trash, so nothing more was moved: {path}"
                 )
             }
             Why::NoBin => {}
@@ -592,7 +592,7 @@ mod bin_check {
                 Verdict::Off(place) => Ok(Some((place, Why::TurnedOff))),
                 Verdict::TooBig(place) => Ok(Some((place, Why::TooBig))),
                 Verdict::Unknown(place) => Err(Error::other(format!(
-                    "Trove cannot tell whether {place} has a Recycle Bin, so nothing was deleted: {}",
+                    "Velkrys cannot tell whether {place} has a Recycle Bin, so nothing was deleted: {}",
                     path.display()
                 ))),
             })
@@ -663,7 +663,7 @@ mod bin_check {
     /// (either hive) turns every bin off; per volume (by its GUID), `NukeOnDelete` turns it off
     /// and `MaxCapacity` (MB) is its size. A read that fails, or a volume with no GUID, is
     /// unknown. ⚠ No `MaxCapacity` value (never set in the Properties dialog) skips the size
-    /// check: Windows' default size is a share of the disk Trove does not compute. A Replace
+    /// check: Windows' default size is a share of the disk Velkrys does not compute. A Replace
     /// passes `unset_cap` (`REPLACE_BIN_GUESS`) to be judged against that size instead.
     pub(super) fn settings(
         root: &str,
@@ -886,7 +886,7 @@ mod bin_check {
     use Unplaced::{ByLetter, Strict};
 
     /// Where a path sits: on a volume (its root as Windows names it, and the place as a person
-    /// would), or somewhere the verdict is already plain (a share, a device Trove cannot read).
+    /// would), or somewhere the verdict is already plain (a share, a device Velkrys cannot read).
     pub(super) enum Spot {
         Volume { root: String, place: String },
         Not(Verdict),
@@ -1060,7 +1060,7 @@ mod tests {
     use std::fs;
 
     fn scratch(name: &str) -> PathBuf {
-        let dir = std::env::temp_dir().join(format!("trove-ops-{name}-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("velkrys-ops-{name}-{}", std::process::id()));
         let _ = fs::remove_dir_all(&dir);
         fs::create_dir_all(&dir).unwrap();
         dir
@@ -1560,7 +1560,7 @@ mod tests {
         fs::remove_dir_all(dir).unwrap();
     }
 
-    /// `C:\Users\…\Temp\trove-…` as `\\localhost\C$\Users\…`: a real SMB path to this disk.
+    /// `C:\Users\…\Temp\velkrys-…` as `\\localhost\C$\Users\…`: a real SMB path to this disk.
     #[cfg(windows)]
     fn via_admin_share(local: &Path, verbatim: bool) -> PathBuf {
         let s = local.to_string_lossy();
@@ -1652,7 +1652,7 @@ mod tests {
     fn trash_on_a_local_fixed_disk_still_goes_to_the_bin() {
         use crate::core::recycle::{list, purge};
         let dir = scratch("trash-local");
-        let name = format!("trove-bin-probe-{}.txt", std::process::id());
+        let name = format!("velkrys-bin-probe-{}.txt", std::process::id());
         let path = dir.join(&name);
         fs::write(&path, b"bin me").unwrap();
         trash(std::slice::from_ref(&path)).unwrap();
@@ -1808,7 +1808,7 @@ mod tests {
         }
 
         /// The folder as written is on C:; where it really is cannot be read. Only "it is not
-        /// there" keeps C:'s verdict; anything else is a place Trove cannot vouch for.
+        /// there" keeps C:'s verdict; anything else is a place Velkrys cannot vouch for.
         #[test]
         fn an_unresolvable_folder_is_unknown_unless_it_is_simply_gone() {
             let folder = Path::new(r"C:\Users\alex\link");
@@ -2050,7 +2050,7 @@ mod tests {
     #[ignore = "creates and removes a subst drive letter"]
     fn a_subst_drive_of_a_local_folder_keeps_its_bin() {
         let dir = scratch("trash-subst");
-        let name = format!("trove-subst-probe-{}.txt", std::process::id());
+        let name = format!("velkrys-subst-probe-{}.txt", std::process::id());
         fs::write(dir.join(&name), b"bin me").unwrap();
         let Some(letter) = ('H'..='Y')
             .rev()
@@ -2094,7 +2094,7 @@ mod tests {
             eprintln!("skip: no WSL distro installed");
             return;
         };
-        let tag = format!("trove-link-{}", std::process::id());
+        let tag = format!("velkrys-link-{}", std::process::id());
         let made = std::process::Command::new("wsl.exe")
             .args(["-d", &distro, "--", "sh", "-c"])
             .arg(format!(
@@ -2129,7 +2129,7 @@ mod tests {
             eprintln!("skip: no WSL distro installed");
             return;
         };
-        let probe = PathBuf::from(format!(r"\\wsl.localhost\{distro}\tmp\trove-probe"));
+        let probe = PathBuf::from(format!(r"\\wsl.localhost\{distro}\tmp\velkrys-probe"));
         if let Err(e) = fs::write(&probe, b"probe") {
             eprintln!("skip: cannot write {}: {e}", probe.display());
             return;
@@ -2167,7 +2167,7 @@ mod case_probe_tests {
 
     fn scratch(name: &str) -> PathBuf {
         let dir =
-            std::env::temp_dir().join(format!("trove-ops-probe-{name}-{}", std::process::id()));
+            std::env::temp_dir().join(format!("velkrys-ops-probe-{name}-{}", std::process::id()));
         let _ = fs::remove_dir_all(&dir);
         fs::create_dir_all(&dir).unwrap();
         dir

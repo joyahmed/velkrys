@@ -710,7 +710,7 @@ fn write_file(
     let partial = Partial {
         path: dir.join(ops::unique_name(
             dir,
-            &format!(".{name}.trove-partial"),
+            &format!(".{name}.velkrys-partial"),
             false,
         )),
         armed: true,

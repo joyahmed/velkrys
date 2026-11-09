@@ -104,9 +104,9 @@ mod tests {
     fn unknown_names_and_missing_paths_resolve_to_nothing() {
         assert_eq!(resolve_custom(""), None);
         assert_eq!(resolve_custom("   "), None);
-        assert_eq!(resolve_custom("trove-no-such-program-4f1c"), None);
+        assert_eq!(resolve_custom("velkrys-no-such-program-4f1c"), None);
         let missing = std::env::temp_dir()
-            .join("trove-no-such-dir-4f1c")
+            .join("velkrys-no-such-dir-4f1c")
             .join("x.exe");
         assert_eq!(resolve_custom(&missing.to_string_lossy()), None);
     }

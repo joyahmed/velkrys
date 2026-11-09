@@ -13,7 +13,7 @@ type Platform = Parameters<typeof onWindows>[0];
 
 export type ArchiveLocation = Extract<Location, { kind: 'archive' }>;
 
-/** Names Trove can browse inside: zip, 7z and the tar family, plus RAR in a build that reads it
+/** Names Velkrys can browse inside: zip, 7z and the tar family, plus RAR in a build that reads it
  * (`readsRar`). A bare `x.gz` is one compressed file, not a folder, so it is not one of them
  * (it still extracts). */
 const BROWSABLE = /\.(zip|7z|tar|tgz|txz|tzst|tar\.gz|tar\.xz|tar\.zst)$/i;

@@ -105,7 +105,7 @@ const singleQuoteEnd = (line: string, start: number): number => {
  *   and a literal quote, backslashes anywhere else stay as typed (so `C:\dir\x` is safe).
  *   Elsewhere only `\"` is special.
  * - single quotes group too, on Windows as well (CommandLineToArgvW has none, so this is
- *   Trove's own rule there): `'a b'` is one argument. A `'` opens a group only at the start of
+ *   Velkrys's own rule there): `'a b'` is one argument. A `'` opens a group only at the start of
  *   an argument and closes at a `'` that ends it, so `it's` stays `it's`; with no closing `'`
  *   the quote is just a character. Inside a single-quoted group nothing else is special.
  * - `""` and `''` are an empty argument; an empty or blank line is no arguments.

@@ -30,7 +30,7 @@ describe('PaletteSettings', () => {
   it('takes tab sets (M8) and rebinds (M7) from the explorer live, and keeps them over a stale file', () => {
     const s = fakeSettings();
     const sync = new PaletteSettings(s);
-    const set = { name: 'Trove work', tabs: ['/Users/alex/a'], active: 0, savedAt: 1 };
+    const set = { name: 'Velkrys work', tabs: ['/Users/alex/a'], active: 0, savedAt: 1 };
     // "Save tabs as…" and a rebind in the main window: its settings:changed patch
     sync.live({ tabSets: [set], shortcutOverrides: { 'open-home': 'Ctrl+Alt+J' } });
     expect(s.tabSets).toEqual([set]);

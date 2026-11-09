@@ -1,6 +1,6 @@
 //! What can be uninstalled, and the one seam every uninstall goes through (plan 18).
 //!
-//! Trove never removes an app itself: it starts the OS's own way (Windows: the app's
+//! Velkrys never removes an app itself: it starts the OS's own way (Windows: the app's
 //! `UninstallString`; Ubuntu: GNOME Software, else the removal command typed — not run — in a
 //! fresh terminal shell, `uninstall_linux.rs`; macOS: the bundle moved to the Trash, never
 //! deleted for good, `uninstall_mac.rs`) after the person said yes, then re-lists to say what
@@ -26,9 +26,9 @@ pub enum Removable {
     Yes,
     /// part of the OS (`NoRemove=1` on Windows; `Essential`/`required`/`important` on Ubuntu)
     System,
-    /// Trove itself
-    Trove,
-    /// no uninstaller Trove can start safely (missing, ambiguous, not absolute)
+    /// Velkrys itself
+    Velkrys,
+    /// no uninstaller Velkrys can start safely (missing, ambiguous, not absolute)
     NoUninstaller,
     /// macOS: the bundle, or a folder on its way, is a symlink (plan 18, 3.1)
     #[cfg_attr(not(target_os = "macos"), allow(dead_code))]
@@ -79,7 +79,7 @@ pub struct Uninstallable {
     /// and mtime); `''` on Windows, whose rows are compared by name, version and program.
     /// Sent back with the id so Rust can refuse an entry that changed since the confirm.
     pub stamp: String,
-    /// Ubuntu, no GNOME Software: Trove starts nothing; after the checks the frontend types
+    /// Ubuntu, no GNOME Software: Velkrys starts nothing; after the checks the frontend types
     /// `program` (no newline) into a fresh terminal shell, and Enter is the person's.
     pub typed: bool,
     #[serde(skip)]
@@ -116,7 +116,7 @@ pub fn stable_id(parts: &[&str]) -> String {
 /// How a started uninstaller's wait ended.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Waited {
-    /// the process Trove started has exited — not proof the uninstall finished (plan 18, 1.5)
+    /// the process Velkrys started has exited — not proof the uninstall finished (plan 18, 1.5)
     Exited,
     /// the cap passed first
     TimedOut,
@@ -149,7 +149,7 @@ pub enum Refusal {
     /// the row under that id no longer shows what the person confirmed
     Changed,
     Not(Removable),
-    /// a typed row asked to be started: Trove never runs a removal command itself
+    /// a typed row asked to be started: Velkrys never runs a removal command itself
     Typed,
     Launch(String),
     /// macOS: a process runs from inside the bundle
@@ -189,12 +189,17 @@ impl Refusal {
             Refusal::Running(name) => format!("Quit {name} first."),
             Refusal::Trash(why) => format!("It was not moved to the Trash: {why}"),
             Refusal::NoTrash => {
-                "macOS did not let Trove use the Trash. Drag the app to the Trash in Finder.".into()
+                "macOS did not let Velkrys use the Trash. Drag the app to the Trash in Finder."
+                    .into()
             }
-            Refusal::Not(Removable::Trove) => "This is Trove: it cannot uninstall itself.".into(),
-            Refusal::Not(Removable::NoUninstaller) => "No uninstaller Trove can run safely.".into(),
+            Refusal::Not(Removable::Velkrys) => {
+                "This is Velkrys: it cannot uninstall itself.".into()
+            }
+            Refusal::Not(Removable::NoUninstaller) => {
+                "No uninstaller Velkrys can run safely.".into()
+            }
             Refusal::Not(Removable::Yes) => "Nothing to refuse.".into(),
-            Refusal::Typed => "Trove never runs this command itself.".into(),
+            Refusal::Typed => "Velkrys never runs this command itself.".into(),
             Refusal::Launch(why) => format!("The uninstaller did not start: {why}"),
         }
     }
@@ -392,7 +397,7 @@ impl Launcher for LiveLauncher {
     }
 }
 
-/// Ubuntu: the only program Trove ever starts is GNOME Software on one app's page, where the
+/// Ubuntu: the only program Velkrys ever starts is GNOME Software on one app's page, where the
 /// person presses Uninstall and polkit asks. Every other line is typed, never started
 /// (`Refusal::Typed`), so anything but exactly `gnome-software --details=<desktop-id>` is refused.
 #[cfg(all(not(test), unix, not(target_os = "macos")))]
@@ -445,7 +450,7 @@ mod live_linux {
                     .strip_prefix("--details=")
                     .is_some_and(valid_desktop_id);
             if !ok {
-                return Err("Trove starts only GNOME Software here.".into());
+                return Err("Velkrys starts only GNOME Software here.".into());
             }
             // no shell: an argv of exactly two words
             Proc::new(argv[0])
@@ -650,11 +655,11 @@ pub(crate) mod tests {
     }
 
     #[test]
-    fn system_and_trove_rows_are_refused() {
+    fn system_and_velkrys_rows_are_refused() {
         let rec = Recorder::new(Waited::Exited);
         for r in [
             Removable::System,
-            Removable::Trove,
+            Removable::Velkrys,
             Removable::NoUninstaller,
         ] {
             let fresh = vec![row("a", "A", r)];

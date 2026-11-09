@@ -32,12 +32,12 @@ describe('trashEntries', () => {
     expect((none as InstanceType<typeof NoRecycleBin>).reason).toBe('noBin');
   });
 
-  it('carries `denied`: macOS refused Trove the Trash', async () => {
+  it('carries `denied`: macOS refused Velkrys the Trash', async () => {
     invoke.mockRejectedValueOnce({
       noBin: 'This Mac',
       reason: 'denied',
       paths: ['/u/a'],
-      message: 'macOS did not let Trove use the Trash, so nothing more was moved: /u/a',
+      message: 'macOS did not let Velkrys use the Trash, so nothing more was moved: /u/a',
     });
     const err = (await trashEntries(['/u/a']).catch((e: unknown) => e)) as InstanceType<
       typeof NoRecycleBin

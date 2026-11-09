@@ -1,5 +1,5 @@
 MIT-0 (MIT No Attribution) licence
-Used by: ppmd-rust 1.5.0 (7z PPMd method). Offered as CC0-1.0 OR MIT-0; Trove uses MIT-0.
+Used by: ppmd-rust 1.5.0 (7z PPMd method). Offered as CC0-1.0 OR MIT-0; Velkrys uses MIT-0.
 
 MIT No Attribution
 

@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for trying Trove. The full list of things to check is in
+        Thanks for trying Velkrys. The full list of things to check is in
         `docs/plans/15-feature-check-on-every-os.md`. Report one item or many.
   - type: input
     id: os
@@ -33,7 +33,7 @@ body:
   - type: input
     id: version
     attributes:
-      label: Trove version or commit
+      label: Velkrys version or commit
       description: The version in Settings > About, or the git commit you built.
     validations:
       required: true

@@ -13,15 +13,15 @@
 #   scripts/linux-gnome-headless.sh eval JS    run JS in the shell (unsafe mode is on)
 #   scripts/linux-gnome-headless.sh stop       kill everything this script started
 #
-# Env knobs: GH_STATE (default ~/.cache/trove-gnome-headless), GH_SIZE (1280x800),
+# Env knobs: GH_STATE (default ~/.cache/velkrys-gnome-headless), GH_SIZE (1280x800),
 #            GH_BACKEND for launch: wayland (default) or x11 (Xwayland of the headless shell).
 #
 # ⛔ Keys from scripts/linux-remote-input.py reach an X11 app only (2026-10-23, mutter 50.1):
-#    Trove launched with the default wayland backend ignored Ctrl+L, with and without a click
+#    Velkrys launched with the default wayland backend ignored Ctrl+L, with and without a click
 #    first; GH_BACKEND=x11 selected the address bar. Wayland is fine for screenshots.
 set -euo pipefail
 
-STATE="${GH_STATE:-$HOME/.cache/trove-gnome-headless}"
+STATE="${GH_STATE:-$HOME/.cache/velkrys-gnome-headless}"
 SIZE="${GH_SIZE:-1280x800}"
 ENVF="$STATE/env"
 

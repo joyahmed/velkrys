@@ -158,7 +158,7 @@ pub fn build_explorer_window<R: Runtime>(
     bounds: Option<Bounds>,
 ) -> tauri::Result<WebviewWindow<R>> {
     let builder = WebviewWindowBuilder::new(app, label, url)
-        .title("Trove")
+        .title("Velkrys")
         .inner_size(1200.0, 760.0)
         .min_inner_size(800.0, 500.0)
         .decorations(false)
@@ -250,7 +250,7 @@ pub fn apply_bounds<R: Runtime>(window: &WebviewWindow<R>, bounds: Bounds) {
 }
 
 /// Put `window`'s VISIBLE frame exactly on `rect` (physical px): what Cascade / Stacked / Side by
-/// side and Trove's own Snap ask for, where the visible edge must land on the work area's edge.
+/// side and Velkrys's own Snap ask for, where the visible edge must land on the work area's edge.
 ///
 /// ⛔ **Windows: not `apply_bounds`.** Every explorer window keeps `WS_THICKFRAME`, and the OS
 /// hangs an invisible 7 px resize border (at 100 %) off its left, right and bottom: an outer

@@ -1,4 +1,4 @@
-//! Archives inside Trove (plan 16): make, extract and later browse zip, 7z, tar.* and RAR
+//! Archives inside Velkrys (plan 16): make, extract and later browse zip, 7z, tar.* and RAR
 //! without a second app. ZIP (Phase 1), tar, bare or in gz / xz / zst (Phase 2), and 7z
 //! (Phase 3) are read and written; RAR (Phase 5) is listed and extracted, never written, and
 //! only in a build with the `rar` cargo feature (default) — without it RAR is refused in words.
@@ -56,9 +56,9 @@ pub enum ArchiveFormat {
     TarZst,
 }
 
-pub const NOT_AN_ARCHIVE: &str = "Not an archive Trove can open";
+pub const NOT_AN_ARCHIVE: &str = "Not an archive Velkrys can open";
 /// What a build without the `rar` feature says for a RAR.
-pub const RAR_NOT_BUILT: &str = "RAR is not supported in this build of Trove";
+pub const RAR_NOT_BUILT: &str = "RAR is not supported in this build of Velkrys";
 
 impl Format {
     /// Magic bytes first: a zip renamed to `x.7z` is still a zip, and a text file named
@@ -370,7 +370,8 @@ pub(crate) mod test_util {
     /// A fresh folder under the temp dir, unique per test and process. Every archive test
     /// extracts at least three levels below it, so a broken `..` rule still lands inside it.
     pub fn scratch(name: &str) -> PathBuf {
-        let dir = std::env::temp_dir().join(format!("trove-archive-{name}-{}", std::process::id()));
+        let dir =
+            std::env::temp_dir().join(format!("velkrys-archive-{name}-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         dir

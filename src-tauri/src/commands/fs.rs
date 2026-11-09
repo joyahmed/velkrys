@@ -19,7 +19,7 @@ const SLOW_READ_DIR: std::time::Duration = std::time::Duration::from_millis(300)
 #[tauri::command(async)]
 pub fn read_dir(app: AppHandle, path: String) -> CmdResult<DirListing> {
     let listing = list_folder(&path)?;
-    // Mac: the person opened a privacy-guarded folder and the OS let Trove in, so the index and
+    // Mac: the person opened a privacy-guarded folder and the OS let Velkrys in, so the index and
     // the size walks may read it from now on (`core::privacy_folders`). Off a Mac: never `Some`.
     if let Some(folder) = crate::core::privacy_folders::note_listed(Path::new(&path)) {
         index_opened(&app, folder);
@@ -41,7 +41,7 @@ pub fn palette_folder_count(path: String) -> Option<usize> {
 }
 
 /// Mac: the privacy-guarded folders (Desktop, Documents, Downloads…) the person has not opened
-/// in Trove yet, which searches leave out. Empty off a Mac and once every one is opened.
+/// in Velkrys yet, which searches leave out. Empty off a Mac and once every one is opened.
 #[tauri::command(async)]
 pub fn unopened_guarded_folders() -> Vec<String> {
     let unopened = crate::core::privacy_folders::unopened();
@@ -49,7 +49,7 @@ pub fn unopened_guarded_folders() -> Vec<String> {
 }
 
 /// "Not searched: Desktop, Documents… — Allow": read each of `paths` once, so macOS asks for it
-/// now, at a moment the person chose, and remember each one the OS let Trove into as opened
+/// now, at a moment the person chose, and remember each one the OS let Velkrys into as opened
 /// (`privacy_folders::note_listed`, the same path `read_dir` takes), so searches enter it from
 /// then on. Answers the folders now opened; one the person refused stays unopened and is asked
 /// again only on the next Allow. ⛔ Only a guarded folder not opened yet is read: a path the
@@ -72,7 +72,7 @@ pub fn allow_guarded_folders(app: AppHandle, paths: Vec<String>) -> Vec<String> 
         .collect()
 }
 
-/// Whether the OS lets Trove read `path` — the folder AND what is guarded inside it. On a Mac
+/// Whether the OS lets Velkrys read `path` — the folder AND what is guarded inside it. On a Mac
 /// these reads are what raise the prompts.
 ///
 /// ⛔ Not a listing of the folder alone: `~/Pictures`, `~/Music` and `~/Movies` list fine with
@@ -265,7 +265,7 @@ const THIS_DEVICE: &str = if cfg!(target_os = "macos") {
 /// Windows `ERROR_NO_ASSOCIATION`: ShellExecuteExW found no app for the file's type.
 const ERROR_NO_ASSOCIATION: i32 = 1155;
 
-/// Why an open failed, as far as Trove can tell.
+/// Why an open failed, as far as Velkrys can tell.
 #[derive(Debug, PartialEq, Eq)]
 enum OpenFailure {
     Gone,
@@ -323,7 +323,7 @@ pub(crate) fn open_failed(path: &Path, err: Option<&std::io::Error>) -> String {
         .unwrap_or_else(|| path.to_string_lossy().into_owned());
     match open_failure(path, err) {
         OpenFailure::Gone => format!("\"{name}\" is no longer there."),
-        OpenFailure::Denied => format!("Trove can't open \"{name}\": access is denied."),
+        OpenFailure::Denied => format!("Velkrys can't open \"{name}\": access is denied."),
         OpenFailure::NoApp => format!("No app on {THIS_DEVICE} opens \"{name}\"."),
         OpenFailure::Other => format!("Couldn't open \"{name}\"."),
     }
@@ -335,7 +335,7 @@ const OPEN_URL_SCHEMES: [&str; 4] = ["http", "https", "ftp", "mailto"];
 /// Refuse anything that is not a plain web / mail link, so a bad string can't launch
 /// `file:`, `ms-settings:`, `search-ms:` or a bare path. Scheme match is case-insensitive.
 fn check_url_scheme(url: &str) -> CmdResult<()> {
-    let refuse = || "Trove only opens http, https, ftp and mailto links.".to_string();
+    let refuse = || "Velkrys only opens http, https, ftp and mailto links.".to_string();
     let url = url.trim();
     if url.chars().any(|c| c.is_control()) {
         return Err(refuse());
@@ -387,7 +387,7 @@ pub fn create_folder(dir: String) -> CmdResult<String> {
 }
 
 /// "Retry as administrator" (plan 05 5.6): the one operation that failed with access denied,
-/// run again in an elevated copy of Trove that does it and exits (`core/elevate.rs`).
+/// run again in an elevated copy of Velkrys that does it and exits (`core/elevate.rs`).
 #[tauri::command(async)]
 pub fn retry_elevated(op: crate::core::elevate::ElevatedOp) -> CmdResult<String> {
     crate::core::elevate::run_elevated(&op)
@@ -404,7 +404,7 @@ pub enum TrashError {
         /// `WSL`, a drive (`N:`) or a share (`\\server\share`)
         no_bin: String,
         /// `noBin` (the place has none), `off` (turned off), `tooBig` (bigger than the bin) or
-        /// `denied` (macOS refused Trove the Trash; items not in `paths` already went to it)
+        /// `denied` (macOS refused Velkrys the Trash; items not in `paths` already went to it)
         reason: &'static str,
         /// every path that cannot go to a bin; the rest of the batch can
         paths: Vec<String>,
@@ -502,8 +502,8 @@ fn cloud_pin_message(failed: &[&String], keep: bool) -> Option<String> {
         "free up its space"
     };
     Some(match failed.len() {
-        1 => format!("Trove couldn't {what}: \"{name}\"."),
-        n => format!("Trove couldn't {what}: \"{name}\" and {} more.", n - 1),
+        1 => format!("Velkrys couldn't {what}: \"{name}\"."),
+        n => format!("Velkrys couldn't {what}: \"{name}\" and {} more.", n - 1),
     })
 }
 
@@ -557,7 +557,7 @@ mod tests {
     #[test]
     fn a_folder_whose_library_inside_was_refused_is_not_opened() {
         use std::os::unix::fs::PermissionsExt;
-        let dir = std::env::temp_dir().join(format!("trove-allow-deep-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("velkrys-allow-deep-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         let lib = dir.join("Pictures/Photos Library.photoslibrary");
         std::fs::create_dir_all(lib.join("originals")).unwrap();
@@ -577,7 +577,7 @@ mod tests {
 
     #[test]
     fn the_palette_preview_never_counts_an_unopened_guarded_folder() {
-        let dir = std::env::temp_dir().join(format!("trove-pcount-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("velkrys-pcount-{}", std::process::id()));
         let desk = dir.join("Desktop");
         std::fs::create_dir_all(desk.join("inner")).unwrap();
         std::fs::write(desk.join("a.txt"), b"x").unwrap();
@@ -655,12 +655,12 @@ mod tests {
         assert_eq!(serde_json::to_value(&other).unwrap(), "disk on fire");
     }
 
-    /// Seen on a Mac: a Recent folder deleted outside Trove toasted
+    /// Seen on a Mac: a Recent folder deleted outside Velkrys toasted
     /// `/Users/alex/x: No such file or directory (os error 2)`. It is the open's sentence now,
     /// with no OS text; a folder that is there but unreadable keeps the OS's words.
     #[test]
     fn a_missing_folder_is_no_longer_there_in_plain_words() {
-        let root = std::env::temp_dir().join(format!("trove-read-dir-{}", std::process::id()));
+        let root = std::env::temp_dir().join(format!("velkrys-read-dir-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&root);
         std::fs::create_dir_all(&root).unwrap();
         let gone = root.join("x");
@@ -682,7 +682,7 @@ mod tests {
     #[test]
     fn a_failed_open_names_its_cause_in_a_plain_sentence() {
         use std::io::{Error, ErrorKind};
-        let root = std::env::temp_dir().join(format!("trove-open-failed-{}", std::process::id()));
+        let root = std::env::temp_dir().join(format!("velkrys-open-failed-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&root);
         std::fs::create_dir_all(&root).unwrap();
         let file = root.join(".DS_Store");
@@ -704,7 +704,7 @@ mod tests {
             "\"gone.txt\" is no longer there."
         );
         // Access denied, from the opener (Windows ERROR_ACCESS_DENIED is os error 5).
-        let denied_text = "Trove can't open \".DS_Store\": access is denied.";
+        let denied_text = "Velkrys can't open \".DS_Store\": access is denied.";
         assert_eq!(open_failed(&file, Some(&denied)), denied_text);
         if cfg!(windows) {
             assert_eq!(
@@ -714,7 +714,7 @@ mod tests {
         }
         assert_eq!(
             open_failed(&folder, Some(&denied)),
-            "Trove can't open \"docs\": access is denied."
+            "Velkrys can't open \"docs\": access is denied."
         );
 
         // No app: only when the opener says so, in its own OS's words.

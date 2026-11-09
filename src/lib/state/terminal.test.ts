@@ -268,11 +268,11 @@ describe('terminal pane state', () => {
     terminal.toggle();
     await terminal.spawn();
     const output: Output = pty.ptySpawn.mock.calls[0][3];
-    const seen = terminal.waitFor('trove-uninstall$ ', 1000);
-    output('trove-unin');
+    const seen = terminal.waitFor('velkrys-uninstall$ ', 1000);
+    output('velkrys-unin');
     output('stall$ ');
     expect(await seen).toBe(true);
-    const never = terminal.waitFor('trove-uninstall$ ', 20);
+    const never = terminal.waitFor('velkrys-uninstall$ ', 20);
     output('hijacked> ');
     expect(await never).toBe(false);
   });

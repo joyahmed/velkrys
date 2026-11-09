@@ -1,6 +1,6 @@
 // A saved undo record (`types/undo.ts`) turned back into the undo it describes: the check that
 // the disk still matches, and the step itself. Rename, New folder / file and Delete push their
-// entries through here while Trove runs, so the undo a restart brings back is the same code as
+// entries through here while Velkrys runs, so the undo a restart brings back is the same code as
 // the one the action left. A copy or move keeps its job-aware entry (`transfers`) while it is
 // live and comes through here only after a restart.
 import * as fs from '$lib/api/fs';

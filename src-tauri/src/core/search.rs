@@ -142,7 +142,7 @@ pub fn walk(
 /// network volume" prompt; on Linux, a hang on a dead NFS server. A root that IS a share is
 /// walked — the person opened it.
 ///
-/// ⛔ The same for a Mac's privacy-guarded folders the person has not opened in Trove
+/// ⛔ The same for a Mac's privacy-guarded folders the person has not opened in Velkrys
 /// (`core::privacy_folders`): from `/` or the home folder a walk reached `~/Desktop`, `~/Music`
 /// and `~/Pictures` four levels down and each listing raised its own prompt — the palette's
 /// "Find anything" fired them on every search (Mac test, 2026-11-04). The folder's own row is
@@ -477,7 +477,8 @@ mod tests {
     }
 
     fn tree(name: &str) -> Scratch {
-        let dir = std::env::temp_dir().join(format!("trove-search-{name}-{}", std::process::id()));
+        let dir =
+            std::env::temp_dir().join(format!("velkrys-search-{name}-{}", std::process::id()));
         let _ = stdfs::remove_dir_all(&dir);
         stdfs::create_dir_all(dir.join("photos").join("2024")).unwrap();
         stdfs::create_dir_all(dir.join("docs")).unwrap();
@@ -837,7 +838,7 @@ mod tests {
         .unwrap();
         let cancel = AtomicBool::new(false);
         let mut names = Vec::new();
-        let missing = std::env::temp_dir().join("trove-search-roots-missing");
+        let missing = std::env::temp_dir().join("velkrys-search-roots-missing");
         let scanned = walk(
             &[missing, a.0.clone(), b.0.clone()],
             &query("readme"),
@@ -860,7 +861,7 @@ mod tests {
     #[test]
     fn a_missing_root_is_an_error() {
         let cancel = AtomicBool::new(false);
-        let missing = std::env::temp_dir().join("trove-search-nope-does-not-exist");
+        let missing = std::env::temp_dir().join("velkrys-search-nope-does-not-exist");
         let err = walk(
             std::slice::from_ref(&missing),
             &query(""),

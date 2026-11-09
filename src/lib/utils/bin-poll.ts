@@ -1,5 +1,5 @@
-// Keeps an open Recycle Bin view current when the bin changes outside Trove (Explorer, another
-// app, a script). Windows tells Explorer through the shell; Trove has no hook into that, so the
+// Keeps an open Recycle Bin view current when the bin changes outside Velkrys (Explorer, another
+// app, a script). Windows tells Explorer through the shell; Velkrys has no hook into that, so the
 // open view re-reads the bin on a short timer instead — only while it is open and the window is
 // shown, one read at a time. Entering the view already reads it, so the first poll waits.
 import type { RecycleItem } from '$lib/types/recycle';

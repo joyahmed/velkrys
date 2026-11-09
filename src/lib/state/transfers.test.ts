@@ -105,7 +105,9 @@ describe('transfers', () => {
   });
 
   it('on Linux selects what landed only in the exact-cased folder', async () => {
-    vi.stubGlobal('window', { __TROVE_PLATFORM__: { os: 'linux', thisPcLabel: 'This Computer' } });
+    vi.stubGlobal('window', {
+      __VELKRYS_PLATFORM__: { os: 'linux', thisPcLabel: 'This Computer' },
+    });
     try {
       tabs.active.location = { kind: 'path', path: '/home/alex/Dest/' };
       const id = await transfers.start(['/tmp/a.txt', '/tmp/b.txt'], '/home/alex', 'copy', 'skip');
@@ -128,7 +130,9 @@ describe('transfers', () => {
   });
 
   it('on Linux a Keep-both move of `a\\b.txt` goes back as `a\\b.txt`, not `b.txt`', async () => {
-    vi.stubGlobal('window', { __TROVE_PLATFORM__: { os: 'linux', thisPcLabel: 'This Computer' } });
+    vi.stubGlobal('window', {
+      __VELKRYS_PLATFORM__: { os: 'linux', thisPcLabel: 'This Computer' },
+    });
     try {
       const id = await transfers.start(['/src/a\\b.txt'], '/dest', 'move', 'keep-both');
       await transfers.applyDone({

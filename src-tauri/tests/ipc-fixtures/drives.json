@@ -1,6 +1,10 @@
 [
   [
     {
+      "canRename": false,
+      "driveType": "fixed",
+      "ejectable": false,
+      "fileSystem": "ext4",
       "freeBytes": 40,
       "label": "Root",
       "network": false,
@@ -8,6 +12,10 @@
       "totalBytes": 100
     },
     {
+      "canRename": false,
+      "driveType": "network",
+      "ejectable": false,
+      "fileSystem": "nfs",
       "freeBytes": null,
       "label": "nas",
       "network": true,

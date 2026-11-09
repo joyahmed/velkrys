@@ -170,7 +170,7 @@ mod tests {
 
     fn scratch(tag: &str) -> std::path::PathBuf {
         let dir = std::env::temp_dir().join(format!(
-            "trove-thumbs-{tag}-{}-{}",
+            "velkrys-thumbs-{tag}-{}-{}",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)

@@ -24,7 +24,7 @@
 //! in the Trash (turned into a POSIX path, [`FINDER_SCRIPT`]); the file manager answers its
 //! `resultingItemURL`. Each answer is trusted only when the file there is the very file that was
 //! sent — same device and inode as before the move — and then goes into the [`Ledger`], so ⌘Z
-//! ([`put_back`]) can move that exact item back. Only what Trove itself sent in this run is in the
+//! ([`put_back`]) can move that exact item back. Only what Velkrys itself sent in this run is in the
 //! ledger; the Trash is never listed.
 //!
 //! The method runner is a parameter, so the tests drive the order with a fake and never touch
@@ -62,7 +62,7 @@ const DENIED_MARKS: [&str; 5] = [
     "Not authorized to send Apple events",
 ];
 
-/// Whether a `trash` error is macOS refusing Trove Apple Events (for Finder).
+/// Whether a `trash` error is macOS refusing Velkrys Apple Events (for Finder).
 pub fn is_apple_events_denied(e: &trash::Error) -> bool {
     let text = match e {
         trash::Error::Unknown { description } | trash::Error::Os { description, .. } => description,
@@ -341,7 +341,7 @@ fn file_manager_delete(full: &[PathBuf]) -> Landed {
 
 // ── ⌘Z of a Delete ─────────────────────────────────────────────────────────────────────────
 
-/// One item Trove sent to the Trash in this run: where it was, where the Trash put it, and which
+/// One item Velkrys sent to the Trash in this run: where it was, where the Trash put it, and which
 /// file it is there (device, inode).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Trashed {
@@ -351,7 +351,7 @@ pub struct Trashed {
     pub ino: u64,
 }
 
-/// What Trove sent to the Trash in this run, oldest first. Lives as long as the app.
+/// What Velkrys sent to the Trash in this run, oldest first. Lives as long as the app.
 #[derive(Debug, Default)]
 pub struct Ledger {
     items: Vec<Trashed>,
@@ -396,7 +396,7 @@ pub fn put_back(paths: &[String]) -> std::result::Result<(), String> {
     put_back_in(&LEDGER, paths, rename_new)
 }
 
-/// Put back each of `paths` that Trove sent to the Trash in this run, with `move_new` (a rename
+/// Put back each of `paths` that Velkrys sent to the Trash in this run, with `move_new` (a rename
 /// that refuses to replace anything; the real one is [`rename_new`]). Only the very file that was
 /// sent moves back: something else now at its place in the Trash is left alone. Every path is
 /// tried; the ones that could not come back are named after, by why.
@@ -462,10 +462,13 @@ where
         ("The disk it is on is not connected", &unplugged),
         ("Something else is in its place in the Trash now", &other),
         ("Something new is already there", &taken),
-        ("Trove did not send these to the Trash in this run", &never),
+        (
+            "Velkrys did not send these to the Trash in this run",
+            &never,
+        ),
         ("The folder it came from is gone", &no_folder),
         (
-            "macOS did not let Trove move these out of the Trash",
+            "macOS did not let Velkrys move these out of the Trash",
             &refused,
         ),
         ("Could not put back", &failed),
@@ -601,7 +604,7 @@ mod tests {
     #[test]
     fn only_what_is_still_in_place_is_left_to_ask_about() {
         let mut calls = vec![];
-        let gone = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("no-such-file-trove-test");
+        let gone = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("no-such-file-velkrys-test");
         let mut paths = here();
         paths.insert(0, gone);
         let e = trash_with(
@@ -633,7 +636,7 @@ mod tests {
     }
 
     /// Review item 4: only an Apple Events refusal followed by a failed file-manager move is
-    /// `Denied` ("macOS did not let Trove use the Trash"); every other failure keeps main's plain
+    /// `Denied` ("macOS did not let Velkrys use the Trash"); every other failure keeps main's plain
     /// sentence, and the file manager is never tried for it.
     #[test]
     fn only_an_apple_events_refusal_can_become_denied() {
@@ -717,7 +720,7 @@ mod tests {
     impl Scratch {
         fn new(tag: &str) -> Self {
             let p = std::env::temp_dir().join(format!(
-                "trove-undo-trash-{tag}-{}-{}",
+                "velkrys-undo-trash-{tag}-{}-{}",
                 std::process::id(),
                 std::time::SystemTime::now()
                     .duration_since(std::time::UNIX_EPOCH)
@@ -832,7 +835,7 @@ mod tests {
         .unwrap();
         assert!(lock(&ledger).items().is_empty());
         let e = put_back_in(&ledger, &[s(&a)], rename_new).unwrap_err();
-        assert!(e.starts_with("Trove did not send these"), "{e}");
+        assert!(e.starts_with("Velkrys did not send these"), "{e}");
         assert_eq!(std::fs::read(&decoy).unwrap(), b"decoy");
     }
 
@@ -871,14 +874,14 @@ mod tests {
         let ledger = ledger();
         let root_dev = file_id(Path::new("/")).unwrap().0;
         lock(&ledger).items.push(Trashed {
-            from: PathBuf::from("/Volumes/TroveNoSuchDisk/a.txt"),
-            at: PathBuf::from("/Volumes/TroveNoSuchDisk/.Trashes/501/a.txt"),
+            from: PathBuf::from("/Volumes/VelkrysNoSuchDisk/a.txt"),
+            at: PathBuf::from("/Volumes/VelkrysNoSuchDisk/.Trashes/501/a.txt"),
             dev: root_dev.wrapping_add(12345),
             ino: 7,
         });
         let e = put_back_in(
             &ledger,
-            &["/Volumes/TroveNoSuchDisk/a.txt".into()],
+            &["/Volumes/VelkrysNoSuchDisk/a.txt".into()],
             rename_new,
         )
         .unwrap_err();
@@ -924,7 +927,7 @@ mod tests {
     }
 
     #[test]
-    fn gone_from_the_trash_or_never_trashed_by_trove_is_named_and_the_rest_comes_back() {
+    fn gone_from_the_trash_or_never_trashed_by_velkrys_is_named_and_the_rest_comes_back() {
         let sc = Scratch::new("gone");
         let (a, b) = (sc.work("a.txt"), sc.work("b.txt"));
         // different lengths: off unix, `file_id` tells files apart by size and change time, and two
@@ -941,7 +944,7 @@ mod tests {
         assert_eq!(
             e,
             format!(
-                "Not in the Trash any more: {}. Trove did not send these to the Trash in this run: {}",
+                "Not in the Trash any more: {}. Velkrys did not send these to the Trash in this run: {}",
                 a.display(),
                 stranger.display()
             )

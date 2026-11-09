@@ -10,8 +10,17 @@ pub mod default_handler;
 #[cfg(any(all(unix, not(target_os = "macos")), test))]
 pub mod default_handler_linux;
 pub mod drag_out;
+pub mod drive;
+#[cfg(any(target_os = "linux", test))]
+pub mod drive_linux;
+#[cfg(any(target_os = "macos", test))]
+pub mod drive_mac;
+#[cfg(windows)]
+pub mod drive_windows;
 pub mod folder_sizes;
+// One-time carry-over from the old folders (plan 28).
 pub mod frame;
+pub mod from_trove; // rename-keep
 pub mod fs;
 pub mod gallery;
 pub mod helper_windows;
@@ -22,7 +31,7 @@ pub mod image_dims;
 // Off Windows: image thumbnails decoded in Rust (plan 14.2). In tests on every OS.
 #[cfg(any(not(windows), test))]
 pub mod image_thumbs;
-// Trove's own file-name index (plan 21C): the home folder in memory, kept live by a watcher.
+// Velkrys's own file-name index (plan 21C): the home folder in memory, kept live by a watcher.
 pub mod index;
 pub mod key_menu;
 pub mod keys;

@@ -3,14 +3,14 @@
 // Called once from the root layout, so every window — explorer and Spotlight — follows it.
 // On a Mac it also sets the explorer window's own appearance, because the frosted glass behind
 // the page (the `sidebar` material) follows the WINDOW's appearance, not our tokens: without it,
-// Trove Light on a Mac in Dark mode shows dark glass under light chrome.
+// Velkrys Light on a Mac in Dark mode shows dark glass under light chrome.
 import { logError } from '$lib/api/log';
 import { setNativeTheme, windowLabel } from '$lib/api/window';
 import { settings, type ThemeChoice } from '$lib/state/settings.svelte';
 import { prefersDark, theme, watchSystemDark } from '$lib/state/theme.svelte';
 
 /** localStorage key the inline script in app.html reads before the first paint; holds the choice. */
-export const THEME_STORAGE_KEY = 'trove-theme';
+export const THEME_STORAGE_KEY = 'velkrys-theme';
 
 /** Explorer windows (`main`, `main-<n>`, as Rust's `is_explorer_label`) — the ones with glass and the set-theme permission. */
 export const isExplorerLabel = (label: string) => /^main(-\d+)?$/.test(label);

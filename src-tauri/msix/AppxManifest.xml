@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Trove's MSIX manifest (plan 22.2.3). A TEST package: the Identity below is a placeholder, not
+  Velkrys's MSIX manifest (plan 22.2.3). A TEST package: the Identity below is a placeholder, not
   the Partner Center one (that swap is plan 22.2.1, JOY). scripts/pack-msix.ps1 fills {VERSION}
   and {ARCH} and packs it with the Windows SDK's makeappx.
-  - runFullTrust: Trove is a plain Win32 desktop app, not sandboxed.
-  - AppExecutionAlias trove.exe: `trove` from Run / a terminal; replaces NSIS' App Paths key.
-  - StartupTask TroveStartup: "Start with Windows" in the Store build (core/startup.rs);
+  - runFullTrust: Velkrys is a plain Win32 desktop app, not sandboxed.
+  - AppExecutionAlias velkrys.exe: `velkrys` from Run / a terminal; replaces NSIS' App Paths key.
+  - StartupTask VelkrysStartup: "Start with Windows" in the Store build (core/startup.rs);
     replaces the Run key. Disabled until the user turns it on in Settings.
 -->
 <Package
@@ -17,14 +17,14 @@
   IgnorableNamespaces="uap uap3 desktop rescap">
 
   <Identity
-    Name="TroveTest.Placeholder"
-    Publisher="CN=Trove Test Placeholder"
+    Name="VelkrysTest.Placeholder"
+    Publisher="CN=Velkrys Test Placeholder"
     Version="{VERSION}"
     ProcessorArchitecture="{ARCH}" />
 
   <Properties>
-    <DisplayName>Trove (test package)</DisplayName>
-    <PublisherDisplayName>Trove Test Placeholder</PublisherDisplayName>
+    <DisplayName>Velkrys (test package)</DisplayName>
+    <PublisherDisplayName>Velkrys Test Placeholder</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
@@ -37,9 +37,9 @@
   </Resources>
 
   <Applications>
-    <Application Id="Trove" Executable="trove.exe" EntryPoint="Windows.FullTrustApplication">
+    <Application Id="Velkrys" Executable="velkrys.exe" EntryPoint="Windows.FullTrustApplication">
       <uap:VisualElements
-        DisplayName="Trove"
+        DisplayName="Velkrys"
         Description="A file manager"
         BackgroundColor="transparent"
         Square150x150Logo="Assets\Square150x150Logo.png"
@@ -49,13 +49,13 @@
         <uap:DefaultTile Square71x71Logo="Assets\Square71x71Logo.png" />
       </uap:VisualElements>
       <Extensions>
-        <uap3:Extension Category="windows.appExecutionAlias" Executable="trove.exe" EntryPoint="Windows.FullTrustApplication">
+        <uap3:Extension Category="windows.appExecutionAlias" Executable="velkrys.exe" EntryPoint="Windows.FullTrustApplication">
           <uap3:AppExecutionAlias>
-            <desktop:ExecutionAlias Alias="trove.exe" />
+            <desktop:ExecutionAlias Alias="velkrys.exe" />
           </uap3:AppExecutionAlias>
         </uap3:Extension>
-        <desktop:Extension Category="windows.startupTask" Executable="trove.exe" EntryPoint="Windows.FullTrustApplication">
-          <desktop:StartupTask TaskId="TroveStartup" Enabled="false" DisplayName="Trove" />
+        <desktop:Extension Category="windows.startupTask" Executable="velkrys.exe" EntryPoint="Windows.FullTrustApplication">
+          <desktop:StartupTask TaskId="VelkrysStartup" Enabled="false" DisplayName="Velkrys" />
         </desktop:Extension>
       </Extensions>
     </Application>

@@ -65,7 +65,7 @@ export const spotlightApps = (refresh = false) => invoke<AppEntry[]>('spotlight_
 export const launchApp = (aumid: string) => invoke<void>('launch_app', { aumid });
 /**
  * The file hits, and (Mac) the privacy-guarded folders the search left out because the person
- * has not opened them in Trove yet — Desktop, Documents… in that order (`core::privacy_folders`).
+ * has not opened them in Velkrys yet — Desktop, Documents… in that order (`core::privacy_folders`).
  */
 export type FoundFiles = { entries: FileEntry[]; skippedGuarded: string[] };
 /** A bounded name search: ≤ maxResults, three levels deep, within budgetMs. */
@@ -79,7 +79,7 @@ export const spotlightFiles = (
 /** A root still on its first index walk: `label` is `home` or a drive (`D:`), `seen` names so far. */
 export type IndexFilling = { label: string; seen: number };
 /**
- * Trove's own name index (plan 21C): the best `maxResults` names under `roots`, ranked, from
+ * Velkrys's own name index (plan 21C): the best `maxResults` names under `roots`, ranked, from
  * memory. `ready: false` while no root has finished its first walk — search the old way then.
  * `filling` names the roots still walking (absent from answers older than plan 21C.2a).
  */

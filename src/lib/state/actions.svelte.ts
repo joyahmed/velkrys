@@ -6,10 +6,12 @@ import type { ArchiveFormat } from '$lib/types/archive';
 import * as fs from '$lib/api/fs';
 import { openTerminal } from '$lib/api/shell';
 import { newItemKinds, type NewItemKind } from '$lib/data/new-items';
+import { driveRename } from '$lib/state/drive-rename.svelte';
 import { clipboard } from '$lib/state/clipboard.svelte';
 import { confirm } from '$lib/state/confirm.svelte';
 import { listing } from '$lib/state/listing.svelte';
 import { notices, type NoticeKind } from '$lib/state/notices.svelte';
+import { places } from '$lib/state/places.svelte';
 import { tabs } from '$lib/state/tabs.svelte';
 import { terminal } from '$lib/state/terminal.svelte';
 import { paneShellFor, pastePathsText } from '$lib/utils/shell-quote';
@@ -23,6 +25,7 @@ import { selection } from '$lib/state/selection.svelte';
 import { transfers } from '$lib/state/transfers.svelte';
 import { steppedText, undo, UndoBarrier, UndoDeclined, UndoRefused } from '$lib/state/undo.svelte';
 import type { UndoEntry } from '$lib/state/undo.svelte';
+import { DRIVE_NOT_RENAMEABLE } from '$lib/data/drive-menu';
 import { checkWorld, entryFor } from '$lib/state/undo-executor';
 import type { FileEntry } from '$lib/types/fs';
 import { destinationProblem } from '$lib/utils/extract-destination';
@@ -138,7 +141,7 @@ class ActionsState {
 
   /**
    * Windows refused with access denied: the error notice offers "Retry as administrator", which
-   * runs `op` once in a copy of Trove started through UAC (plan 05 5.6) and then `done` with its
+   * runs `op` once in a copy of Velkrys started through UAC (plan 05 5.6) and then `done` with its
    * answer. No undo entry: undoing it would need the same rights. false: not that failure.
    */
   #offerAdmin = (e: unknown, op: fs.ElevatedOp, done: (answer: string) => Promise<void>) => {
@@ -192,7 +195,7 @@ class ActionsState {
 
   /**
    * Folder → navigate; file → default app; a Mac's `X.app` folder → launch it, as Finder does.
-   * A zip / 7z / tar (setting on) opens inside Trove; a file inside an archive is extracted to
+   * A zip / 7z / tar (setting on) opens inside Velkrys; a file inside an archive is extracted to
    * a read-only temp copy first, and that copy opens.
    */
   open = async (entry: FileEntry) => {
@@ -229,7 +232,16 @@ class ActionsState {
     if (!this.inFolder) return;
     const entry = listing.rows.find((e) => e.path === path);
     if (!entry) return;
+    // a drive row edits the drive's label, not the folder name (plan 23.7.3)
+    const drive = entry.isDir ? places.driveAt(entry.path) : undefined;
+    // the menu offers no Rename for this drive, so F2 must not open a box that can only fail
+    if (drive && drive.canRename !== true) return void this.notify(DRIVE_NOT_RENAMEABLE);
     this.renaming = entry.path;
+    if (drive) {
+      this.#renameSuffix = '';
+      this.draft = drive.label;
+      return;
+    }
     const base = settings.showExtensions || entry.isDir ? entry.name : stripExtension(entry.name);
     this.#renameSuffix = entry.name.slice(base.length);
     this.draft = base;
@@ -248,6 +260,9 @@ class ActionsState {
     this.renaming = null;
     if (!path) return;
     const current = listing.rows.find((e) => e.path === path);
+    const drive = current?.isDir ? places.driveAt(path) : undefined;
+    // a drive row: the typed text is the label, set through the drive command, never a file rename
+    if (drive) return driveRename.commitFor(drive, typed);
     // an emptied box is a change of mind, not a request for the name '' (which would only fail
     // with a toast and lose the edit)
     if (!current || name === '' || name === current.name) return;

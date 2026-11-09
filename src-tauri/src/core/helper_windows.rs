@@ -12,14 +12,14 @@
 //! None of their window procedures handles `WM_CLOSE`, so `DefWindowProcW` answers it with
 //! `DestroyWindow`. Nothing a person can click reaches these windows — they are 0x0, layered,
 //! never activated — but anything that posts `WM_CLOSE` to every window of the process does:
-//! `taskkill /IM trove.exe` without `/F`, and a test harness on 2026-10-20 that did exactly
+//! `taskkill /IM velkrys.exe` without `/F`, and a test harness on 2026-10-20 that did exactly
 //! that. Afterwards, on the screen:
 //!
-//! - the main window could not be closed — not by `WM_CLOSE`, not by Trove's own Close button:
+//! - the main window could not be closed — not by `WM_CLOSE`, not by Velkrys's own Close button:
 //!   the JS close path (`api/window.ts`) ends in `plugin:window|close`, which reaches the event
 //!   loop only through tao's proxy, and the proxy's window was gone (reasoned from
 //!   `tauri-runtime-wry-2.11.4` + `tao-0.35.3`, not traced on the screen);
-//! - the next launch started a SECOND Trove: the plugin's mutex is still held, but
+//! - the next launch started a SECOND Velkrys: the plugin's mutex is still held, but
 //!   `FindWindowW` finds no window to hand the launch to, so the new process simply carries on
 //!   (`tauri-plugin-single-instance-2.4.5/src/platform_impl/windows.rs`, the
 //!   `if !hwnd.is_null()` branch has no else). The mutex is NOT released — that is not the bug;
@@ -152,20 +152,20 @@ pub fn guard_on_main<R: tauri::Runtime>(app: &tauri::AppHandle<R>) {
 mod tests {
     use super::is_guarded_class;
 
-    const ID: &str = "com.joyahmed.trove";
+    const ID: &str = "com.joyahmed.velkrys";
 
     #[test]
     fn the_four_helper_windows_are_guarded() {
         assert!(is_guarded_class("Tao Thread Event Target", ID));
         assert!(is_guarded_class("global_hotkey_app", ID));
         assert!(is_guarded_class("tray_icon_app", ID));
-        assert!(is_guarded_class("com.joyahmed.trove-sic", ID));
+        assert!(is_guarded_class("com.joyahmed.velkrys-sic", ID));
         // the plugin's `semver` feature puts the version between the two
-        assert!(is_guarded_class("com.joyahmed.trove_1.2-sic", ID));
+        assert!(is_guarded_class("com.joyahmed.velkrys_1.2-sic", ID));
         // the screen build's own identifier
         assert!(is_guarded_class(
-            "com.joyahmed.trove.screen-sic",
-            "com.joyahmed.trove.screen"
+            "com.joyahmed.velkrys.screen-sic",
+            "com.joyahmed.velkrys.screen"
         ));
     }
 
@@ -175,7 +175,7 @@ mod tests {
         assert!(!is_guarded_class("Window Class", ID));
         assert!(!is_guarded_class("Chrome_WidgetWin_0", ID));
         // the single-instance WINDOW name is `-siw`; only its class is matched
-        assert!(!is_guarded_class("com.joyahmed.trove-siw", ID));
+        assert!(!is_guarded_class("com.joyahmed.velkrys-siw", ID));
         // another app's single-instance helper
         assert!(!is_guarded_class("com.other.app-sic", ID));
         assert!(!is_guarded_class("", ID));
@@ -218,7 +218,7 @@ mod tests {
             hwnd
         };
         let helper = make("global_hotkey_app");
-        let ordinary = make("trove_test_ordinary_window");
+        let ordinary = make("velkrys_test_ordinary_window");
         assert!(guard_this_thread(ID) >= 1);
         unsafe {
             SendMessageW(helper, WM_CLOSE, 0, 0);

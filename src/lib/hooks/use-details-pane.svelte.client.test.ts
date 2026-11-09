@@ -6,6 +6,7 @@ import { fileProps, onFolderTotals } from '$lib/api/props';
 import { attributeToggles } from '$lib/data/details-rows';
 import { details } from '$lib/state/details.svelte';
 import { listing } from '$lib/state/listing.svelte';
+import { panes } from '$lib/state/panes.svelte';
 import { recycle } from '$lib/state/recycle.svelte';
 import { selection } from '$lib/state/selection.svelte';
 import { tabs } from '$lib/state/tabs.svelte';
@@ -77,6 +78,14 @@ afterEach(() => {
 });
 
 describe('useDetailsPane lifecycle', () => {
+  it('close hides the pane, the same as the toolbar button', () => {
+    const { pane, stop } = mount();
+    panes.open = 'details';
+    pane.close();
+    expect(panes.open).toBeNull();
+    stop();
+  });
+
   it('listens for folder totals while mounted and drops everything on unmount', async () => {
     const { stop } = mount();
     expect(onFolderTotals).toHaveBeenCalledTimes(1);

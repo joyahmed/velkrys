@@ -1,6 +1,6 @@
 // Prints the rustc flags that keep build-machine paths out of a release binary (plan 22.0.4).
 // `trim-paths` in the release profile is still nightly-only, so we remap by hand instead:
-//   the home folder (cargo registry, rustup) -> "~"      the repo folder -> "trove"
+//   the home folder (cargo registry, rustup) -> "~"      the repo folder -> "velkrys"
 // Use:  RUSTFLAGS="$(bun scripts/remap-flags.ts)" bun run tauri build
 // Not plain `cargo build --release`: that leaves tauri in dev mode, which embeds the src-tauri
 // folder (see scripts/path-leak-check.ts). `cargo build --release --features tauri/custom-protocol`
@@ -12,7 +12,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 export function remapFlags(home: string, root: string): string[] {
-  const flags = [`--remap-path-prefix=${root}=trove`];
+  const flags = [`--remap-path-prefix=${root}=velkrys`];
   // Longest prefix first would matter if the repo sat inside home; rustc applies the LAST match
   // that fits, so list home first and the more specific repo root after it.
   flags.unshift(`--remap-path-prefix=${home}=~`);

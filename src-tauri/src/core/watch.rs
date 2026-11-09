@@ -543,7 +543,7 @@ mod symlink_tests {
     /// symlink: a folder reached THROUGH a symlink must still get its own events.
     #[test]
     fn a_folder_reached_through_a_symlink_still_reports_its_changes() {
-        let base = std::env::temp_dir().join(format!("trove-watch-link-{}", std::process::id()));
+        let base = std::env::temp_dir().join(format!("velkrys-watch-link-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&base);
         let real = base.join("real");
         std::fs::create_dir_all(&real).unwrap();

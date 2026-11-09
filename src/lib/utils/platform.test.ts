@@ -31,15 +31,15 @@ describe('thisPcLabel', () => {
 
   it('is what Rust injected while the choice is native, for each of the three platforms', () => {
     for (const label of THIS_PC_LABELS) {
-      vi.stubGlobal('window', { __TROVE_PLATFORM__: { os: 'x', thisPcLabel: label } });
+      vi.stubGlobal('window', { __VELKRYS_PLATFORM__: { os: 'x', thisPcLabel: label } });
       expect(thisPcLabel()).toBe(label);
     }
   });
 
   it("refuses a name the parser would not read back, and falls back to the host's", () => {
-    vi.stubGlobal('window', { __TROVE_PLATFORM__: { os: 'linux', thisPcLabel: 'My Computer' } });
+    vi.stubGlobal('window', { __VELKRYS_PLATFORM__: { os: 'linux', thisPcLabel: 'My Computer' } });
     expect(thisPcLabel()).toBe('This Computer');
-    vi.stubGlobal('window', { __TROVE_PLATFORM__: { os: 'x', thisPcLabel: 'My Computer' } });
+    vi.stubGlobal('window', { __VELKRYS_PLATFORM__: { os: 'x', thisPcLabel: 'My Computer' } });
     expect(thisPcLabel()).toBe('This PC');
   });
 
@@ -55,7 +55,7 @@ describe('thisPcLabel', () => {
   });
 
   it('follows a chosen style over what Rust injected', () => {
-    vi.stubGlobal('window', { __TROVE_PLATFORM__: { os: 'windows', thisPcLabel: 'This PC' } });
+    vi.stubGlobal('window', { __VELKRYS_PLATFORM__: { os: 'windows', thisPcLabel: 'This PC' } });
     comingFrom.choice = 'mac';
     expect(thisPcLabel()).toBe('This Mac');
     comingFrom.choice = 'linux';
@@ -73,7 +73,7 @@ describe('a Mac build, end to end through the module-level label', () => {
 
   it('names the place This Mac and still round-trips it through the parser', async () => {
     // what `platform_init_script` sets before any page script runs
-    vi.stubGlobal('window', { __TROVE_PLATFORM__: { os: 'macos', thisPcLabel: 'This Mac' } });
+    vi.stubGlobal('window', { __VELKRYS_PLATFORM__: { os: 'macos', thisPcLabel: 'This Mac' } });
     vi.resetModules();
     const loc = await import('$lib/utils/location');
     const palette = await import('$lib/data/palette-actions');
@@ -124,7 +124,7 @@ describe('binName and onWindows', () => {
       ['macos', 'Trash'],
       ['linux', 'Trash'],
     ]) {
-      vi.stubGlobal('window', { __TROVE_PLATFORM__: on(os) });
+      vi.stubGlobal('window', { __VELKRYS_PLATFORM__: on(os) });
       expect(binName()).toBe(word);
     }
     vi.unstubAllGlobals();
@@ -133,7 +133,7 @@ describe('binName and onWindows', () => {
   });
 
   it('follows the chosen style live, and onWindows stays the host', async () => {
-    vi.stubGlobal('window', { __TROVE_PLATFORM__: on('windows') });
+    vi.stubGlobal('window', { __VELKRYS_PLATFORM__: on('windows') });
     comingFrom.choice = 'mac';
     expect(binName()).toBe('Trash');
     expect(onWindows()).toBe(true);
@@ -152,7 +152,7 @@ describe('propertiesLabel', () => {
   });
 
   it('follows the host by default and the chosen style when set', async () => {
-    vi.stubGlobal('window', { __TROVE_PLATFORM__: { os: 'macos', thisPcLabel: 'This Mac' } });
+    vi.stubGlobal('window', { __VELKRYS_PLATFORM__: { os: 'macos', thisPcLabel: 'This Mac' } });
     expect(propertiesLabel()).toBe('Get Info');
     comingFrom.choice = 'windows';
     expect(propertiesLabel()).toBe('Properties');
@@ -186,14 +186,14 @@ describe('onMac', () => {
 describe('inBinWords: Rust sentences in the chosen bin word (plan 19 Q3)', () => {
   // the Mac's Full Disk Access sentence, as `recycle_mac.rs` NEEDS_FULL_DISK_ACCESS writes it
   const FDA =
-    'Trove needs Full Disk Access to show the Trash. Open System Settings → Privacy & Security → Full Disk Access.';
+    'Velkrys needs Full Disk Access to show the Trash. Open System Settings → Privacy & Security → Full Disk Access.';
   afterEach(() => vi.unstubAllGlobals());
 
   it('Windows picked on a Mac: the Full Disk Access sentence says Recycle Bin (Mac, 2026-10-08)', () => {
-    vi.stubGlobal('window', { __TROVE_PLATFORM__: { os: 'macos', thisPcLabel: 'This Mac' } });
+    vi.stubGlobal('window', { __VELKRYS_PLATFORM__: { os: 'macos', thisPcLabel: 'This Mac' } });
     comingFrom.choice = 'windows';
     expect(inBinWords(FDA)).toBe(
-      'Trove needs Full Disk Access to show the Recycle Bin. Open System Settings → Privacy & Security → Full Disk Access.',
+      'Velkrys needs Full Disk Access to show the Recycle Bin. Open System Settings → Privacy & Security → Full Disk Access.',
     );
     comingFrom.choice = 'mac';
     expect(inBinWords(FDA)).toBe(FDA);
@@ -207,8 +207,8 @@ describe('inBinWords: Rust sentences in the chosen bin word (plan 19 Q3)', () =>
       expect(inBinWords('D: has no Recycle Bin, so nothing was deleted', style)).toBe(
         'D: has no Trash, so nothing was deleted',
       );
-      expect(inBinWords('Trove cannot tell whether D: has a Recycle Bin', style)).toBe(
-        'Trove cannot tell whether D: has a Trash',
+      expect(inBinWords('Velkrys cannot tell whether D: has a Recycle Bin', style)).toBe(
+        'Velkrys cannot tell whether D: has a Trash',
       );
     }
     expect(inBinWords('Not in the Trash any more: a.txt', 'windows')).toBe(

@@ -51,7 +51,7 @@ describe('tileIconUrl stamp', () => {
 describe('tileIconUrl', () => {
   // ⭐ The bug Joy reported: at Medium the grid asked for `ext/jpg`, one icon shared by every
   // .jpg in the folder, so no tile could ever show its own picture. Real Explorer at Medium
-  // icons draws the thumbnail (measured), so Trove must too.
+  // icons draws the thumbnail (measured), so Velkrys must too.
   it('asks for the file\u2019s own thumbnail at Medium, not the per-extension icon', () => {
     expect(tileIconUrl(entry(), 48)).toBe(thumb('C:\\pics\\photo.jpg', 48));
   });

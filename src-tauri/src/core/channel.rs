@@ -1,7 +1,7 @@
 //! Which store this build ships through (plan 22, 22.2.2). One source tree, many channels: the
-//! channel is a compile-time fact, `TROVE_CHANNEL` read by `option_env!` while cargo builds.
+//! channel is a compile-time fact, `VELKRYS_CHANNEL` read by `option_env!` while cargo builds.
 //! Unset (every build today, the GitHub `setup.exe`) is `direct`; the Microsoft Store MSIX
-//! build is made with `TROVE_CHANNEL=msstore` and `--config src-tauri/tauri.msix.conf.json`.
+//! build is made with `VELKRYS_CHANNEL=msstore` and `--config src-tauri/tauri.msix.conf.json`.
 //!
 //! What changes per channel is decided here and nowhere else:
 //! - "Start with Windows": the HKCU `Run` key is virtualized inside an MSIX package, so it
@@ -27,7 +27,7 @@ pub const DEFAULT_HANDLER_UNAVAILABLE: &str = "Not available in the Store versio
 
 /// The MSIX `windows.startupTask` `TaskId` the Store manifest declares (22.2.3).
 #[cfg_attr(not(windows), allow(dead_code))]
-pub const STARTUP_TASK_ID: &str = "TroveStartup";
+pub const STARTUP_TASK_ID: &str = "VelkrysStartup";
 
 impl Channel {
     /// `None` and an empty value are `direct`; an unknown name is refused, so a typo in the
@@ -77,17 +77,17 @@ pub const fn updater_on(feature: bool, channel: Channel) -> bool {
 /// This build's answer to [`updater_on`].
 pub const UPDATER: bool = updater_on(cfg!(feature = "updater"), CURRENT);
 
-// ⛔ A store build never self-updates (plan 22 rules): `TROVE_CHANNEL=msstore` with
+// ⛔ A store build never self-updates (plan 22 rules): `VELKRYS_CHANNEL=msstore` with
 // `--features updater` is refused at compile time rather than shipping a plugin the Store forbids.
 const _: () = assert!(
     !(cfg!(feature = "updater") && !CURRENT.self_updates()),
     "the updater feature is for the GitHub builds only; build msstore without --features updater"
 );
 
-/// This build's channel. An unknown `TROVE_CHANNEL` is a compile error.
-pub const CURRENT: Channel = match Channel::parse(option_env!("TROVE_CHANNEL")) {
+/// This build's channel. An unknown `VELKRYS_CHANNEL` is a compile error.
+pub const CURRENT: Channel = match Channel::parse(option_env!("VELKRYS_CHANNEL")) {
     Some(c) => c,
-    None => panic!("TROVE_CHANNEL must be unset, \"direct\" or \"msstore\""),
+    None => panic!("VELKRYS_CHANNEL must be unset, \"direct\" or \"msstore\""),
 };
 
 #[cfg(test)]

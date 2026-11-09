@@ -6,6 +6,7 @@ import { untrack } from 'svelte';
 import {
   attributeToggles,
   detailsRows,
+  driveRows,
   fmtContains,
   notCountedNote,
   recycleItemRows,
@@ -13,7 +14,9 @@ import {
   recycleSummary,
 } from '$lib/data/details-rows';
 import { recycle } from '$lib/state/recycle.svelte';
+import { driveUsage } from '$lib/data/sidebar-sections';
 import { details } from '$lib/state/details.svelte';
+import { panes } from '$lib/state/panes.svelte';
 import { selection } from '$lib/state/selection.svelte';
 import { tabs } from '$lib/state/tabs.svelte';
 import { fmtSize } from '$lib/utils/format';
@@ -63,6 +66,18 @@ export const useDetailsPane = () => {
             shown: r.shown ? r.shown(r.value as string, homeFolder.path) : (r.value as string),
           }))
       : [],
+  );
+
+  // a drive: its own rows (a `null` one is left out) and how full it is
+  const driveRowsShown = $derived(
+    details.drive
+      ? driveRows
+          .map((r) => ({ key: r.key, label: r.label, value: r.value(details.drive!) }))
+          .filter((r): r is { key: string; label: string; value: string } => r.value !== null)
+      : [],
+  );
+  const driveFill = $derived(
+    details.drive ? driveUsage(details.drive.totalBytes, details.drive.freeBytes) : undefined,
   );
 
   const manySummary = $derived.by(() => {
@@ -136,6 +151,15 @@ export const useDetailsPane = () => {
     get props() {
       return details.props;
     },
+    get drive() {
+      return details.drive;
+    },
+    get driveRows() {
+      return driveRowsShown;
+    },
+    get driveFill() {
+      return driveFill;
+    },
     get count() {
       return details.count;
     },
@@ -174,5 +198,6 @@ export const useDetailsPane = () => {
       return toggles;
     },
     setAttribute,
+    close: () => panes.close(),
   };
 };

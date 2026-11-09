@@ -1,5 +1,5 @@
 //! The undo history, saved as one JSON file beside settings.json (`undo.json`), so Ctrl+Z
-//! still works after Trove restarts (plan 08 F2). The frontend owns the shape and checks every
+//! still works after Velkrys restarts (plan 08 F2). The frontend owns the shape and checks every
 //! entry when it reads it back (`utils/undo-records.ts`); Rust only reads and writes the file,
 //! atomically, so a crash mid-write never leaves half a history.
 
@@ -44,7 +44,7 @@ mod tests {
 
     fn scratch(name: &str) -> PathBuf {
         let dir =
-            std::env::temp_dir().join(format!("trove-undo-log-{}-{name}", std::process::id()));
+            std::env::temp_dir().join(format!("velkrys-undo-log-{}-{name}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         dir
     }

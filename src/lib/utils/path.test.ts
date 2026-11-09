@@ -5,11 +5,14 @@ import {
   fromLinuxForm,
   isDriveRoot,
   isRootPath,
+  isUnderPath,
   isWslPath,
   nameOf,
   parentOf,
   pathKey,
   pathSep,
+  relativeUnder,
+  retargetPath,
   samePath,
   toLinuxForm,
   wslRootOf,
@@ -250,5 +253,30 @@ describe('a network share as a root', () => {
     expect(crumbsOf('//nas/media', LINUX).map((c) => c.label)).toEqual(['/', 'nas', 'media']);
     expect(parentOf('//nas/media/a', LINUX)).toBe('//nas/media');
     expect(crumbsOf(win('C:/a')).map((c) => c.label)).toEqual(['C:', 'a']);
+  });
+});
+
+describe('paths below a drive root', () => {
+  const MAC = { os: 'macos', thisPcLabel: 'This Mac' };
+  const LINUX = { os: 'linux', thisPcLabel: 'This Computer' };
+  const WIN = { os: 'windows', thisPcLabel: 'This PC' };
+  it('relativeUnder tells inside from outside, on a name boundary', () => {
+    expect(relativeUnder('/Volumes/Backup/a/b', '/Volumes/Backup', MAC)).toBe('a/b');
+    expect(relativeUnder('/Volumes/Backup', '/Volumes/Backup', MAC)).toBe('');
+    expect(relativeUnder('/Volumes/Backup2/a', '/Volumes/Backup', MAC)).toBeNull();
+    expect(relativeUnder('/Volumes/backup/a', '/Volumes/Backup', MAC)).toBeNull();
+    expect(relativeUnder('e:\\Photos\\x', 'E:\\', WIN)).toBe('Photos\\x');
+    expect(relativeUnder('E:\\', 'E:\\', WIN)).toBe('');
+    expect(relativeUnder('F:\\x', 'E:\\', WIN)).toBeNull();
+  });
+  it('isUnderPath and retargetPath move a path with its root', () => {
+    expect(isUnderPath('/media/u/X/a', '/media/u/X', LINUX)).toBe(true);
+    expect(retargetPath('/Volumes/Old/a/b', '/Volumes/Old', '/Volumes/New', MAC)).toBe(
+      '/Volumes/New/a/b',
+    );
+    expect(retargetPath('/Volumes/Old', '/Volumes/Old', '/Volumes/New', MAC)).toBe('/Volumes/New');
+    expect(retargetPath('/Volumes/Other/a', '/Volumes/Old', '/Volumes/New', MAC)).toBe(
+      '/Volumes/Other/a',
+    );
   });
 });

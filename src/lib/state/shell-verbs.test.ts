@@ -112,7 +112,7 @@ describe('commandsFor off Windows', () => {
   });
 
   it('a wsl-only command never appears on a Mac, even if one is stored', () => {
-    vi.stubGlobal('window', { __TROVE_PLATFORM__: { os: 'macos', thisPcLabel: 'This Mac' } });
+    vi.stubGlobal('window', { __VELKRYS_PLATFORM__: { os: 'macos', thisPcLabel: 'This Mac' } });
     settings.customCommands = [cmd('code-wsl', ['wsl']), cmd('vlc', ['file'])];
     expect(ids('file', WSL)).toEqual(['vlc']);
     expect(ids('file', '/Users/me/a.txt')).toEqual(['vlc']);

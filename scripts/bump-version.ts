@@ -1,7 +1,7 @@
-// One place to change Trove's version.
+// One place to change Velkrys's version.
 //   bun scripts/bump-version.ts 1.2.3          set all four files to 1.2.3
 //   bun scripts/bump-version.ts --check        exit 1 if the files disagree
-// The four: package.json, src-tauri/Cargo.toml, src-tauri/tauri.conf.json and the "trove" entry
+// The four: package.json, src-tauri/Cargo.toml, src-tauri/tauri.conf.json and the "velkrys" entry
 // in src-tauri/Cargo.lock. Edits are text replacements so formatting and comments stay intact.
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
@@ -18,7 +18,7 @@ export const FILES: VersionFile[] = [
   { path: 'src-tauri/tauri.conf.json', pattern: /^(\s*"version":\s*")([^"]+)(")/m },
   {
     path: 'src-tauri/Cargo.lock',
-    pattern: /(\[\[package\]\]\r?\nname = "trove"\r?\nversion = ")([^"]+)(")/,
+    pattern: /(\[\[package\]\]\r?\nname = "velkrys"\r?\nversion = ")([^"]+)(")/,
   },
 ];
 

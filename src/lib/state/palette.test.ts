@@ -172,11 +172,15 @@ describe('palette', () => {
       query: async (text) =>
         text.trim() === '1+2' ? [{ ...result('= 3', 'calc', copy), matched: true }] : [],
     };
-    palette.configure([calc, source('recent', [result('trove-1.log', 'recent', openLog)]), files]);
+    palette.configure([
+      calc,
+      source('recent', [result('velkrys-1.log', 'recent', openLog)]),
+      files,
+    ]);
 
     palette.setQuery('1');
     await vi.advanceTimersByTimeAsync(QUERY_DEBOUNCE_MS + 5);
-    expect(palette.current?.title).toBe('trove-1.log');
+    expect(palette.current?.title).toBe('velkrys-1.log');
 
     palette.setQuery('1+2');
     await vi.advanceTimersByTimeAsync(QUERY_DEBOUNCE_MS + 5);

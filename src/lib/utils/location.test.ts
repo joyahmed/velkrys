@@ -158,7 +158,7 @@ describe('separators: Windows style keeps Explorer look, Mac and Linux style onl
   // on 'native' the style is the host's.
   describe.each(['macos', 'linux'])('%s', (os) => {
     beforeEach(() => {
-      vi.stubGlobal('window', { __TROVE_PLATFORM__: { os, thisPcLabel: 'This Mac' } });
+      vi.stubGlobal('window', { __VELKRYS_PLATFORM__: { os, thisPcLabel: 'This Mac' } });
     });
     it('has no trailing tail', () => {
       expect(crumbTail()).toBe(false);
@@ -193,7 +193,7 @@ describe('separators follow the coming-from style, not the host', () => {
 
   describe.each(hosts)('on a %s host', (_host, injected, path) => {
     beforeEach(() => {
-      if (injected) vi.stubGlobal('window', { __TROVE_PLATFORM__: injected });
+      if (injected) vi.stubGlobal('window', { __VELKRYS_PLATFORM__: injected });
     });
     it('Windows style: a › before every crumb and a tail', () => {
       comingFrom.choice = 'windows';
@@ -318,7 +318,7 @@ describe('parseLocation and locationText', () => {
 
 describe('typed drive paths on Windows use backslashes and a capital drive letter', () => {
   beforeEach(() => {
-    vi.stubGlobal('window', { __TROVE_PLATFORM__: { os: 'windows', thisPcLabel: 'This PC' } });
+    vi.stubGlobal('window', { __VELKRYS_PLATFORM__: { os: 'windows', thisPcLabel: 'This PC' } });
   });
 
   afterEach(() => {
@@ -340,7 +340,7 @@ describe('typed drive paths on Windows use backslashes and a capital drive lette
   it('leaves backslash input, tokens and UNC alone', () => {
     expect(parseLocation('C:\\trove-test')).toEqual(pathLocation('C:\\trove-test'));
     expect(parseLocation('::{20D04FE0-3AEA-1069-A2D8-08002B30309D}')).toEqual(THIS_PC);
-    expect(parseLocation('trove:home')).toEqual(HOME);
+    expect(parseLocation('velkrys:home')).toEqual(HOME);
     expect(parseLocation('\\\\server\\share')).toEqual(pathLocation('\\\\server\\share'));
     // nothing treats UNC as a special path today, so forward-slash UNC is left as typed
     expect(parseLocation('//server/share')).toEqual(pathLocation('//server/share'));
@@ -371,7 +371,9 @@ describe('typed drive paths on Windows use backslashes and a capital drive lette
 
 describe('typed paths off Windows are left alone', () => {
   beforeEach(() => {
-    vi.stubGlobal('window', { __TROVE_PLATFORM__: { os: 'linux', thisPcLabel: 'This Computer' } });
+    vi.stubGlobal('window', {
+      __VELKRYS_PLATFORM__: { os: 'linux', thisPcLabel: 'This Computer' },
+    });
   });
 
   afterEach(() => {
@@ -432,7 +434,9 @@ describe('WSL locations', () => {
 
 describe('POSIX locations (macOS, Linux)', () => {
   beforeEach(() => {
-    vi.stubGlobal('window', { __TROVE_PLATFORM__: { os: 'linux', thisPcLabel: 'This Computer' } });
+    vi.stubGlobal('window', {
+      __VELKRYS_PLATFORM__: { os: 'linux', thisPcLabel: 'This Computer' },
+    });
   });
 
   afterEach(() => {
@@ -457,10 +461,10 @@ describe('POSIX locations (macOS, Linux)', () => {
 
   it('home is ~ on macOS and Linux too, and ~/x types into it', () => {
     for (const home of ['/home/alex', '/Users/alex']) {
-      const crumbs = crumbsOfLocation(pathLocation(`${home}/src/trove`), home);
-      expect(crumbs.map((c) => c.label)).toEqual([HOME_MARK, 'src', 'trove']);
+      const crumbs = crumbsOfLocation(pathLocation(`${home}/src/velkrys`), home);
+      expect(crumbs.map((c) => c.label)).toEqual([HOME_MARK, 'src', 'velkrys']);
       expect(crumbs[0].location).toEqual(pathLocation(home));
-      expect(parseLocation('~/src/trove', home)).toEqual(pathLocation(`${home}/src/trove`));
+      expect(parseLocation('~/src/velkrys', home)).toEqual(pathLocation(`${home}/src/velkrys`));
     }
     expect(
       crumbsOfLocation(pathLocation('/home/Alex/x'), '/home/alex').map((c) => c.label),
@@ -508,7 +512,7 @@ describe('tabToken and tabLocation: a tab as the session saves it (plan 15 G.45)
     for (const place of [HOME, THIS_PC, GALLERY, APPLICATIONS, RECYCLE_BIN]) {
       expect(tabLocation(tabToken(place))).toEqual(place);
     }
-    expect(tabToken(HOME)).toBe('trove:home');
+    expect(tabToken(HOME)).toBe('velkrys:home');
     expect(tabToken(THIS_PC)).toBe('::{20d04fe0-3aea-1069-a2d8-08002b30309d}');
     expect(tabToken(RECYCLE_BIN)).toBe('::{645ff040-5081-101b-9f08-00aa002f954e}');
   });
@@ -519,8 +523,21 @@ describe('tabToken and tabLocation: a tab as the session saves it (plan 15 G.45)
     expect(tabLocation('Home')).toEqual(pathLocation('Home'));
   });
 
-  it('an unknown trove: token is skipped, never opened as a path', () => {
-    expect(tabLocation('trove:x')).toBeNull();
+  it('a place token saved before the rename still opens its place', () => {
+    expect(tabLocation('trove:home')).toEqual(HOME); // rename-keep
+    expect(tabLocation('trove:gallery')).toEqual(GALLERY); // rename-keep
+    expect(tabLocation('trove:applications')).toEqual(APPLICATIONS); // rename-keep
+    expect(parseLocation('trove:home')).toEqual(HOME); // rename-keep
+    expect(parseLocation('trove:gallery')).toEqual(GALLERY); // rename-keep
+    expect(parseLocation('trove:applications')).toEqual(APPLICATIONS); // rename-keep
+  });
+
+  it('an unknown token from before the rename is skipped, never opened as a path', () => {
+    expect(tabLocation('trove:x')).toBeNull(); // rename-keep
+  });
+
+  it('an unknown velkrys: token is skipped, never opened as a path', () => {
+    expect(tabLocation('velkrys:x')).toBeNull();
     expect(tabLocation('')).toBeNull();
   });
 
@@ -530,9 +547,9 @@ describe('tabToken and tabLocation: a tab as the session saves it (plan 15 G.45)
   });
 
   it('a one-tab restored window reads its token through parseLocation too', () => {
-    expect(parseLocation('trove:home')).toEqual(HOME);
-    expect(parseLocation('trove:gallery')).toEqual(GALLERY);
-    expect(parseLocation('trove:applications')).toEqual(APPLICATIONS);
+    expect(parseLocation('velkrys:home')).toEqual(HOME);
+    expect(parseLocation('velkrys:gallery')).toEqual(GALLERY);
+    expect(parseLocation('velkrys:applications')).toEqual(APPLICATIONS);
   });
 });
 
@@ -547,7 +564,7 @@ describe('urlScheme', () => {
   });
 
   it('is null for paths, WSL distros and places', () => {
-    for (const text of ['C:\\a', 'c:/a', 'Ubuntu:/home/a', '/home/a', 'trove:home', 'This PC'])
+    for (const text of ['C:\\a', 'c:/a', 'Ubuntu:/home/a', '/home/a', 'velkrys:home', 'This PC'])
       expect(urlScheme(text)).toBeNull();
   });
 });
@@ -558,7 +575,7 @@ describe('typed . and .. segments are resolved, so Recent never gets a tile name
   });
 
   it('Windows: climbs one level, stops at the root', () => {
-    vi.stubGlobal('window', { __TROVE_PLATFORM__: { os: 'windows', thisPcLabel: 'This PC' } });
+    vi.stubGlobal('window', { __VELKRYS_PLATFORM__: { os: 'windows', thisPcLabel: 'This PC' } });
     expect(parseLocation(String.raw`C:\a\b\..`)).toEqual(pathLocation(String.raw`C:\a`));
     expect(parseLocation('c:/a/b/..')).toEqual(pathLocation(String.raw`C:\a`));
     expect(parseLocation(String.raw`C:\a\.\b`)).toEqual(pathLocation(String.raw`C:\a\b`));
@@ -568,7 +585,7 @@ describe('typed . and .. segments are resolved, so Recent never gets a tile name
   });
 
   it('Windows: a share and a WSL distro are the floor', () => {
-    vi.stubGlobal('window', { __TROVE_PLATFORM__: { os: 'windows', thisPcLabel: 'This PC' } });
+    vi.stubGlobal('window', { __VELKRYS_PLATFORM__: { os: 'windows', thisPcLabel: 'This PC' } });
     expect(parseLocation(String.raw`\\server\share\a\..`)).toEqual(
       pathLocation(String.raw`\\server\share` + '\\'),
     );
@@ -584,7 +601,9 @@ describe('typed . and .. segments are resolved, so Recent never gets a tile name
   });
 
   it('Linux and macOS: / is the floor, a relative path keeps what it cannot resolve', () => {
-    vi.stubGlobal('window', { __TROVE_PLATFORM__: { os: 'linux', thisPcLabel: 'This Computer' } });
+    vi.stubGlobal('window', {
+      __VELKRYS_PLATFORM__: { os: 'linux', thisPcLabel: 'This Computer' },
+    });
     expect(parseLocation('/home/a/..')).toEqual(pathLocation('/home'));
     expect(parseLocation('/home/a/../b/./c')).toEqual(pathLocation('/home/b/c'));
     expect(parseLocation('/..')).toEqual(pathLocation('/'));
@@ -593,7 +612,9 @@ describe('typed . and .. segments are resolved, so Recent never gets a tile name
   });
 
   it('a path without dot segments is untouched; ~/.. resolves above home', () => {
-    vi.stubGlobal('window', { __TROVE_PLATFORM__: { os: 'linux', thisPcLabel: 'This Computer' } });
+    vi.stubGlobal('window', {
+      __VELKRYS_PLATFORM__: { os: 'linux', thisPcLabel: 'This Computer' },
+    });
     expect(parseLocation('/home/a/')).toEqual(pathLocation('/home/a/'));
     expect(parseLocation('/home/.hidden/x')).toEqual(pathLocation('/home/.hidden/x'));
     expect(parseLocation('~/..', '/home/alex')).toEqual(pathLocation('/home'));

@@ -1,4 +1,4 @@
-//! Where Trove puts its own windows (plan 20): Windows' Snap for one window, and Cascade /
+//! Where Velkrys puts its own windows (plan 20): Windows' Snap for one window, and Cascade /
 //! Show windows stacked / Show windows side by side for all of them. Pure: a monitor's work
 //! area in, rects out, all in PHYSICAL px like `core::session`'s `Bounds` and `Screen`.
 //!
@@ -29,7 +29,7 @@ pub enum SnapKey {
     Down,
 }
 
-/// Windows' taskbar menu, for every Trove window at once.
+/// Windows' taskbar menu, for every Velkrys window at once.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum Layout {
@@ -171,7 +171,7 @@ pub fn layout_rects(layout: Layout, n: usize, area: &Screen) -> Vec<Bounds> {
     }
 }
 
-/// What Trove remembers about a window it snapped: which half, the rect it put it at, and the
+/// What Velkrys remembers about a window it snapped: which half, the rect it put it at, and the
 /// bounds it had before — where Restore takes it back to.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct SnapMemo {
@@ -217,7 +217,7 @@ fn near(a: &Bounds, b: &Bounds) -> bool {
         && d(a.h as i64, b.h as i64)
 }
 
-/// The window's state: maximized, a half Trove snapped it to and it still sits at, or normal (a
+/// The window's state: maximized, a half Velkrys snapped it to and it still sits at, or normal (a
 /// half the user has since dragged or resized is normal again).
 pub fn snap_state(memo: Option<&SnapMemo>, now: Bounds, maximized: bool) -> SnapState {
     if maximized {

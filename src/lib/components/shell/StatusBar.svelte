@@ -16,7 +16,7 @@
   <span class="min-w-0 flex-1 truncate">{bar.selectionLine ?? (selected || status)}</span>
   {#if bar.updateVersion}
     <span class="text-text-secondary flex shrink-0 items-center gap-2" role="status">
-      <span title={`Trove ${bar.updateVersion}`}>{UPDATE_READY_TEXT}</span>
+      <span title={`Velkrys ${bar.updateVersion}`}>{UPDATE_READY_TEXT}</span>
       <button
         type="button"
         class="text-accent hover:bg-subtle-hover active:bg-subtle-pressed rounded-xs px-1.5 disabled:opacity-60"

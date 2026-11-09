@@ -6,7 +6,7 @@ import { moreMenu } from './menus';
 import { customizeIntro, showsWindowsEntries } from '$lib/utils/customize-text';
 
 const onOs = (os: string) =>
-  vi.stubGlobal('window', { __TROVE_PLATFORM__: { os, thisPcLabel: 'This PC' } });
+  vi.stubGlobal('window', { __VELKRYS_PLATFORM__: { os, thisPcLabel: 'This PC' } });
 const labelOf = (items: typeof rowMenu) => {
   const item = items.find((i) => i.key === 'properties');
   return item && item.kind === 'item' ? item.label : undefined;

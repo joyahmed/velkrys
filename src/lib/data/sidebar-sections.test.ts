@@ -202,7 +202,7 @@ describe('sidebar sections', () => {
 
   it('Applications sits right after Gallery and opens the applications place, on all three OSes', () => {
     for (const os of ['windows', 'macos', 'linux']) {
-      vi.stubGlobal('window', { __TROVE_PLATFORM__: { os, thisPcLabel: 'This PC' } });
+      vi.stubGlobal('window', { __VELKRYS_PLATFORM__: { os, thisPcLabel: 'This PC' } });
       const keys = section('system')
         .items()
         .map((i) => i.key);

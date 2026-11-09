@@ -35,7 +35,7 @@ const app: FileEntry = {
 };
 
 const onOs = (os: string) =>
-  vi.stubGlobal('window', { __TROVE_PLATFORM__: { os, thisPcLabel: 'This Mac' } });
+  vi.stubGlobal('window', { __VELKRYS_PLATFORM__: { os, thisPcLabel: 'This Mac' } });
 
 describe('actions on an app bundle', () => {
   beforeEach(() => {

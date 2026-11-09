@@ -71,7 +71,7 @@ const CANDIDATES: DetectedApp[] = [
 ];
 
 /**
- * Joy's three live commands, read from `%APPDATA%\com.joyahmed.trove\settings.json`. This is the
+ * Joy's three live commands, read from `%APPDATA%\com.joyahmed.velkrys\settings.json`. This is the
  * regression: both Zed rows were repaired to `zed %path%` by `7275431`, and between them they
  * hid the single detected Zed entry — the correct one.
  */

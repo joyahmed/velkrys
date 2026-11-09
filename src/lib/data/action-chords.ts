@@ -87,7 +87,7 @@ export const LIST_OWNED: ReadonlySet<string> = new Set([
  */
 export const CHORD_FREE: Record<string, string> = {
   'cascade-windows':
-    'arranges every Trove window at once, a rare layout command; Explorer, Finder and Nautilus give it no key, and the free-looking chords (Ctrl+Alt+arrows, Super+arrows) are window-manager keys',
+    'arranges every Velkrys window at once, a rare layout command; Explorer, Finder and Nautilus give it no key, and the free-looking chords (Ctrl+Alt+arrows, Super+arrows) are window-manager keys',
   'stack-windows': 'the same arrange family as Cascade windows: rare, palette and Window menu only',
   'windows-side-by-side':
     'the same arrange family as Cascade windows: rare, palette and Window menu only',

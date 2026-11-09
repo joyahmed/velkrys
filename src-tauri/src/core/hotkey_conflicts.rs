@@ -70,8 +70,8 @@ pub fn find_holder(listing: &str, chord: &str) -> Option<(String, String)> {
     })
 }
 
-/// One GNOME accelerator (`<Primary><Shift>a`) in Trove's chord form (`ctrl+shift+a`), or None
-/// for an empty binding or a modifier Trove cannot register (`<Hyper>`, `<Meta>`, …).
+/// One GNOME accelerator (`<Primary><Shift>a`) in Velkrys's chord form (`ctrl+shift+a`), or None
+/// for an empty binding or a modifier Velkrys cannot register (`<Hyper>`, `<Meta>`, …).
 #[cfg(any(target_os = "linux", test))]
 fn accel_to_chord(accel: &str) -> Option<String> {
     let mut rest = accel.trim();
@@ -90,7 +90,7 @@ fn accel_to_chord(accel: &str) -> Option<String> {
     if rest.is_empty() {
         return None;
     }
-    // X keysym names where Trove's (`utils/hotkeys.ts` `keyName`) differ; the rest only lowercase.
+    // X keysym names where Velkrys's (`utils/hotkeys.ts` `keyName`) differ; the rest only lowercase.
     let key = match rest.to_ascii_lowercase().as_str() {
         "return" => "enter".to_string(),
         "grave" => "backquote".to_string(),
@@ -102,7 +102,7 @@ fn accel_to_chord(accel: &str) -> Option<String> {
 }
 
 /// A chord as its sorted modifiers plus its key, so `shift+alt+a` and `alt+shift+a` compare
-/// equal. Spellings Trove's parser also accepts (`control`, `cmd`, `meta`) are folded in.
+/// equal. Spellings Velkrys's parser also accepts (`control`, `cmd`, `meta`) are folded in.
 #[cfg(any(target_os = "linux", test))]
 fn canonical(chord: &str) -> Option<(Vec<&'static str>, String)> {
     let parts: Vec<String> = chord
@@ -197,7 +197,7 @@ mod tests {
     }
 
     #[test]
-    fn accelerators_become_trove_chords() {
+    fn accelerators_become_velkrys_chords() {
         assert_eq!(accel_to_chord("<Alt>space").as_deref(), Some("alt+space"));
         assert_eq!(
             accel_to_chord("<Primary><Shift>grave").as_deref(),

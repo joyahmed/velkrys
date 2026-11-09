@@ -15,7 +15,7 @@ use crate::core::default_handler_linux as linux;
 
 /// The real root; tests in `core` use a throw-away key instead.
 #[cfg(not(all(unix, not(target_os = "macos"))))]
-const CLASSES: &str = r"Software\Classes";
+pub(crate) const CLASSES: &str = r"Software\Classes";
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -43,7 +43,7 @@ fn backup_path(app: &AppHandle) -> Result<PathBuf, String> {
 
 /// `~/.local/share/applications/<id>.desktop` (`$XDG_DATA_HOME` respected).
 #[cfg(all(unix, not(target_os = "macos")))]
-fn desktop_path() -> Result<PathBuf, String> {
+pub(crate) fn desktop_path() -> Result<PathBuf, String> {
     let home = std::env::var_os("HOME")
         .map(PathBuf::from)
         .ok_or("HOME is not set")?;

@@ -188,7 +188,7 @@ mod tests {
 
     fn temp(name: &str) -> PathBuf {
         let d = std::env::temp_dir().join(format!(
-            "trove-index-settings-{name}-{}",
+            "velkrys-index-settings-{name}-{}",
             std::process::id()
         ));
         let _ = std::fs::remove_dir_all(&d);

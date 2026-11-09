@@ -123,7 +123,7 @@ describe('defaultSpotlightHotkey', () => {
       ['windows', 'alt+space'],
       ['macos', 'alt+space'],
     ] as const) {
-      vi.stubGlobal('window', { __TROVE_PLATFORM__: { os, thisPcLabel: 'x' } });
+      vi.stubGlobal('window', { __VELKRYS_PLATFORM__: { os, thisPcLabel: 'x' } });
       expect(defaultSpotlightHotkey()).toBe(chord);
     }
   });

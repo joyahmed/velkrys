@@ -2,7 +2,7 @@
 // matching what the keys actually are there (data/shortcuts.ts makes Ctrl into ⌘ on a Mac,
 // except the terminal's Ctrl+`, which stays the Control key there and is written ⌃`).
 // Two axes (plan 19, Phase 2): the "I'm coming from" STYLE picks which chord a hint names and
-// which extra keys are on; the HOST (the OS Trove runs on) draws it — ⌘ only on a Mac keyboard.
+// which extra keys are on; the HOST (the OS Velkrys runs on) draws it — ⌘ only on a Mac keyboard.
 import { onMac } from './platform';
 import { comingFrom, hostStyle, type OsStyle } from '$lib/state/coming-from.svelte';
 
@@ -189,7 +189,7 @@ export const hiddenItemsHint = (
  * Plan 08 A1: the chords that give every palette action a key, one column per "I'm coming from"
  * style — `[windows, mac, linux]`, written as the table writes them (Ctrl is ⌘ on a Mac, `Control`
  * the real Control key). The file manager's own chord wherever one exists: Finder's ⇧⌘H Home and
- * ⌃⌥⌘1/2/5/6 Sort by, Nautilus' Alt+Home and Ctrl+Shift+I. The rest are Trove's, picked clear of
+ * ⌃⌥⌘1/2/5/6 Sort by, Nautilus' Alt+Home and Ctrl+Shift+I. The rest are Velkrys's, picked clear of
  * every chord already bound under any style and of each system's reserved keys (data/shortcuts
  * `action-chords.test.ts` holds both). `data/shortcuts` `styleChordShortcuts` binds this table,
  * so a hint and its key cannot drift.
@@ -341,7 +341,7 @@ export const isSelectAllKey = (e: KeyChord, mac: boolean = onMac()): boolean =>
 export type SnapKey = 'left' | 'right' | 'up' | 'down';
 
 /**
- * Trove's own Snap, Windows' Win+arrows on a Mac coming from Windows (plan 20): Control+Option
+ * Velkrys's own Snap, Windows' Win+arrows on a Mac coming from Windows (plan 20): Control+Option
  * and an arrow, Rectangle's own modifier for halves. Not ⌃+arrows (Spaces, Mission Control), not
  * Fn+⌃+arrows (macOS 15's tiling), not ⌘+arrows (text, ⌘↑ Enclosing Folder). `Control` is the
  * real Control key (`keepCtrl` in data/shortcuts.ts).
@@ -354,7 +354,7 @@ export const SNAP_CHORDS: Record<SnapKey, string> = {
 };
 
 /**
- * Whether Trove binds the Snap keys: only a Mac host coming from Windows. Windows has its own
+ * Whether Velkrys binds the Snap keys: only a Mac host coming from Windows. Windows has its own
  * Snap (Win+arrows reach the frameless window), and on Linux the desktop's Super+arrows win and
  * every free-looking fallback is a workspace key somewhere (plan 20 Q1). Mac style on a Mac has
  * macOS 15's own tiling.

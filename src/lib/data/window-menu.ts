@@ -1,6 +1,6 @@
 // The window menu (plan 20): a right-click on the title bar's empty part. The frameless window
 // gets neither the OS title bar's menu nor Windows' taskbar menu, so this is both in one —
-// Minimize, Maximize / Restore, the Snap halves where Trove binds their keys, the three arrange
+// Minimize, Maximize / Restore, the Snap halves where Velkrys binds their keys, the three arrange
 // commands, Close. Data only: the actions come in from the hook (or `windowMenuApi`).
 import type { MenuItem } from '$lib/hooks/use-menu.svelte';
 import * as win from '$lib/api/window';
@@ -74,7 +74,7 @@ export const windowMenuFor = (
 const said = (p: Promise<unknown>) =>
   p.catch((e) => notices.push({ kind: 'warning', message: String(e) }));
 
-/** Arrange every Trove window; the window menu and Find anything both run this. */
+/** Arrange every Velkrys window; the window menu and Find anything both run this. */
 export const arrangeWindows = (layout: WindowLayout) => said(win.arrangeWindows(layout));
 
 /** The real handlers for this window. */

@@ -1,4 +1,4 @@
-/* Trove's light terminal palette. wterm's built-in `light` theme (One Light) leaves cyan #0184bc at
+/* Velkrys's light terminal palette. wterm's built-in `light` theme (One Light) leaves cyan #0184bc at
    4.0:1, yellow, green and bright black under 4.5:1 and paints ANSI white and bright white
    (#fafafa, #fff) the same as the #fafafa background, so Starship's directory segment and any
    "white" text were hard to read on Mac. Every one of the 16 colours here clears WCAG AA (4.5:1)

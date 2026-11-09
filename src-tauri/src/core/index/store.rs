@@ -136,7 +136,7 @@ impl<'a> Reader<'a> {
 fn decode(raw: &[u8]) -> io::Result<Table> {
     let mut rd = Reader(raw);
     if rd.take(4)? != MAGIC {
-        return Err(bad("not a Trove index"));
+        return Err(bad("not a Velkrys index"));
     }
     if rd.u32()? != VERSION {
         return Err(bad("another version"));

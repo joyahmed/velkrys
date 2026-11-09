@@ -1,5 +1,5 @@
 // What an undo entry did, as plain data: the form the undo history is saved in (`undo.json`
-// beside settings.json) so Ctrl+Z still works after Trove restarts. A closure dies with the
+// beside settings.json) so Ctrl+Z still works after Velkrys restarts. A closure dies with the
 // window; one of these does not. `utils/undo-records.ts` reads and checks them,
 // `state/undo-executor.ts` turns one back into the undo it describes.
 

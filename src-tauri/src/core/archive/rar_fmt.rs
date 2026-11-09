@@ -1,4 +1,4 @@
-//! RAR (plan 16 Phase 5): list and extract only — Trove never makes a RAR (UnRAR licence,
+//! RAR (plan 16 Phase 5): list and extract only — Velkrys never makes a RAR (UnRAR licence,
 //! `LICENSES/unrar.txt`). Built only with the `rar` cargo feature (on by default).
 //!
 //! The reader is RARLAB's UnRAR through the `unrar` crate. `entries` walks the headers
@@ -8,7 +8,7 @@
 //!
 //! Every entry name still goes through `safe_path` in `job.rs`, exactly as for zip, 7z and tar:
 //! the engine plans the target path and refuses `..`, absolute and drive names BEFORE this
-//! reader writes anything. UnRAR itself is only ever told to write one file into Trove's own
+//! reader writes anything. UnRAR itself is only ever told to write one file into Velkrys's own
 //! private temp folder (`extract_to(<temp>/<index>)`), never into the destination, so a name
 //! UnRAR would place elsewhere cannot reach it. The engine then copies that file through its
 //! usual partial-then-rename write (size cap, no-replace, Mark of the Web, cancel).
@@ -112,7 +112,7 @@ impl Scratch {
     fn new() -> Result<Scratch> {
         static NEXT: AtomicU64 = AtomicU64::new(0);
         let dir = std::env::temp_dir().join(format!(
-            "trove-rar-{}-{}",
+            "velkrys-rar-{}-{}",
             std::process::id(),
             NEXT.fetch_add(1, Ordering::Relaxed)
         ));
@@ -297,7 +297,7 @@ mod tests {
     }
 
     /// Tests that run a real RAR through `RarSource` hold this, because
-    /// `real_rar_lists_and_extracts` checks that no `trove-rar-<pid>-*` temp folder of this
+    /// `real_rar_lists_and_extracts` checks that no `velkrys-rar-<pid>-*` temp folder of this
     /// process is left, and another test's live `Scratch` would otherwise fail that check.
     fn real_rar_lock() -> std::sync::MutexGuard<'static, ()> {
         static LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
@@ -404,8 +404,8 @@ mod tests {
         assert!(done.failed.is_empty(), "{:?}", done.failed);
         let bytes = fs::read(dest.join("VERSION")).unwrap();
         assert!(!bytes.is_empty());
-        // nothing left in a trove-rar temp folder of this process
-        let ours = format!("trove-rar-{}-", std::process::id());
+        // nothing left in a velkrys-rar temp folder of this process
+        let ours = format!("velkrys-rar-{}-", std::process::id());
         let left: Vec<_> = fs::read_dir(std::env::temp_dir())
             .unwrap()
             .flatten()

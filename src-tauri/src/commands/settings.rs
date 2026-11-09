@@ -60,7 +60,7 @@ pub fn window_theme_of(saved: &serde_json::Value) -> Option<tauri::Theme> {
 
 /// macOS: the explorer windows' glass (the `sidebar` material) follows the WINDOW's appearance,
 /// and the frontend can only set it once its settings load — about a second after the window
-/// is on screen. Read the saved choice here, before the window shows, so Trove Light on a Mac
+/// is on screen. Read the saved choice here, before the window shows, so Velkrys Light on a Mac
 /// in Dark mode does not open on a second of dark glass. The frontend keeps it in step after
 /// (`hooks/use-theme`). Mac-only, as both its callers are.
 #[cfg(target_os = "macos")]

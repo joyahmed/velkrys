@@ -1,10 +1,10 @@
 [package]
-name = "trove"
-version = "0.1.1"
-description = "Trove — a fast file explorer for Windows, macOS and Linux, built with Tauri 2 + Svelte 5"
+name = "velkrys"
+version = "0.1.2"
+description = "Velkrys — a fast file explorer for Windows, macOS and Linux, built with Tauri 2 + Svelte 5"
 authors = ["Joy Ahmed <joy@zettabyteincorp.com>"]
-homepage = "https://github.com/joyahmed/trove"
-repository = "https://github.com/joyahmed/trove"
+homepage = "https://github.com/joyahmed/velkrys"
+repository = "https://github.com/joyahmed/velkrys"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -13,7 +13,7 @@ edition = "2021"
 # The `_lib` suffix may seem redundant but it is necessary
 # to make the lib name unique and wouldn't conflict with the bin name.
 # This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
-name = "trove_lib"
+name = "velkrys_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]

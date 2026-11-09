@@ -51,7 +51,7 @@ fn mb(b: usize) -> f64 {
 #[ignore = "walks every fixed drive; run by hand"]
 fn measure_all_drives() {
     let home = std::env::var_os("USERPROFILE").map(PathBuf::from);
-    let tmp = std::env::temp_dir().join("trove-measure-store");
+    let tmp = std::env::temp_dir().join("velkrys-measure-store");
     let _ = std::fs::remove_dir_all(&tmp);
     std::fs::create_dir_all(&tmp).unwrap();
     let cancel = AtomicBool::new(false);

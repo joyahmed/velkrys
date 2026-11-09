@@ -5,7 +5,7 @@
 export type Removable =
   | 'yes'
   | 'system'
-  | 'trove'
+  | 'velkrys'
   | 'noUninstaller'
   /** Mac: a symlink or alias, not the bundle itself */
   | 'link'
@@ -34,7 +34,7 @@ export interface Uninstallable {
   /** Mac: a hash of the bundle's device, inode and mtime, sent back so a swapped bundle is refused; `''` on Windows and Ubuntu */
   stamp: string;
   /**
-   * Ubuntu without GNOME Software: Trove starts nothing; `program` is typed (no newline) into a
+   * Ubuntu without GNOME Software: Velkrys starts nothing; `program` is typed (no newline) into a
    * fresh terminal shell and Enter is the person's.
    */
   typed: boolean;
@@ -42,7 +42,7 @@ export interface Uninstallable {
 
 /**
  * What happened after the uninstaller ended (Windows, Ubuntu) or the move to the Trash (Mac),
- * only as far as Trove can know it. `noTrash`: macOS let neither Trash method run; nothing
- * moved. `typedInTerminal`: Ubuntu, Trove started nothing; the line waits for the person's Enter.
+ * only as far as Velkrys can know it. `noTrash`: macOS let neither Trash method run; nothing
+ * moved. `typedInTerminal`: Ubuntu, Velkrys started nothing; the line waits for the person's Enter.
  */
 export type UninstallOutcome = 'gone' | 'stillListed' | 'unknown' | 'noTrash' | 'typedInTerminal';

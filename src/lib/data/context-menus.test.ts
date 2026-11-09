@@ -16,6 +16,7 @@ import { archiveLocation } from '$lib/utils/archive-location';
 import { openWithApps } from '$lib/api/open-with';
 import { iconUrl, thumbUrl } from '$lib/api/icons';
 import { actions } from '$lib/state/actions.svelte';
+import { places } from '$lib/state/places.svelte';
 
 const run = vi.hoisted(() => ({ verb: vi.fn(async () => {}), custom: vi.fn(async () => {}) }));
 vi.mock('$lib/api/shell-verbs', () => ({
@@ -200,7 +201,7 @@ describe('context menu builders', () => {
 
 /**
  * Right-clicking the empty space is the gesture people reach for to sort and group — Explorer
- * has always answered it. Trove's answer was nothing at all, which is why a built, working
+ * has always answered it. Velkrys's answer was nothing at all, which is why a built, working
  * "Group by date" went unfound for weeks: "you are never grouping with this week, this month".
  */
 describe('the background menu, as the way sort and group are found', () => {
@@ -680,5 +681,40 @@ describe('the OneDrive items on a row (plan 05 5.4)', () => {
     await item(local, [local, plain], 'free-up-space').run();
     expect(spy).toHaveBeenLastCalledWith(false);
     expect(actions.cloudSelection.map((e) => e.name)).toEqual(['here.docx']);
+  });
+});
+
+describe('the row menu on a drive', () => {
+  const keys = (items: MenuItem[]) => items.filter((i) => i.kind === 'item').map((i) => i.key);
+  const shownKeys = (items: MenuItem[]) =>
+    items.filter((i) => i.kind === 'item' && (i.visible?.() ?? true)).map((i) => i.key);
+
+  beforeEach(() => {
+    places.drives = [
+      { path: 'C:\\', label: 'OS', totalBytes: 10, freeBytes: 5, ejectable: false },
+      { path: 'E:\\', label: 'USB', totalBytes: 10, freeBytes: 5, ejectable: true },
+    ];
+  });
+
+  it('a USB drive: Eject right after the Open block, no Cut, Delete or Delete permanently', () => {
+    const items = keys(rowMenuFor(entry('E:\\', true)));
+    expect(items).not.toContain('cut');
+    expect(items).not.toContain('delete');
+    expect(items).not.toContain('delete-permanently');
+    expect(items.indexOf('eject')).toBe(items.indexOf('open-terminal') + 1);
+    expect(items).toContain('rename');
+    expect(items).toContain('properties');
+  });
+
+  it('a fixed drive has no Eject', () => {
+    const menu = rowMenuFor(entry('C:\\', true));
+    expect(shownKeys(menu)).not.toContain('eject');
+    expect(shownKeys(menu)).not.toContain('delete');
+  });
+
+  it('a folder row is unchanged: Cut, Delete, no Eject', () => {
+    const items = keys(rowMenuFor(entry('C:\\docs', true)));
+    expect(items).toEqual(expect.arrayContaining(['cut', 'delete', 'delete-permanently']));
+    expect(items).not.toContain('eject');
   });
 });

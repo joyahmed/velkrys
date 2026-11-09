@@ -30,7 +30,7 @@ describe('who draws the window buttons', () => {
     expect(tabStripInsetPx(true, mac)).toBe(TAB_STRIP_PAD_PX);
   });
 
-  it('is Trove on Windows and Linux, with the strip where it always was', () => {
+  it('is Velkrys on Windows and Linux, with the strip where it always was', () => {
     for (const p of [windows, linux]) {
       expect(drawsCaptionButtons(p)).toBe(true);
       expect(tabStripInsetPx(false, p)).toBe(10);
@@ -38,7 +38,7 @@ describe('who draws the window buttons', () => {
     }
   });
 
-  it("is Trove when nothing was injected (tests, a plain browser): Windows' layout", () => {
+  it("is Velkrys when nothing was injected (tests, a plain browser): Windows' layout", () => {
     expect(drawsCaptionButtons()).toBe(true);
     expect(tabStripInsetPx()).toBe(10);
   });
@@ -50,13 +50,13 @@ describe('read from what Rust injected', () => {
   });
 
   it('hides the buttons when `platform_init_script` said macos', () => {
-    vi.stubGlobal('window', { __TROVE_PLATFORM__: mac });
+    vi.stubGlobal('window', { __VELKRYS_PLATFORM__: mac });
     expect(drawsCaptionButtons()).toBe(false);
     expect(tabStripInsetPx()).toBe(MAC_TRAFFIC_LIGHT_INSET_PX);
   });
 
   it('keeps them when it said windows', () => {
-    vi.stubGlobal('window', { __TROVE_PLATFORM__: windows });
+    vi.stubGlobal('window', { __VELKRYS_PLATFORM__: windows });
     expect(drawsCaptionButtons()).toBe(true);
   });
 });
@@ -109,7 +109,7 @@ describe('titleBarDblclickZooms — a double-click zooms exactly once', () => {
     ['Windows', windows],
     ['Linux', linux],
   ])('on %s, leaves a drag region to Tauri and zooms only in a gap', (_, platform) => {
-    vi.stubGlobal('window', { __TROVE_PLATFORM__: platform });
+    vi.stubGlobal('window', { __VELKRYS_PLATFORM__: platform });
     expect(titleBarDblclickZooms([header])).toBe(false);
     expect(titleBarDblclickZooms(gap)).toBe(true);
   });

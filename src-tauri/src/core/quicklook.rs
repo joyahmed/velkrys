@@ -14,7 +14,7 @@
 //!
 //! An app bundle (`Calculator.app`, a folder) gets QuickLook's *icon* representation the same way:
 //! many modern apps keep their icon only in `Assets.car`, which no Rust crate reads, so a glyph
-//! was all Trove drew. QuickLook reads the asset catalog (or the `.icns`) as Finder does.
+//! was all Velkrys drew. QuickLook reads the asset catalog (or the `.icns`) as Finder does.
 
 use std::path::Path;
 use std::sync::mpsc;
@@ -292,7 +292,7 @@ mod tests {
 
     #[test]
     fn a_missing_file_or_another_kind_is_not_read() {
-        let missing = std::env::temp_dir().join("trove-ql-missing-file.heic");
+        let missing = std::env::temp_dir().join("velkrys-ql-missing-file.heic");
         assert_eq!(thumbnail_of_file(&missing, 256), Err(NoThumbnail::NotRead));
         assert_eq!(
             thumbnail_of_file(Path::new("/etc/hosts"), 256),
@@ -301,7 +301,7 @@ mod tests {
     }
 
     fn scratch(tag: &str) -> PathBuf {
-        let dir = std::env::temp_dir().join(format!("trove-ql-{tag}-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("velkrys-ql-{tag}-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         dir

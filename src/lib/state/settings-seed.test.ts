@@ -53,7 +53,7 @@ describe('custom command seeding off Windows', () => {
   beforeEach(() => {
     settings.loaded = false;
     settings.customCommands = [];
-    vi.stubGlobal('window', { __TROVE_PLATFORM__: { os: 'macos', thisPcLabel: 'This Mac' } });
+    vi.stubGlobal('window', { __VELKRYS_PLATFORM__: { os: 'macos', thisPcLabel: 'This Mac' } });
   });
   afterEach(() => {
     vi.unstubAllGlobals();

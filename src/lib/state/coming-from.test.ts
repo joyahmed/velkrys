@@ -27,7 +27,7 @@ describe('hostStyle', () => {
 
   it('reads what Rust injected at call time by default', () => {
     expect(hostStyle()).toBe('windows');
-    vi.stubGlobal('window', { __TROVE_PLATFORM__: on('macos') });
+    vi.stubGlobal('window', { __VELKRYS_PLATFORM__: on('macos') });
     expect(hostStyle()).toBe('mac');
   });
 });
@@ -39,13 +39,13 @@ describe('comingFrom.style', () => {
       ['macos', 'mac'],
       ['linux', 'linux'],
     ]) {
-      vi.stubGlobal('window', { __TROVE_PLATFORM__: on(os) });
+      vi.stubGlobal('window', { __VELKRYS_PLATFORM__: on(os) });
       expect(comingFrom.style).toBe(style);
     }
   });
 
   it('is the chosen style whatever the host', () => {
-    vi.stubGlobal('window', { __TROVE_PLATFORM__: on('windows') });
+    vi.stubGlobal('window', { __VELKRYS_PLATFORM__: on('windows') });
     comingFrom.choice = 'mac';
     expect(comingFrom.style).toBe('mac');
     comingFrom.choice = 'linux';

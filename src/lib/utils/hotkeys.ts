@@ -103,7 +103,7 @@ export const chordWarning = (
   // window-menu handling, and the palette opened. The cost is real but it is a trade, not a
   // failure, so this says what it costs instead of warning it off.
   if (windows && parts.length === 2 && parts[0] === 'alt' && key === 'space') {
-    return 'This works, but while Trove holds it Alt+Space will no longer open the window menu in other apps.';
+    return 'This works, but while Velkrys holds it Alt+Space will no longer open the window menu in other apps.';
   }
   return null;
 };

@@ -99,15 +99,15 @@ describe('matchRow (plan 18, 2.1)', () => {
 });
 
 describe('checkApp', () => {
-  it('greys system, trove and no-uninstaller with their reasons', () => {
+  it('greys system, velkrys and no-uninstaller with their reasons', () => {
     const t = tile('7-Zip', 'C:\\Program Files\\7-Zip\\7z.exe');
     expect(checkApp(t, [{ ...sevenZip, removable: 'system' }], 'windows')).toEqual({
       kind: 'refused',
       reason: 'Part of Windows',
     });
-    expect(checkApp(t, [{ ...sevenZip, removable: 'trove' }], 'windows')).toMatchObject({
+    expect(checkApp(t, [{ ...sevenZip, removable: 'velkrys' }], 'windows')).toMatchObject({
       kind: 'refused',
-      reason: 'This is Trove',
+      reason: 'This is Velkrys',
     });
     expect(checkApp(tile('Ghost'), [], 'windows')).toEqual({
       kind: 'refused',
@@ -201,7 +201,7 @@ describe('uninstall.ask', () => {
     expect(notices.list.some((n) => n.message === '7-Zip was uninstalled')).toBe(true);
   });
 
-  it.each(['system', 'trove', 'noUninstaller'] as const)(
+  it.each(['system', 'velkrys', 'noUninstaller'] as const)(
     'never asks nor calls for a %s row',
     async (removable) => {
       uninstall.rows = [{ ...sevenZip, removable }];
@@ -243,7 +243,7 @@ describe('uninstall.ask on a Mac', () => {
 
   beforeEach(() => {
     vi.stubGlobal('window', {
-      __TROVE_PLATFORM__: { os: 'macos', thisPcLabel: 'This Mac' },
+      __VELKRYS_PLATFORM__: { os: 'macos', thisPcLabel: 'This Mac' },
       addEventListener: () => {},
       removeEventListener: () => {},
     });
@@ -260,9 +260,15 @@ describe('uninstall.ask on a Mac', () => {
   });
 
   it('a new ~/Applications app gets a live "Move to Trash" once the app list re-reads', async () => {
-    const fresh = '/Users/me/Applications/TroveTest.app';
-    const newApp = row({ id: 'n', name: 'TroveTest', folder: fresh, program: fresh, stamp: 's2' });
-    const newTile: AppEntry = { ...tile('TroveTest'), path: fresh };
+    const fresh = '/Users/me/Applications/VelkrysTest.app';
+    const newApp = row({
+      id: 'n',
+      name: 'VelkrysTest',
+      folder: fresh,
+      program: fresh,
+      stamp: 's2',
+    });
+    const newTile: AppEntry = { ...tile('VelkrysTest'), path: fresh };
     // the rows were read when the place first showed, before the bundle existed
     expect(uninstall.menuState(newTile)).toEqual({
       enabled: false,
@@ -373,7 +379,7 @@ describe('Ubuntu (plan 18, Phase 4)', () => {
     await p;
     expect(fakeTerminal.open).toBe(true);
     expect(fakeTerminal.requestPlain).toHaveBeenCalledWith();
-    expect(fakeTerminal.waitFor).toHaveBeenCalledWith('trove-uninstall$ ', 5000);
+    expect(fakeTerminal.waitFor).toHaveBeenCalledWith('velkrys-uninstall$ ', 5000);
     expect(fakeTerminal.write).toHaveBeenCalledTimes(1);
     const written = fakeTerminal.write.mock.calls[0][0];
     expect(written).toBe('sudo apt remove gnome-mines');

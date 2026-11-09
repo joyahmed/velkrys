@@ -1,4 +1,4 @@
-//! Plan 20: Trove's own Snap for one window (the Snap keys, bound on a Mac coming from Windows)
+//! Plan 20: Velkrys's own Snap for one window (the Snap keys, bound on a Mac coming from Windows)
 //! and Cascade / Show windows stacked / Show windows side by side for all of them. The rules are
 //! `core::window_layout`; this file reads the windows and monitors and moves them.
 //!
@@ -22,11 +22,11 @@ use crate::core::window_layout::{
     SnapAction, SnapKey, SnapMemo,
 };
 
-/// The halves Trove snapped each window to, by label (`snap_state` reads it).
+/// The halves Velkrys snapped each window to, by label (`snap_state` reads it).
 static MEMOS: Mutex<BTreeMap<String, SnapMemo>> = Mutex::new(BTreeMap::new());
 
 const NO_PLACES: &str =
-    "This desktop (Wayland) keeps window places to itself, so Trove cannot move its windows.";
+    "This desktop (Wayland) keeps window places to itself, so Velkrys cannot move its windows.";
 
 /// The refusal both commands share: where the windowing system keeps window places to itself
 /// (Wayland), nothing is moved and the caller gets `NO_PLACES`.

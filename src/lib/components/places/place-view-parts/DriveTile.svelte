@@ -2,6 +2,9 @@
 <script lang="ts">
   import type { PlaceTile } from '$lib/data/place-tiles';
   import Glyph from '$lib/components/ui/Glyph.svelte';
+  import UsageBar from '$lib/components/ui/UsageBar.svelte';
+  import DriveRenameBox from '$lib/components/ui/DriveRenameBox.svelte';
+  import { driveRename } from '$lib/state/drive-rename.svelte';
 
   interface Props {
     tile: Extract<PlaceTile, { kind: 'drive' }>;
@@ -12,6 +15,8 @@
     oncontextmenu?: (e: MouseEvent) => void;
   }
   let { tile, tabindex, onopen, oncontextmenu }: Props = $props();
+
+  const renaming = $derived(driveRename.isTarget(tile.path, 'tile'));
 
   // Enter or Space opens; Shift+F10 / the Menu key ask for the context menu, as on a file row —
   // sent as a `contextmenu` event at the tile so whatever menu is wired up above gets it.
@@ -46,14 +51,9 @@
 >
   <Glyph name="drive" size={40} color="#9aa4b2" class="h-12 w-12" />
   <div class="flex min-w-0 flex-1 flex-col gap-1">
-    <span class="truncate text-sm">{tile.label}</span>
+    {#if renaming}<DriveRenameBox />{:else}<span class="truncate text-sm">{tile.label}</span>{/if}
     {#if tile.usedFraction !== null}
-      <div class="bg-subtle-selected h-2 w-full overflow-hidden rounded-xs">
-        <div
-          class="h-full {tile.critical ? 'bg-critical' : 'bg-accent'}"
-          style:width="{tile.usedFraction * 100}%"
-        ></div>
-      </div>
+      <UsageBar thick fraction={tile.usedFraction} level={tile.critical ? 'critical' : 'ok'} />
     {/if}
     {#if tile.caption !== null}
       <span class="text-text-secondary truncate">{tile.caption}</span>

@@ -1,5 +1,5 @@
 #!/bin/sh
-# Trove pre-push: the gate for pushes made by hand. Installed by scripts/install-git-hook.ts;
+# Velkrys pre-push: the gate for pushes made by hand. Installed by scripts/install-git-hook.ts;
 # the global ~/.git-hooks/pre-push chains to it. Tiers:
 #   every push:      private-words check (cheap), bun run check, bun run lint, and cargo fmt --check when src-tauri/ changed
 #   a push to main:  + bun run test, bun run build, and cargo clippy + cargo test when src-tauri/ changed,
@@ -11,7 +11,7 @@ ZERO=0000000000000000000000000000000000000000
 REPO=$(basename "$(git rev-parse --show-toplevel 2>/dev/null)")
 
 if [ -n "${SKIP_VERIFY:-}" ]; then
-	echo "⚠️  trove pre-push: SKIP_VERIFY set - nothing was verified on $REPO" >&2
+	echo "⚠️  velkrys pre-push: SKIP_VERIFY set - nothing was verified on $REPO" >&2
 	exit 0
 fi
 
@@ -48,14 +48,14 @@ done
 [ "$SENDING" = "0" ] && exit 0
 
 if ! command -v bun >/dev/null 2>&1 || ! command -v node >/dev/null 2>&1 || [ ! -d node_modules ]; then
-	echo "⚠️  trove pre-push: no bun, node or node_modules here - the gate DID NOT RUN, nothing was verified" >&2
+	echo "⚠️  velkrys pre-push: no bun, node or node_modules here - the gate DID NOT RUN, nothing was verified" >&2
 	exit 0
 fi
 
 RUST=0
 printf '%s' "$CHANGED" | grep -q '^src-tauri/' && RUST=1
 if [ "$RUST" = "1" ] && ! command -v cargo >/dev/null 2>&1; then
-	echo "⚠️  trove pre-push: src-tauri/ changed but there is no cargo - Rust NOT checked" >&2
+	echo "⚠️  velkrys pre-push: src-tauri/ changed but there is no cargo - Rust NOT checked" >&2
 	RUST=0
 fi
 
@@ -63,18 +63,18 @@ step() {
 	NAME=$1
 	shift
 	START=$(date +%s)
-	if "$@" >/tmp/trove-pre-push.$$.log 2>&1; then
-		echo "   trove pre-push: $NAME ok ($(($(date +%s) - START))s)" >&2
+	if "$@" >/tmp/velkrys-pre-push.$$.log 2>&1; then
+		echo "   velkrys pre-push: $NAME ok ($(($(date +%s) - START))s)" >&2
 	else
-		tail -30 /tmp/trove-pre-push.$$.log >&2
-		rm -f /tmp/trove-pre-push.$$.log
-		echo "⛔ trove pre-push: $NAME is RED - push refused. Fix it, or SKIP_VERIFY=1 git push ..." >&2
+		tail -30 /tmp/velkrys-pre-push.$$.log >&2
+		rm -f /tmp/velkrys-pre-push.$$.log
+		echo "⛔ velkrys pre-push: $NAME is RED - push refused. Fix it, or SKIP_VERIFY=1 git push ..." >&2
 		exit 1
 	fi
-	rm -f /tmp/trove-pre-push.$$.log
+	rm -f /tmp/velkrys-pre-push.$$.log
 }
 
-echo "   trove pre-push: $([ "$MAIN" = "1" ] && echo "main push, full tier" || echo "branch push, quick tier")$([ "$RUST" = "1" ] && echo ", Rust changed")" >&2
+echo "   velkrys pre-push: $([ "$MAIN" = "1" ] && echo "main push, full tier" || echo "branch push, quick tier")$([ "$RUST" = "1" ] && echo ", Rust changed")" >&2
 step "private words" bun scripts/private-words-check.ts
 step "typecheck" bun run check
 step "lint" bun run lint

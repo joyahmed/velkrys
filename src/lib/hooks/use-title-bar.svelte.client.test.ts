@@ -77,7 +77,7 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals());
 
 const hostOs = (os: string) =>
-  vi.stubGlobal('window', { __TROVE_PLATFORM__: { os, thisPcLabel: 'This PC' } });
+  vi.stubGlobal('window', { __VELKRYS_PLATFORM__: { os, thisPcLabel: 'This PC' } });
 
 describe('useTitleBar maximize state', () => {
   it('reads the window state on mount and shows Maximize when restored', async () => {
@@ -132,17 +132,17 @@ describe('useTitleBar maximize state', () => {
 describe('useTitleBar OS title', () => {
   it('follows the active tab', async () => {
     const { stop } = await mount();
-    expect(w.setTitle).toHaveBeenLastCalledWith('Downloads - Trove');
+    expect(w.setTitle).toHaveBeenLastCalledWith('Downloads - Velkrys');
     (tabs as { active: { location: unknown } }).active.location = { kind: 'home' };
     flushSync();
-    expect(w.setTitle).toHaveBeenLastCalledWith('Home - Trove');
+    expect(w.setTitle).toHaveBeenLastCalledWith('Home - Velkrys');
     stop();
   });
 
-  it('is just "Trove" when the tab has no label', async () => {
+  it('is just "Velkrys" when the tab has no label', async () => {
     (tabs as { active: { location: unknown } }).active.location = { kind: 'path', path: '' };
     const { stop } = await mount();
-    expect(w.setTitle).toHaveBeenLastCalledWith('Trove');
+    expect(w.setTitle).toHaveBeenLastCalledWith('Velkrys');
     stop();
   });
 });

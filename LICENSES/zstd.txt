@@ -1,6 +1,6 @@
 BSD 3-Clause licence
 Used by: zstd 0.14.0, zstd-safe 8.0.0, zstd-sys 2.1.0 (Rust bindings) and the Zstandard C library
-that zstd-sys compiles in (zstd 1.5.7). The C library is offered under BSD or GPL-2.0; Trove uses it under BSD.
+that zstd-sys compiles in (zstd 1.5.7). The C library is offered under BSD or GPL-2.0; Velkrys uses it under BSD.
 
 ===== zstd / zstd-safe / zstd-sys bindings =====
 

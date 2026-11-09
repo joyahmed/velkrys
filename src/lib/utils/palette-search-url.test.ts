@@ -53,8 +53,8 @@ describe('buildSearchUrl', () => {
   });
 
   it('works with a template whose %s is not at the end', () => {
-    expect(buildSearchUrl('https://duckduckgo.com/?q=%s&ia=web', 'trove')).toBe(
-      'https://duckduckgo.com/?q=trove&ia=web',
+    expect(buildSearchUrl('https://duckduckgo.com/?q=%s&ia=web', 'velkrys')).toBe(
+      'https://duckduckgo.com/?q=velkrys&ia=web',
     );
   });
 });

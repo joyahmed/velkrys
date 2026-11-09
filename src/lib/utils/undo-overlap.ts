@@ -5,14 +5,14 @@
 // History panel (`state/undo-history.svelte.ts`) both read it.
 import type { UndoRecord } from '$lib/types/undo';
 import { folderKey, nameOf, pathSep } from '$lib/utils/path';
-import type { TrovePlatform } from '$lib/utils/platform';
+import type { VelkrysPlatform } from '$lib/utils/platform';
 
-type Platform = TrovePlatform | undefined;
+type Platform = VelkrysPlatform | undefined;
 
 /**
  * Every path `record` touches: a rename's both names, a move's both ends, what a copy made (its
  * sources are only read), what went to the bin, the new item, a permanent delete's paths. `null`
- * for an `other` — Trove cannot say what it touched, so it blocks every older entry.
+ * for an `other` — Velkrys cannot say what it touched, so it blocks every older entry.
  */
 export const recordPaths = (record: UndoRecord): string[] | null => {
   switch (record.kind) {
@@ -135,7 +135,7 @@ export const entryTitle = (label: string, record: UndoRecord | null): string => 
 /** What the blocker did to the path: `it moved report.txt`. */
 const didTo = (record: UndoRecord | null, path: string | null): string => {
   if (!record || path === null || record.kind === 'other')
-    return "Trove can't tell which files it touched";
+    return "Velkrys can't tell which files it touched";
   const name = nameOf(path);
   switch (record.kind) {
     case 'rename':
@@ -168,7 +168,7 @@ export const blockedText = (
     at.more === 0 ? '' : ` (and ${at.more} more newer action${at.more === 1 ? '' : 's'})`;
   const unknownMine = at.path === null && (mine === null || mine.kind === 'other');
   const why = unknownMine
-    ? "Trove can't tell which files this one touched"
+    ? "Velkrys can't tell which files this one touched"
     : didTo(blocker.record, at.path);
   return `Undo ${entryTitle(blocker.label, blocker.record)} first — ${why}${more}`;
 };

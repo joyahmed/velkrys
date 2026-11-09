@@ -1,13 +1,13 @@
 //! The folders a Mac guards with a privacy prompt (TCC), and which of them the person has
-//! opened in Trove.
+//! opened in Velkrys.
 //!
 //! ⛔ Reading INSIDE one of these — a listing, a size walk, the name index's walk of the home
-//! folder — raises "Trove would like to access files in your Downloads folder" (or Documents,
+//! folder — raises "Velkrys would like to access files in your Downloads folder" (or Documents,
 //! Desktop, iCloud Drive, Apple Music, data from other apps). A `stat` of the folder itself
 //! does not, so the sidebar may name them freely. On a first launch the name index walked the
 //! whole home folder and fired the whole chain of prompts before the person had clicked
 //! anything (Mac test, 2026-11-03). So nothing in the background reads inside one until the
-//! person has opened it in Trove: their own listing is what asks, once, and from then on the
+//! person has opened it in Velkrys: their own listing is what asks, once, and from then on the
 //! answer is theirs. A folder whose listing worked is remembered (`privacy-opened.json` in the
 //! config folder) and the background may read it on every later start.
 //!
@@ -23,7 +23,7 @@ const FILE: &str = "privacy-opened.json";
 /// and Photos libraries live there), iCloud Drive (`Mobile Documents`), the cloud providers
 /// (`CloudStorage`), other apps' shared data (`Group Containers`), Calendars and Contacts, and
 /// `Library/Photos` — the Photos data vault (`Libraries/Syndication.photoslibrary`, "Shared with
-/// You"): even a listing of the folder itself raises "Allow Trove to access your photo
+/// You"): even a listing of the folder itself raises "Allow Velkrys to access your photo
 /// library?", and the home index walked it on a first launch (Mac test, 2026-11-03).
 pub fn protected_under(home: &Path) -> Vec<PathBuf> {
     [
@@ -199,7 +199,7 @@ pub fn load(config_dir: &Path) {
     s.opened = opened;
 }
 
-/// The guarded folders the person has opened in Trove (they may be read in the background).
+/// The guarded folders the person has opened in Velkrys (they may be read in the background).
 pub fn opened() -> Vec<PathBuf> {
     let roots = roots();
     let s = state().lock().unwrap_or_else(|e| e.into_inner());
@@ -374,7 +374,7 @@ mod tests {
     #[cfg(unix)]
     #[test]
     fn a_link_target_is_read_off_the_link_and_folded() {
-        let dir = std::env::temp_dir().join(format!("trove-pf-link-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("velkrys-pf-link-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(dir.join("a")).unwrap();
         std::os::unix::fs::symlink("../b/./c", dir.join("a/rel")).unwrap();

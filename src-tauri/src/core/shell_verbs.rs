@@ -384,7 +384,7 @@ pub fn run_custom(program: &str, args: &[String], cwd: &str) -> std::io::Result<
     // stderr goes to a temp file, not a pipe: a program that outlives the wait below keeps its end
     // open, where a dropped pipe would break it on its next write.
     let err_path = std::env::temp_dir().join(format!(
-        "trove-cmd-{}-{}.err",
+        "velkrys-cmd-{}-{}.err",
         std::process::id(),
         ERR_SEQ.fetch_add(1, std::sync::atomic::Ordering::Relaxed)
     ));
@@ -707,16 +707,16 @@ mod live_tests {
     /// (CVE-2024-24576), which wrapping by hand would undo.
     #[test]
     fn a_bare_name_cannot_reach_a_cmd_but_a_resolved_path_runs_it() {
-        let dir = std::env::temp_dir().join(format!("trove-batch-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("velkrys-batch-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
-        let script = dir.join("trove-probe.cmd");
+        let script = dir.join("velkrys-probe.cmd");
         let marker = dir.join("ran.txt");
         std::fs::write(&script, "@echo ran > \"%~dp0ran.txt\"\r\n").unwrap();
         let _ = std::fs::remove_file(&marker);
 
         // With the script's own folder as the whole of the child's PATH: the bare stem is still
-        // not found, because only `trove-probe.exe` is ever tried…
-        let bare = std::process::Command::new("trove-probe")
+        // not found, because only `velkrys-probe.exe` is ever tried…
+        let bare = std::process::Command::new("velkrys-probe")
             .env("PATH", &dir)
             .current_dir(&dir)
             .spawn();
@@ -726,7 +726,7 @@ mod live_tests {
         );
         // …while spelling the extension out finds it on the same PATH. The only difference is the
         // extension, which is the whole of the bug.
-        let named = std::process::Command::new("trove-probe.cmd")
+        let named = std::process::Command::new("velkrys-probe.cmd")
             .env("PATH", &dir)
             .current_dir(&dir)
             .spawn();
@@ -763,7 +763,7 @@ mod registry_live_tests {
                 .unwrap_or(0);
             Scratch(
                 format!(
-                    "Software\\trove-test\\verbs-{}-{nanos}\\",
+                    "Software\\velkrys-test\\verbs-{}-{nanos}\\",
                     std::process::id()
                 ),
                 crate::core::registry::tests::scratch_lock(),
@@ -773,7 +773,7 @@ mod registry_live_tests {
     impl Drop for Scratch {
         fn drop(&mut self) {
             let _ = delete_tree(self.0.trim_end_matches('\\'));
-            let _ = delete_key_if_empty("Software\\trove-test");
+            let _ = delete_key_if_empty("Software\\velkrys-test");
         }
     }
 

@@ -157,9 +157,18 @@ describe('place tabs come back (plan 15 G.45)', () => {
     expect(plan.main).toEqual({ tabs: ['C:\\a', 'D:\\b'], active: 1 });
   });
 
-  it('an unknown trove: token is skipped, the active tab followed past it', () => {
+  it('a session saved before the rename keeps its places and skips what it does not know', () => {
+    const oldPlace = 'trove:gallery'; // rename-keep
+    const oldUnknown = 'trove:x'; // rename-keep
     const plan = planRestore(null, on, {
-      windows: [{ label: 'main', tabs: ['trove:x', 'C:\\a', home], active: 2 }],
+      windows: [{ label: 'main', tabs: [oldUnknown, 'C:\\a', oldPlace], active: 2 }],
+    });
+    expect(plan.main).toEqual({ tabs: ['C:\\a', oldPlace], active: 1 });
+  });
+
+  it('an unknown velkrys: token is skipped, the active tab followed past it', () => {
+    const plan = planRestore(null, on, {
+      windows: [{ label: 'main', tabs: ['velkrys:x', 'C:\\a', home], active: 2 }],
     });
     expect(plan.main).toEqual({ tabs: ['C:\\a', home], active: 1 });
   });
@@ -215,7 +224,7 @@ describe('resolveRestoredTab (a restored tab from another OS or gone opens Home)
   it('a failed existence check keeps the tab, an unknown token opens Home', async () => {
     const boom = { ...deps(false), exists: () => Promise.reject(new Error('x')) };
     expect(await resolveRestoredTab('/a', boom)).toEqual(pathLocation('/a'));
-    expect(await resolveRestoredTab('trove:newer', deps(false))).toEqual(HOME);
+    expect(await resolveRestoredTab('velkrys:newer', deps(false))).toEqual(HOME);
   });
 
   it('pathIsNative tells each OS its own form', () => {

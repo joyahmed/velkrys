@@ -6,7 +6,7 @@ import { listen } from '@tauri-apps/api/event';
 /** The version downloaded and waiting for "Restart to update", or null. */
 export const updateReady = () => invoke<string | null>('update_ready');
 
-/** Install the waiting update and start Trove again. Only ever on the person's click. */
+/** Install the waiting update and start Velkrys again. Only ever on the person's click. */
 export const updateRestart = () => invoke<void>('update_restart');
 
 /** An update finished downloading in the background. Returns the unlisten fn. */

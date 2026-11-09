@@ -70,7 +70,7 @@ describe('effectFor and isNoOp', () => {
 
     beforeEach(() => {
       vi.stubGlobal('window', {
-        __TROVE_PLATFORM__: { os: 'linux', thisPcLabel: 'This Computer' },
+        __VELKRYS_PLATFORM__: { os: 'linux', thisPcLabel: 'This Computer' },
       });
     });
 
@@ -149,7 +149,7 @@ describe('drag', () => {
   });
 
   it('the device id decides, not the drive list: a disk image the list leaves out copies', async () => {
-    // Mac test (d): /Volumes/TroveTest is no listed drive, so the guess said "same volume"
+    // Mac test (d): /Volumes/VelkrysTest is no listed drive, so the guess said "same volume"
     vi.mocked(sameVolume).mockResolvedValue(false);
     drag.resolveTarget = () => row('D:\\dest');
     drag.start([A], 5, 5);
@@ -336,7 +336,9 @@ describe('drag', () => {
   });
 
   it('off Windows, leaving the window hands the drag to the OS the same way', async () => {
-    vi.stubGlobal('window', { __TROVE_PLATFORM__: { os: 'linux', thisPcLabel: 'This Computer' } });
+    vi.stubGlobal('window', {
+      __VELKRYS_PLATFORM__: { os: 'linux', thisPcLabel: 'This Computer' },
+    });
     try {
       notices.clear();
       drag.start([A], 10, 10);
@@ -360,7 +362,7 @@ describe('drag', () => {
     reload.mockRestore();
   });
 
-  it('a drop from another Trove window moves on the same volume; Ctrl held copies', async () => {
+  it('a drop from another Velkrys window moves on the same volume; Ctrl held copies', async () => {
     drag.resolveTarget = () => row('D:\\dest');
     await drag.externalDrop([A], 0, 0);
     expect(startTransfer).toHaveBeenLastCalledWith([A], 'D:\\dest', 'move', 'skip');
@@ -369,7 +371,7 @@ describe('drag', () => {
     expect(startTransfer).toHaveBeenLastCalledWith([A], 'D:\\dest', 'copy', 'skip');
   });
 
-  it('a drop from another Trove window onto another device copies, by the device id', async () => {
+  it('a drop from another Velkrys window onto another device copies, by the device id', async () => {
     drag.resolveTarget = () => row('D:\\dest');
     vi.mocked(sameVolume).mockResolvedValueOnce(false);
     await drag.externalDrop([A], 0, 0);

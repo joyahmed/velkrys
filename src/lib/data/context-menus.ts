@@ -30,8 +30,12 @@ import { tabs } from '$lib/state/tabs.svelte';
 import { propertiesLabel } from '$lib/utils/platform';
 import { isArchivePath } from '$lib/utils/archive-location';
 import type { FileEntry } from '$lib/types/fs';
+import type { DriveInfo } from '$lib/types/shell';
 import type { CommandScope, VerbScope } from '$lib/types/shell-verbs';
 import { isDriveRoot } from '$lib/utils/path';
+import { driveMenuItems } from '$lib/data/drive-menu';
+import { driveMenuHandlers } from '$lib/state/drive-menu-handlers';
+import { places } from '$lib/state/places.svelte';
 import { opensAsFolder } from '$lib/utils/app-bundle';
 import { commandHint, keyLabel } from '$lib/utils/key-label';
 import { actionHint } from '$lib/data/action-chords';
@@ -496,6 +500,21 @@ export const dynamicTail = (
   ];
 };
 
+/** Rows a drive never has: moving or deleting a whole drive is not a thing Velkrys does. */
+const NOT_ON_A_DRIVE = new Set(['cut', 'delete', 'delete-permanently']);
+
+/**
+ * The row menu on a drive (plan 23): no Cut, Delete or Delete permanently, and Eject (removable
+ * drives only) right after the Open block. Rename and Properties keep their rows; 23.7.3 and
+ * 23.8.2 route them to the drive.
+ */
+const driveRowMenu = (drive: DriveInfo): MenuItem[] => {
+  const eject = driveMenuItems(drive, 'list', driveMenuHandlers).filter((i) => i.key === 'eject');
+  const kept = rowMenu.filter((i) => !NOT_ON_A_DRIVE.has(i.key));
+  const at = kept.findIndex((i) => i.key === 'd1');
+  return [...kept.slice(0, at), ...eject, ...kept.slice(at)];
+};
+
 /** What a right-click on `entry` offers: the row menu plus the verbs for that kind of item. */
 export const rowMenuFor = (entry: FileEntry): MenuItem[] => {
   const paths = listing.rows.filter((e) => selection.has(e.path)).map((e) => e.path);
@@ -505,10 +524,11 @@ export const rowMenuFor = (entry: FileEntry): MenuItem[] => {
       ? 'drive'
       : 'directory';
   // an archive member has no real path (a NUL inside) and its flyout is hidden: asking the OS
-  // for its apps crashed Trove on macOS (MAC-C.8.7)
+  // for its apps crashed Velkrys on macOS (MAC-C.8.7)
   if (!entry.isDir && !splitArchivePath(entry.path)) void openWith.load(entry.path);
+  const drive = entry.isDir ? places.driveAt(entry.path) : undefined;
   return [
-    ...rowMenu,
+    ...(drive ? driveRowMenu(drive) : rowMenu),
     ...dynamicTail(
       verbScope,
       entry.isDir ? 'folder' : 'file',

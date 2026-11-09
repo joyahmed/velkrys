@@ -1,4 +1,4 @@
-//! Trove's own file-name index (plan 21C): every name under the home folder and every fixed
+//! Velkrys's own file-name index (plan 21C): every name under the home folder and every fixed
 //! local drive in memory, kept fresh by a watcher and (Windows) the NTFS change journal, saved
 //! to disk, so the palette answers in milliseconds instead of walking the disk.
 //!
@@ -47,7 +47,7 @@ use walk::Skip;
 pub const WALK_THREADS: usize = 8;
 /// How often a part with unsaved changes is written to disk.
 pub const SAVE_EVERY: Duration = Duration::from_secs(10 * 60);
-/// How often the change journal is read while Trove runs.
+/// How often the change journal is read while Velkrys runs.
 #[cfg(windows)]
 const JOURNAL_EVERY: Duration = Duration::from_secs(1);
 /// How often a part no watcher keeps live is walked again (plan 21C.9b: Linux's `/`, and the
@@ -604,7 +604,7 @@ fn ghost_limit(rows: usize) -> usize {
 
 #[cfg(windows)]
 impl Journal {
-    /// Resume from the saved position and apply what changed while Trove was closed. `true`
+    /// Resume from the saved position and apply what changed while Velkrys was closed. `true`
     /// when the table is now current and needs no walk. The journal wrapped past the saved
     /// position or was made again (`Wrapped`), the drive has none (`NoJournal`), or reading it is
     /// refused (`NoAccess`): `false`, walk again.
@@ -1242,7 +1242,7 @@ pub struct Startup {
     /// Mac: the privacy-guarded folders under the home folder (`core::privacy_folders`). The
     /// home folder's walk never enters one: reading inside raises a prompt. Empty elsewhere.
     pub guarded: Vec<PathBuf>,
-    /// The guarded folders the person has opened in Trove: each walked as a part of its own.
+    /// The guarded folders the person has opened in Velkrys: each walked as a part of its own.
     pub opened: Vec<PathBuf>,
 }
 
@@ -1300,7 +1300,7 @@ pub(crate) mod test_util {
     impl Scratch {
         pub fn new(tag: &str) -> Self {
             let dir =
-                std::env::temp_dir().join(format!("trove-index-{tag}-{}", std::process::id()));
+                std::env::temp_dir().join(format!("velkrys-index-{tag}-{}", std::process::id()));
             let _ = std::fs::remove_dir_all(&dir);
             std::fs::create_dir_all(&dir).unwrap();
             // the canonical spelling, as the watcher reports it (`/private/var` on a Mac)
@@ -1382,7 +1382,7 @@ mod tests {
             t.bytes(),
             t.bytes() as f64 / 1_048_576.0
         );
-        let file = std::env::temp_dir().join(format!("trove-root-{}.idx", std::process::id()));
+        let file = std::env::temp_dir().join(format!("velkrys-root-{}.idx", std::process::id()));
         let started = Instant::now();
         store::save(&t, &file).unwrap();
         let save_ms = started.elapsed().as_secs_f64() * 1000.0;

@@ -29,5 +29,5 @@ export const tileAsSidebarItem = (tile: PlaceTile): SidebarItem | null => {
 
 export const placeTileMenuFor = (tile: PlaceTile, on: SidebarMenuHandlers): MenuItem[] => {
   const item = tileAsSidebarItem(tile);
-  return item ? sidebarMenuFor(item, on) : [];
+  return item ? sidebarMenuFor(item, on, 'tile') : [];
 };

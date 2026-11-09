@@ -8,7 +8,7 @@ const WIN = { os: 'windows', thisPcLabel: 'This PC' } as const;
 describe('tildeHome', () => {
   it('macOS: home and below start at ~', () => {
     expect(tildeHome('/Users/alex', '/Users/alex', MAC)).toBe('~');
-    expect(tildeHome('/Users/alex/trove-demo', '/Users/alex', MAC)).toBe('~/trove-demo');
+    expect(tildeHome('/Users/alex/velkrys-demo', '/Users/alex', MAC)).toBe('~/velkrys-demo');
     expect(tildeHome('/Users/alex/a/b', '/Users/alex/', MAC)).toBe('~/a/b');
     expect(tildeHome('/Users/alex/', '/Users/alex', MAC)).toBe('~');
   });
