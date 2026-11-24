@@ -140,7 +140,7 @@ jobs:
             build-essential curl wget file \
             libwebkit2gtk-4.1-dev libxdo-dev libssl-dev \
             libayatana-appindicator3-dev librsvg2-dev \
-            desktop-file-utils
+            desktop-file-utils squashfs-tools
 
       - uses: oven-sh/setup-bun@v2
         with:
@@ -159,6 +159,20 @@ jobs:
         shell: bash
         run: echo "CARGO_ENCODED_RUSTFLAGS=$(bun scripts/remap-flags.ts --encoded)" >> "$GITHUB_ENV"
 
+      # tauri-bundler (2.11.5, appimage/mod.rs write_and_make_executable) saves every tool it
+      # downloads into ~/.cache/tauri with mode 0770, and AppRun-x86_64 is packaged as
+      # AppRun.wrapped: others cannot run it, so `firejail --appimage` (AppImageHub's test) says
+      # "Permission denied". tauri only downloads and chmods a tool that is missing, so put this
+      # one there first, hash-pinned, at 0755. No repack: updater signatures stay valid.
+      - name: Pre-seed the AppImage launcher at 0755 (AppImageHub firejail test)
+        shell: bash
+        run: |
+          mkdir -p ~/.cache/tauri
+          curl -sSfL -o ~/.cache/tauri/AppRun-x86_64 \
+            https://github.com/tauri-apps/binary-releases/releases/download/apprun-old/AppRun-x86_64
+          echo "f30140a43a0a59e46db21bdefdf749b9e9f2c6946e92afabbacf98b8ae73fb4f  $HOME/.cache/tauri/AppRun-x86_64" | sha256sum -c -
+          chmod 0755 ~/.cache/tauri/AppRun-x86_64
+
       # On Linux tauri merges src-tauri/tauri.linux.conf.json: targets deb + appimage.
       - name: Build deb + AppImage
         shell: bash
@@ -173,6 +187,15 @@ jobs:
       - name: Check the .deb (glibc, ldd, desktop file, control, metainfo)
         shell: bash
         run: bun scripts/linux-package-check.ts src-tauri/target/release/bundle/deb/*.deb
+
+      # Fails the job if any squashfs entry lacks o+r, any folder or executable lacks o+x
+      # (catches tauri ignoring the pre-seed above), or any ELF inside needs GLIBC > 2.35.
+      - name: Check the AppImage (everyone can read and run it, glibc floor)
+        shell: bash
+        run: |
+          for f in src-tauri/target/release/bundle/appimage/*.AppImage; do
+            bash scripts/linux-appimage-check.sh "$f" --max 2.35
+          done
 
       - name: Size and SHA-256
         run: |
