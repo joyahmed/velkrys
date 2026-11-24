@@ -13,6 +13,8 @@ Find any file in a keystroke.
 
 ### [⬇ Download Velkrys](https://github.com/joyahmed/velkrys/releases/latest)
 
+**Windows:** [Get it from the Microsoft Store](https://apps.microsoft.com/detail/9PNW6SR97XWL) · **Mac:** `brew install --cask joyahmed/tap/velkrys`
+
 Free · No tracking · Rust + Tauri 2 + Svelte 5
 
 <br>
@@ -131,7 +133,15 @@ I use it every day. If something feels off, tell me.
 
 ## Install
 
-Download from the [Releases page](https://github.com/joyahmed/velkrys/releases/latest).
+The easy way, with updates handled for you:
+
+| System      | How                                                                                                   |
+| ----------- | ----------------------------------------------------------------------------------------------------- |
+| **Windows** | [Microsoft Store](https://apps.microsoft.com/detail/9PNW6SR97XWL), or `winget install 9PNW6SR97XWL`. No warning on first launch. |
+| **Windows** | [Scoop](https://scoop.sh): `scoop bucket add zettabyte https://github.com/joyahmed/scoop-bucket` then `scoop install zettabyte/velkrys` |
+| **Mac**     | [Homebrew](https://brew.sh): `brew install --cask joyahmed/tap/velkrys`                                |
+
+Or download from the [Releases page](https://github.com/joyahmed/velkrys/releases/latest).
 
 | System                          | File                                         | First launch                                                                                                                                            |
 | ------------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -139,7 +149,7 @@ Download from the [Releases page](https://github.com/joyahmed/velkrys/releases/l
 | **Mac** (Apple silicon + Intel) | `Velkrys_<version>_universal.dmg`            | Drag Velkrys to Applications and open it. It is signed and notarized by Apple, so macOS opens it without a warning. [Step by step](docs/install/mac.md) |
 | **Ubuntu**                      | `Velkrys_<version>_amd64.deb` or `.AppImage` | `sudo apt install ./Velkrys_<version>_amd64.deb`, or make the AppImage executable and run it. [Step by step](docs/install/linux.md)                     |
 
-On Windows and Ubuntu, Velkrys isn't signed by a known publisher yet, which is why your system warns you. There are no automatic updates yet: install the new version over the old one. Each release has a `SHA256SUMS.txt` to check your download.
+The Releases downloads for Windows and Ubuntu aren't signed by a known publisher yet, which is why your system warns you (the Microsoft Store version is signed by Microsoft). There are no automatic updates yet: install the new version over the old one. Each release has a `SHA256SUMS.txt` to check your download.
 
 ## Watch it
 
