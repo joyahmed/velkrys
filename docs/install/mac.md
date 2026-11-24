@@ -2,7 +2,17 @@
 
 Velkrys for Mac is free. It is signed with a Developer ID and notarized by Apple (Zettabyte Technology Inc.), so it opens like any other app. There is nothing to allow in System Settings first.
 
-## Install
+## Install with Homebrew (easiest)
+
+If you use [Homebrew](https://brew.sh), one command installs Velkrys, and `brew upgrade` keeps it up to date:
+
+```sh
+brew install --cask joyahmed/tap/velkrys
+```
+
+Then open **Velkrys** from Applications.
+
+## Install from the download
 
 1. Download `Velkrys_<version>_universal.dmg` from the releases page. It runs on Apple silicon and Intel Macs.
 2. Open the downloaded file. A window shows the Velkrys icon and an Applications folder.

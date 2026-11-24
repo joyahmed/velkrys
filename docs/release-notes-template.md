@@ -25,6 +25,12 @@
 
 - {{Anything that changes how people use Velkrys, or a step they need to take.}}
 
+## Install
+
+- Windows: [Microsoft Store](https://apps.microsoft.com/detail/9PNW6SR97XWL) or `winget install 9PNW6SR97XWL`; Scoop: `scoop install zettabyte/velkrys`
+- Mac: `brew install --cask joyahmed/tap/velkrys`
+- Or download a file below.
+
 ## Downloads
 
 - Windows: {{file name}}
