@@ -17,7 +17,7 @@ Free · No tracking · Rust + Tauri 2 + Svelte 5
 
 <br>
 
-<img src="docs/media/trove-demo.gif" alt="Velkrys: open a folder of 100,000 files, find a photo with Ctrl K, preview it" width="900">
+<img src="docs/media/velkrys-demo.gif" alt="Velkrys: open a folder of 100,000 files, find a photo with Ctrl K, preview it" width="900">
 
 </div>
 
