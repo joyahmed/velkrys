@@ -226,6 +226,55 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+  # Installs the .rpm the way a Fedora user would: dnf must resolve every dependency, then the
+  # app must start under a virtual display. Exit 124 from `timeout` = still running = PASS.
+  fedora-rpm:
+    name: Fedora .rpm install check
+    needs: linux
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container: fedora:latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: velkrys-linux-x64
+          path: artifact
+
+      - name: Install the .rpm (dnf resolves the dependencies)
+        shell: bash
+        run: |
+          set -euxo pipefail
+          rpmfile=$(find "$PWD/artifact" -name '*.rpm' | head -n1)
+          test -n "$rpmfile"
+          dnf install -y "$rpmfile"
+          echo "PKG=$(rpm -qp --queryformat '%{NAME}' "$rpmfile")" >> "$GITHUB_ENV"
+
+      - name: Package has the binary, the .desktop file and an icon
+        shell: bash
+        run: |
+          set -euxo pipefail
+          rpm -ql "$PKG"
+          rpm -ql "$PKG" | grep -E '^/usr/bin/'
+          rpm -ql "$PKG" | grep -E '\.desktop$'
+          rpm -ql "$PKG" | grep -E '/icons/.*\.(png|svg)$'
+
+      - name: Start the app under Xvfb for 15 s
+        shell: bash
+        run: |
+          dnf install -y xorg-x11-server-Xvfb xorg-x11-xauth
+          bin=$(rpm -ql "$PKG" | grep -E '^/usr/bin/' | head -n1)
+          echo "starting $bin"
+          code=0
+          timeout 15 xvfb-run -a "$bin" > run.log 2>&1 || code=$?
+          cat run.log
+          echo "exit code: $code"
+          if [ "$code" -eq 124 ]; then
+            echo "PASS: still running after 15 s"
+          else
+            echo "FAIL: the app exited with $code before 15 s"
+            exit 1
+          fi
+
   macos:
     name: Mac universal .dmg (ad-hoc signed)
     needs: gate
