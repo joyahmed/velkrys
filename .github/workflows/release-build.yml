@@ -121,7 +121,7 @@ jobs:
           retention-days: 14
 
   linux:
-    name: Ubuntu .deb + AppImage
+    name: Ubuntu .deb + .rpm + AppImage
     needs: gate
     # Oldest glibc we support: a binary built here runs on newer distros, not the other way.
     runs-on: ubuntu-22.04
@@ -173,8 +173,8 @@ jobs:
           echo "f30140a43a0a59e46db21bdefdf749b9e9f2c6946e92afabbacf98b8ae73fb4f  $HOME/.cache/tauri/AppRun-x86_64" | sha256sum -c -
           chmod 0755 ~/.cache/tauri/AppRun-x86_64
 
-      # On Linux tauri merges src-tauri/tauri.linux.conf.json: targets deb + appimage.
-      - name: Build deb + AppImage
+      # On Linux tauri merges src-tauri/tauri.linux.conf.json: targets deb + appimage + rpm.
+      - name: Build deb + rpm + AppImage
         shell: bash
         run: bun run tauri build $UPDATER_ARGS
 
@@ -197,17 +197,30 @@ jobs:
             bash scripts/linux-appimage-check.sh "$f" --max 2.35
           done
 
+      # Fedora / openSUSE users asked for an .rpm (r/rust, 2026-11-26). Reads the package
+      # header and file list only; fails if it is missing, not x86_64, or has no AppStream file.
+      - name: Check the .rpm (arch, metainfo, desktop file)
+        shell: bash
+        run: |
+          sudo apt-get install -y --no-install-recommends rpm >/dev/null
+          for f in src-tauri/target/release/bundle/rpm/*.rpm; do
+            rpm -qp --queryformat '%{NAME} %{VERSION} %{ARCH}\n' "$f" | tee /dev/stderr | grep -q ' x86_64$'
+            rpm -qpl "$f" | grep -q '^/usr/share/metainfo/com.joyahmed.velkrys.metainfo.xml$'
+            rpm -qpl "$f" | grep -q '\.desktop$'
+          done
+
       - name: Size and SHA-256
         run: |
           cd src-tauri/target/release/bundle
-          ls -l deb/*.deb appimage/*.AppImage
-          sha256sum deb/*.deb appimage/*.AppImage | tee SHA256SUMS.txt
+          ls -l deb/*.deb rpm/*.rpm appimage/*.AppImage
+          sha256sum deb/*.deb rpm/*.rpm appimage/*.AppImage | tee SHA256SUMS.txt
 
       - uses: actions/upload-artifact@v4
         with:
           name: velkrys-linux-x64
           path: |
             src-tauri/target/release/bundle/deb/*.deb
+            src-tauri/target/release/bundle/rpm/*.rpm
             src-tauri/target/release/bundle/appimage/*.AppImage
             src-tauri/target/release/bundle/SHA256SUMS.txt
           if-no-files-found: error

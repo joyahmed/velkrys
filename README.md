@@ -17,6 +17,8 @@ Find any file in a keystroke. [▶ 2-minute tour](https://youtu.be/SX1YrkJlSCA)
 
 Free · No tracking · Rust + Tauri 2 + Svelte 5
 
+<sub>Developed in a private repo since September 2026 (first as Trove, ~1,700 commits). This public repo is a cleaned export, so its history is short.</sub>
+
 <br>
 
 <img src="docs/media/velkrys-demo.gif" alt="Velkrys: open a folder of 100,000 files, find a photo with Ctrl K, preview it" width="900">
