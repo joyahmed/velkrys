@@ -91,9 +91,12 @@ jobs:
       - run: bun install --frozen-lockfile
       # Remap only covers rustc's own paths. The tauri context path is dropped by building with
       # `tauri build` (custom-protocol feature on), never plain `cargo build --release`.
-      - name: Drop build-machine paths from the binary (plan 22.0.4)
+      # CARGO_ENCODED_RUSTFLAGS replaces the rustflags in src-tauri/.cargo/config.toml, so the
+      # +crt-static flag from there is added here too. Without it the exe needs the Visual C++
+      # runtime (MSVCP140.dll) and does not start on a fresh Windows (fixed in 0.1.3).
+      - name: Drop build-machine paths from the binary (plan 22.0.4) + static C runtime
         shell: bash
-        run: echo "CARGO_ENCODED_RUSTFLAGS=$(bun scripts/remap-flags.ts --encoded)" >> "$GITHUB_ENV"
+        run: echo "CARGO_ENCODED_RUSTFLAGS=$(bun scripts/remap-flags.ts --encoded)$(printf '\037')-C$(printf '\037')target-feature=+crt-static" >> "$GITHUB_ENV"
 
       # tauri.conf.json: bundle targets nsis, currentUser install, nsis-hooks.nsh.
       - name: Build the installer
@@ -103,6 +106,14 @@ jobs:
       - name: No build-machine path in the binary (plan 22.0.4)
         shell: bash
         run: bun scripts/path-leak-check.ts src-tauri/target/release/velkrys.exe
+
+      - name: No Visual C++ runtime import (static CRT)
+        shell: bash
+        run: |
+          if grep -a -i -o -E '(msvcp140|vcruntime140)[_0-9a-z]*\.dll' src-tauri/target/release/velkrys.exe | sort -u | grep .; then
+            echo "FAIL: velkrys.exe imports the Visual C++ runtime"; exit 1
+          fi
+          echo "PASS: no MSVCP140 / VCRUNTIME140 import"
 
       - name: Size and SHA-256
         shell: bash

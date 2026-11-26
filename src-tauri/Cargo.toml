@@ -1,6 +1,6 @@
 [package]
 name = "velkrys"
-version = "0.1.3"
+version = "0.1.4"
 description = "Velkrys — a fast file explorer for Windows, macOS and Linux, built with Tauri 2 + Svelte 5"
 authors = ["Joy Ahmed <joy@zettabyteincorp.com>"]
 homepage = "https://github.com/joyahmed/velkrys"

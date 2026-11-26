@@ -1,6 +1,6 @@
 # Install Velkrys on Linux
 
-Velkrys for Linux is free. It comes in two forms: a `.deb` package for Ubuntu and Debian, and an AppImage that runs on most other desktops. Pick one.
+Velkrys for Linux is free. It comes in three forms: a `.deb` package for Ubuntu and Debian, an `.rpm` package for Fedora and openSUSE, and an AppImage that runs on most other desktops. Pick one.
 
 ## Install the .deb (Ubuntu, Debian)
 
@@ -12,6 +12,19 @@ Velkrys for Linux is free. It comes in two forms: a `.deb` package for Ubuntu an
    ```
 
    Keep the `./` in front of the name. It tells apt to use the file you downloaded. apt also fetches the few libraries Velkrys needs (the GTK and WebKit libraries, and the tray icon library).
+
+3. Open Velkrys from your applications menu.
+
+## Install the .rpm (Fedora, openSUSE)
+
+1. Download `Velkrys-<version>-1.x86_64.rpm` from the releases page.
+2. Open a terminal in the folder where it was saved and run:
+
+   ```
+   sudo dnf install ./Velkrys-<version>-1.x86_64.rpm
+   ```
+
+   On openSUSE use `sudo zypper install ./Velkrys-<version>-1.x86_64.rpm`. The package manager also fetches the libraries Velkrys needs.
 
 3. Open Velkrys from your applications menu.
 
@@ -37,7 +50,7 @@ The AppImage does not add Velkrys to your applications menu. Keep the file somew
 
 ## Updates
 
-Velkrys does not update itself on Linux yet. To update, download the new `.deb` (or AppImage) and install it the same way as before. A new `.deb` replaces the old one and keeps your settings.
+Velkrys does not update itself on Linux yet. To update, download the new `.deb`, `.rpm` or AppImage and install it the same way as before. A new `.deb` or `.rpm` replaces the old one and keeps your settings.
 
 ## Open Velkrys from anywhere
 
@@ -57,6 +70,7 @@ In Settings, turn on **Use as default file manager**. Velkrys then opens when an
 ## Uninstall
 
 - **.deb:** `sudo apt remove velkrys`
+- **.rpm:** `sudo dnf remove velkrys`
 - **AppImage:** delete the file.
 - Optional: to remove saved settings and the cache too, delete the two folders above.
 - If you turned on "default file manager", turn it off in Settings first.

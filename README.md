@@ -145,13 +145,14 @@ The easy way, with updates handled for you:
 
 Or download from the [Releases page](https://github.com/joyahmed/velkrys/releases/latest).
 
-| System                          | File                                         | First launch                                                                                                                                            |
-| ------------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Windows**                     | `Velkrys_<version>_x64-setup.exe`            | Windows warns you: click **More info**, then **Run anyway**.                                                                                            |
-| **Mac** (Apple silicon + Intel) | `Velkrys_<version>_universal.dmg`            | Drag Velkrys to Applications and open it. It is signed and notarized by Apple, so macOS opens it without a warning. [Step by step](docs/install/mac.md) |
-| **Ubuntu**                      | `Velkrys_<version>_amd64.deb` or `.AppImage` | `sudo apt install ./Velkrys_<version>_amd64.deb`, or make the AppImage executable and run it. [Step by step](docs/install/linux.md)                     |
+| System                          | File                                         | First launch                                                                                                                                                  |
+| ------------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Windows**                     | `Velkrys_<version>_x64-setup.exe`            | Windows warns you: click **More info**, then **Run anyway**.                                                                                                  |
+| **Mac** (Apple silicon + Intel) | `Velkrys_<version>_universal.dmg`            | Drag Velkrys to Applications and open it. It is signed and notarized by Apple, so macOS opens it without a warning. [Step by step](docs/install/mac.md)       |
+| **Ubuntu**                      | `Velkrys_<version>_amd64.deb` or `.AppImage` | `sudo apt install ./Velkrys_<version>_amd64.deb`, or make the AppImage executable and run it. [Step by step](docs/install/linux.md)                           |
+| **Fedora, openSUSE**            | `Velkrys-<version>-1.x86_64.rpm`             | `sudo dnf install ./Velkrys-<version>-1.x86_64.rpm` (openSUSE: `sudo zypper install ./Velkrys-<version>-1.x86_64.rpm`). [Step by step](docs/install/linux.md) |
 
-The Releases downloads for Windows and Ubuntu aren't signed by a known publisher yet, which is why your system warns you (the Microsoft Store version is signed by Microsoft). There are no automatic updates yet: install the new version over the old one. Each release has a `SHA256SUMS.txt` to check your download.
+The Releases downloads for Windows and Linux aren't signed by a known publisher yet, which is why your system warns you (the Microsoft Store version is signed by Microsoft). There are no automatic updates yet: install the new version over the old one. Each release has a `SHA256SUMS` file to check your download.
 
 ## Watch it
 
@@ -178,7 +179,7 @@ bun install --frozen-lockfile
 bun run tauri dev                             # run it while you work on it
 bun run build:installer                       # Windows installer
 bun run tauri build                           # Mac app and .dmg
-bun run tauri build --bundles deb,appimage    # Ubuntu .deb and AppImage
+bun run tauri build --bundles deb,rpm,appimage    # Linux .deb, .rpm and AppImage
 ```
 
 `bun run gate` runs everything I run before a change goes in: type check, lint, tests, the build, then the Rust format check, clippy and tests. [CONTRIBUTING.md](CONTRIBUTING.md) has the rest.
