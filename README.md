@@ -7,7 +7,7 @@
 <sub>Velkrys (formerly Trove)</sub>
 
 **A fast file explorer that feels the same on Windows, Mac and Ubuntu.**<br>
-Find any file in a keystroke.
+Find any file in a keystroke. [▶ 2-minute tour](https://youtu.be/SX1YrkJlSCA)
 
 [![Latest release](https://img.shields.io/github/v/release/joyahmed/velkrys?style=flat-square&label=release&color=3b82f6)](https://github.com/joyahmed/velkrys/releases/latest) [![Platforms](https://img.shields.io/badge/Windows%20%C2%B7%20macOS%20%C2%B7%20Ubuntu-1e293b?style=flat-square)](#install) [![License: MIT](https://img.shields.io/badge/license-MIT-1e293b?style=flat-square)](LICENSE)
 
@@ -153,7 +153,7 @@ The Releases downloads for Windows and Ubuntu aren't signed by a known publisher
 
 ## Watch it
 
-**[▶ Watch the 40-second Short](https://youtube.com/shorts/MFJlusVQLhg)**. More of what I build: [youtube.com/@joysbuilds](https://www.youtube.com/@joysbuilds).
+**[▶ Watch the 2-minute tour](https://youtu.be/SX1YrkJlSCA)**: tabs, 100,000 files, search, zip files, terminal and undo. More of what I build: [youtube.com/@joysbuilds](https://www.youtube.com/@joysbuilds).
 
 ## Privacy
 
