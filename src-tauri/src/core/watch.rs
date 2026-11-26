@@ -264,9 +264,11 @@ fn run(
             .map(|d| d.saturating_duration_since(Instant::now()))
             .unwrap_or(EXISTENCE_POLL)
             .min(EXISTENCE_POLL);
-        let now = Instant::now();
         let mut gone: Vec<String> = Vec::new();
-        match rx.recv_timeout(timeout) {
+        let received = rx.recv_timeout(timeout);
+        // read the clock AFTER the wait: an event that ends an idle wait happened just now
+        let now = Instant::now();
+        match received {
             Ok(Ok(event)) => {
                 let mut s = lock(shared);
                 let keys: Vec<String> = s.refs.keys().cloned().collect();
@@ -488,6 +490,37 @@ mod tests {
             more += 1;
         }
         assert_eq!(more, 0, "the burst must coalesce into one event");
+        w.unwatch(&dir_s);
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn a_short_burst_after_an_idle_wait_is_one_changed() {
+        let dir = scratch("idleburst");
+        let dir_s = dir.to_string_lossy().into_owned();
+        let (mut w, rx) = watchers();
+        w.watch(&dir_s).unwrap();
+        // idle long enough that the emitting thread sits in a long recv_timeout
+        std::thread::sleep(Duration::from_millis(300));
+        // a burst of about 150 ms, bounded by the clock so slow disks keep it under 200 ms
+        let burst_end = Instant::now() + Duration::from_millis(150);
+        let mut i = 0;
+        while Instant::now() < burst_end {
+            std::fs::write(dir.join(format!("f{i}.txt")), b"x").unwrap();
+            i += 1;
+            std::thread::sleep(Duration::from_millis(2));
+        }
+        let first = rx.recv_timeout(WAIT).expect("a change arrives");
+        assert_eq!(first.kind, ChangeKind::Changed);
+        let mut more = 0;
+        let until = Instant::now() + Duration::from_millis(600);
+        while rx
+            .recv_timeout(until.saturating_duration_since(Instant::now()))
+            .is_ok()
+        {
+            more += 1;
+        }
+        assert_eq!(more, 0, "a burst after an idle wait must be one event");
         w.unwatch(&dir_s);
         let _ = std::fs::remove_dir_all(&dir);
     }
