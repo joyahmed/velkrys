@@ -56,6 +56,35 @@ describe('watcher.sync', () => {
   });
 });
 
+describe('watcher when the OS refuses a watch', () => {
+  beforeEach(reset);
+
+  it('polls that folder instead of marking it watched, tells the person once, retries on sync', async () => {
+    vi.mocked(watchPath).mockRejectedValueOnce(new Error('OS file watch limit reached'));
+    const before = notices.list.length;
+    const tab = tabs.active;
+    tab.location = pathLocation('C:\\full');
+    const reload = vi.spyOn(tab, 'reload').mockResolvedValue();
+    watcher.sync(['C:\\full']);
+    await vi.waitFor(() => expect(watcher.watched).toEqual([]));
+    expect(notices.list.length).toBe(before + 1);
+    watcher.reloadWsl();
+    expect(reload).toHaveBeenCalledTimes(1);
+    // a second failure raises no second notice; the next sync tries the real watch again
+    vi.mocked(watchPath).mockRejectedValueOnce(new Error('again'));
+    watcher.sync(['C:\\full']);
+    expect(watchPath).toHaveBeenCalledTimes(2);
+    await vi.waitFor(() => expect(watcher.watched).toEqual([]));
+    expect(notices.list.length).toBe(before + 1);
+    watcher.sync(['C:\\full']);
+    await vi.waitFor(() => expect(watcher.watched).toEqual(['C:\\full']));
+    // once the real watch works the folder is no longer polled
+    reload.mockClear();
+    watcher.reloadWsl();
+    expect(reload).not.toHaveBeenCalled();
+  });
+});
+
 describe('watcher events', () => {
   beforeEach(reset);
 

@@ -30,12 +30,37 @@ interface ReloadState {
 class WatcherState {
   /** folders currently watched, as passed to `watch_path` */
   #watched: string[] = [];
+  /** folders whose live watch was refused (e.g. the OS watch limit): polled like a WSL share */
+  #failed: string[] = [];
+  #told = false;
   #poll: ReturnType<typeof setInterval> | undefined;
 
   /** Tabs whose folder is `path`. */
   #tabsOn = (path: string): TabState[] => tabs.list.filter((t) => samePath(t.path, path));
 
-  #wslTabs = () => tabs.list.filter((t) => t.isFolder && isWslPath(t.path));
+  #polledTabs = () =>
+    tabs.list.filter(
+      (t) => t.isFolder && (isWslPath(t.path) || this.#failed.some((f) => samePath(f, t.path))),
+    );
+
+  /** Start one watch; if the OS refuses, poll that folder instead and say so once. */
+  #watch(path: string) {
+    watchPath(path).then(
+      () => void (this.#failed = this.#failed.filter((f) => !samePath(f, path))),
+      () => {
+        if (!this.#watched.some((w) => samePath(w, path))) return; // closed meanwhile
+        this.#watched = this.#watched.filter((w) => !samePath(w, path));
+        if (!this.#failed.some((f) => samePath(f, path))) this.#failed.push(path);
+        if (!this.#told) {
+          this.#told = true;
+          actions.notify(
+            'Live updates are off for some folders, so they refresh every 5 seconds instead.',
+            'warning',
+          );
+        }
+      },
+    );
+  }
 
   /** A watched folder changed under us: re-read it in every tab that shows it. */
   changed(path: string) {
@@ -105,29 +130,29 @@ class WatcherState {
   /**
    * Bring the Rust watchers in line with the open tabs: watch what is newly open, unwatch
    * what closed. Called from an effect that reads every tab's path. A place ('' path) and a
-   * WSL share are not watchable; the latter is polled instead.
+   * WSL share are not watchable; the latter is polled instead, and so is a folder whose watch
+   * failed (it is tried again on the next sync, i.e. when a tab navigates).
    */
   sync(paths: string[]) {
     // one watcher per folder, however the path is cased in each tab
     const wanted = paths
       .filter((p) => p !== '' && !isWslPath(p))
       .filter((p, i, all) => all.findIndex((q) => samePath(q, p)) === i);
-    for (const p of wanted) {
-      if (!this.#watched.some((w) => samePath(w, p))) void watchPath(p).catch(() => {});
-    }
-    for (const w of this.#watched) {
-      if (!wanted.some((p) => samePath(p, w))) void unwatchPath(w).catch(() => {});
-    }
-    this.#watched = wanted;
+    const fresh = wanted.filter((p) => !this.#watched.some((w) => samePath(w, p)));
+    const closed = this.#watched.filter((w) => !wanted.some((p) => samePath(p, w)));
+    for (const w of closed) void unwatchPath(w).catch(() => {});
+    this.#failed = this.#failed.filter((f) => wanted.some((p) => samePath(p, f)));
+    this.#watched = [...this.#watched.filter((w) => !closed.includes(w)), ...fresh];
+    for (const p of fresh) this.#watch(p);
   }
 
   get watched(): readonly string[] {
     return this.#watched;
   }
 
-  /** Re-read every WSL tab — on focus, and on the poll while focused. */
+  /** Re-read every WSL tab and every tab on a folder whose watch failed — on focus, and on the poll while focused. */
   reloadWsl = () => {
-    for (const tab of this.#wslTabs()) void tab.reload();
+    for (const tab of this.#polledTabs()) void tab.reload();
   };
 
   #startPoll = () => {
