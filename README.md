@@ -137,11 +137,11 @@ I use it every day. If something feels off, tell me.
 
 The easy way, with updates handled for you:
 
-| System      | How                                                                                                   |
-| ----------- | ----------------------------------------------------------------------------------------------------- |
+| System      | How                                                                                                                                                                      |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Windows** | [Microsoft Store](https://apps.microsoft.com/detail/9PNW6SR97XWL), or `winget install 9PNW6SR97XWL`. No warning on first launch. [Step by step](docs/install/windows.md) |
-| **Windows** | [Scoop](https://scoop.sh): `scoop bucket add zettabyte https://github.com/joyahmed/scoop-bucket` then `scoop install zettabyte/velkrys` |
-| **Mac**     | [Homebrew](https://brew.sh): `brew install --cask joyahmed/tap/velkrys`                                |
+| **Windows** | [Scoop](https://scoop.sh): `scoop bucket add zettabyte https://github.com/joyahmed/scoop-bucket` then `scoop install zettabyte/velkrys`                                  |
+| **Mac**     | [Homebrew](https://brew.sh): `brew install --cask joyahmed/tap/velkrys`                                                                                                  |
 
 Or download from the [Releases page](https://github.com/joyahmed/velkrys/releases/latest).
 
